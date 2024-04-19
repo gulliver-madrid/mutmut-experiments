@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "mutmut-experiments"
+version = "0.0.1"
+description = "Experimentos con un fork del repositorio de mutmut."
+authors = ["gulliver-madrid <49131885+gulliver-madrid@users.noreply.github.com>"]
+license = "BSD-3-Clause license"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
