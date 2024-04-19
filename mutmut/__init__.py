@@ -915,7 +915,6 @@ def status_printer():
     return p
 
 
-
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
     this_dir = os.getcwd().split(os.sep)[-1]
@@ -1124,6 +1123,7 @@ def hammett_tests_pass(config: Config, callback) -> bool:
             del sys.modules[module_name]
 
     return returncode == 0
+
 
 CYCLE_PROCESS_AFTER = 100
 
