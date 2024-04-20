@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from collections.abc import Sequence
 import hashlib
 import os
 from collections import defaultdict
@@ -119,11 +120,11 @@ def get_apply_line(mutant):
     return apply_line
 
 
-def ranges(numbers):
+def ranges(numbers: Sequence[int]) -> str:
     if not numbers:
-        return []
+        return ""
 
-    result = []
+    result: list[str] = []
     start_range = numbers[0]
     end_range = numbers[0]
 
