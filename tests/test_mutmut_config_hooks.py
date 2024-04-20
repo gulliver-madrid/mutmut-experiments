@@ -48,14 +48,18 @@ def set_working_dir_and_path(basic_filesystem):
     sys.path = original_path
     os.chdir(original_dir)
 
-@pytest.mark.xfail(reason="unknown reason")
+# En este test, aparece el error "No module named mutmut" en el stderr
+# Por algun motivo aqui se usa python -m mutmut run, en vez de simplemente
+# run como en otros tests.
+# Pero cambiando eso sale el error: FileNotFoundError: [WinError 2] El sistema no puede encontrar el archivo especificado
+@pytest.mark.xfail(reason="unknown reason, probably mutmut not found")
 @pytest.mark.usefixtures("set_working_dir_and_path")
 def test_hooks(basic_filesystem):
     try:
         subprocess.check_output(["python", "-m", "mutmut", "run", "--paths-to-mutate=foo.py"])
     except subprocess.CalledProcessError as e:
         print(e.output)
-        assert False
+        assert False, f"Hubo un error llamando a subprocess: {e.output}"
     assert (basic_filesystem / "init_hook").exists(), "init was not called."
     assert (basic_filesystem / "pre_mutation_hook").exists(), "pre_mutation was not called."
     assert (basic_filesystem / "pre_mutation_ast_hook").exists(), "pre_mutation_ast was not called."
