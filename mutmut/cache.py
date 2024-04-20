@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from collections.abc import Sequence
+
 import hashlib
 import os
 from collections import defaultdict
@@ -19,6 +19,7 @@ from pony.orm.core import Query
 
 from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
     OK_KILLED, RelativeMutationID, Context, mutate
+from mutmut.utils import ranges
 
 db = Database()
 
@@ -120,34 +121,6 @@ def hash_of_tests(tests_dirs):
 def get_apply_line(mutant: Mutant) -> str:
     apply_line = 'mutmut apply {}'.format(mutant.id)
     return apply_line
-
-
-def ranges(numbers: Sequence[int]) -> str:
-    if not numbers:
-        return ""
-
-    result: list[str] = []
-    start_range = numbers[0]
-    end_range = numbers[0]
-
-    def add_result():
-        if start_range == end_range:
-            result.append(str(start_range))
-        else:
-            result.append('{}-{}'.format(start_range, end_range))
-
-    for x in numbers[1:]:
-        if end_range + 1 == x:
-            end_range = x
-        else:
-            add_result()
-
-            start_range = x
-            end_range = x
-
-    add_result()
-
-    return ', '.join(result)
 
 
 @init_db
