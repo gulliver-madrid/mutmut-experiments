@@ -9,7 +9,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
-from typing import Tuple
+from typing import Dict, List, Tuple
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -388,7 +388,7 @@ def update_line_numbers(filename):
 
 @init_db
 @db_session
-def register_mutants(mutations_by_file):
+def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]):
     for filename, mutation_ids in mutations_by_file.items():
         hash = hash_of(filename)
         sourcefile = get_or_create(SourceFile, filename=filename)
