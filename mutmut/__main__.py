@@ -79,6 +79,10 @@ DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def climain():
     """
+    -----------------------------\n
+    Ejecutando mutmut-experiments\n
+    -----------------------------
+
     Mutation testing system for Python.
 
     Getting started:
