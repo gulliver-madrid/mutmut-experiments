@@ -32,7 +32,9 @@ from time import time
 from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple
 
 from parso import parse
-from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd
+from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
+from parso.tree import Node
+
 
 __version__ = '2.4.5'
 
@@ -61,24 +63,24 @@ class InvalidASTPatternException(Exception):
 
 
 class ASTPattern:
-    def __init__(self, source, **definitions):
+    def __init__(self, source: str, **definitions: Any):
         if definitions is None:
             definitions = {}
         source = source.strip()
 
         self.definitions = definitions
 
-        self.module = parse(source)
+        self.module: Module = parse(source)
 
         self.markers = []
 
-        def get_leaf(line, column, of_type=None):
+        def get_leaf(line: int, column: int, of_type: Any = None):
             r = self.module.children[0].get_leaf_for_position((line, column))
             while of_type is not None and r.type != of_type:
                 r = r.parent
             return r
 
-        def parse_markers(node):
+        def parse_markers(node: Node):
             if hasattr(node, '_split_prefix'):
                 for x in node._split_prefix():
                     parse_markers(x)
@@ -107,7 +109,7 @@ class ASTPattern:
         self.pattern = pattern_nodes[0]
         self.marker_type_by_id = {id(x['node']): x['marker_type'] for x in self.markers}
 
-    def matches(self, node, pattern=None, skip_child=None):
+    def matches(self, node: Node, pattern=None, skip_child=None):
         if pattern is None:
             pattern = self.pattern
 
