@@ -28,7 +28,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Callable, Dict, Iterator, List, Optional, Set, Tuple
+from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd
@@ -448,7 +448,7 @@ def name_mutation(node, value, **_):
         return 'None'
 
 
-mutations_by_type = {
+mutations_by_type: Final[Mapping[str, Mapping[str, Any]]] = {
     'operator': dict(value=operator_mutation),
     'keyword': dict(value=keyword_mutation),
     'number': dict(value=number_mutation),
