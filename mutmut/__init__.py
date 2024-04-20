@@ -5,6 +5,7 @@ import fnmatch
 import itertools
 import multiprocessing
 import os
+from pathlib import Path
 import re
 import shlex
 import subprocess
@@ -1210,7 +1211,7 @@ def read_coverage_data() -> Dict[str, Dict[int, List[str]]]:
     return {filepath: data.contexts_by_lineno(filepath) for filepath in data.measured_files()}
 
 
-def read_patch_data(patch_file_path: str):
+def read_patch_data(patch_file_path: str | Path) -> Any:
     try:
         # noinspection PyPackageRequirements
         import whatthepatch
