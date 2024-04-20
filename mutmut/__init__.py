@@ -306,7 +306,7 @@ def argument_mutation(children, context: Context, **_):
             return children
 
 
-def keyword_mutation(value, context, **_):
+def keyword_mutation(value, context: Context, **_):
     if len(context.stack) > 2 and context.stack[-2].type in ('comp_op', 'sync_comp_for') and value in ('in', 'is'):
         return
 
