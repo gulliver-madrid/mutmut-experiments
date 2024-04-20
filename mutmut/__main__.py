@@ -48,6 +48,11 @@ from mutmut.cache import print_result_cache, print_result_ids_cache, \
     update_line_numbers, print_result_cache_junitxml, get_unified_diff
 
 
+# CHECK TYPES START
+from types import NoneType
+# CHECK TYPES END
+
+
 def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool):
     """Apply a specified mutant to the source code
 
@@ -272,30 +277,77 @@ def html(dict_synonyms, directory):
 
 
 def do_run(
-    argument,
-    paths_to_mutate,
-    disable_mutation_types,
-    enable_mutation_types,
-    runner,
-    tests_dir,
-    test_time_multiplier,
-    test_time_base,
-    swallow_output,
-    use_coverage,
-    dict_synonyms,
-    pre_mutation,
-    post_mutation,
-    use_patch_file,
-    paths_to_exclude,
-    simple_output,
-    no_progress,
-    ci,
-    rerun_all,
+    argument: None,
+    paths_to_mutate: str | None,
+    disable_mutation_types: str | None,
+    enable_mutation_types: str | None,
+    runner: str | None,
+    tests_dir: str | None,
+    test_time_multiplier: float,  # ?
+    test_time_base: float,  # ?
+    swallow_output: bool | None,
+    use_coverage: bool | None,
+    dict_synonyms: str,  # ?
+    pre_mutation: str | None,
+    post_mutation: str | None,
+    use_patch_file: str | None,
+    paths_to_exclude: str,  # ?
+    simple_output: bool | None,
+    no_progress: None,
+    ci: None,
+    rerun_all: bool | None,
 ) -> int:
     """return exit code, after performing an mutation test run.
 
     :return: the exit code from executing the mutation tests for run command
     """
+
+    # CHECK TYPES START
+    assert isinstance(argument, NoneType)
+    assert isinstance(disable_mutation_types, (str, NoneType)), disable_mutation_types
+    assert isinstance(enable_mutation_types, (str, NoneType)), enable_mutation_types
+    assert isinstance(paths_to_mutate, (str, NoneType))
+    assert isinstance(runner, (str, NoneType)), runner
+    assert isinstance(tests_dir, (str, NoneType))
+    assert isinstance(test_time_multiplier, float)
+    assert isinstance(test_time_base, float)
+    assert isinstance(swallow_output, (bool, NoneType)), swallow_output
+    assert isinstance(use_coverage, (bool, NoneType)), use_coverage
+    assert isinstance(dict_synonyms, str), dict_synonyms
+    assert isinstance(pre_mutation, (str, NoneType)), pre_mutation
+    assert isinstance(post_mutation, (str, NoneType)), post_mutation
+    assert isinstance(use_patch_file, (str, NoneType)), use_patch_file
+    assert isinstance(paths_to_exclude, str)
+    assert isinstance(simple_output, (bool, NoneType)), simple_output
+    assert isinstance(no_progress, NoneType), no_progress
+    assert isinstance(ci, NoneType)
+    assert isinstance(rerun_all, (bool, NoneType)), rerun_all
+    # CHECK TYPES END
+
+    # DEBUG START
+    for arg in ["argument",
+                "paths_to_mutate",
+                "disable_mutation_types",
+                "enable_mutation_types",
+                "runner",
+                "tests_dir",
+                "test_time_multiplier",
+                "test_time_base",
+                "swallow_output",
+                "use_coverage",
+                "dict_synonyms",
+                "pre_mutation",
+                "post_mutation",
+                "use_patch_file",
+                "paths_to_exclude",
+                "simple_output",
+                "no_progress",
+                "ci",
+                "rerun_all",]:
+        value = locals()[arg]
+        print(arg, ":", value, f"(type:{type(value)})")
+    # DEBUG END
+
     if use_coverage and use_patch_file:
         raise click.BadArgumentUsage("You can't combine --use-coverage and --use-patch")
 
