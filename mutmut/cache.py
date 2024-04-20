@@ -149,7 +149,10 @@ def ranges(numbers):
 
 @init_db
 @db_session
-def print_result_cache(show_diffs=False, dict_synonyms=None, only_this_file=None):
+def print_result_cache(show_diffs: bool = False, dict_synonyms=None, only_this_file=None):
+    # CHECK TYPES START
+    assert isinstance(show_diffs, bool)
+    # CHECK TYPES END
     print('To apply a mutant on disk:')
     print('    mutmut apply <id>')
     print('')
@@ -157,7 +160,10 @@ def print_result_cache(show_diffs=False, dict_synonyms=None, only_this_file=None
     print('    mutmut show <id>')
     print('')
 
-    def print_stuff(title, mutant_query):
+    def print_stuff(title: str, mutant_query):
+        # CHECK TYPES START
+        assert isinstance(title, str)
+        # CHECK TYPES END
         mutant_list = sorted(mutant_query, key=lambda x: x.line.sourcefile.filename)
         if mutant_list:
             print('')
