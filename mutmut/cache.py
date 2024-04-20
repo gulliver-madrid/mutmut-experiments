@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+from dataclasses import field
 import hashlib
 import os
 from collections import defaultdict
@@ -9,7 +10,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
-from typing import TYPE_CHECKING, Any, Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Iterator, List, Tuple, Type
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -55,12 +56,28 @@ class Line(DbEntity):  # type: ignore [valid-type]
     mutants = Set('Mutant')
 
 
-class Mutant(DbEntity):  # type: ignore [valid-type]
-    id: int
-    line = Required(Line)
-    index = Required(int)
-    tested_against_hash = Optional(str, autostrip=False)
-    status = Required(str, autostrip=False)  # really an enum of mutant_statuses
+if TYPE_CHECKING:
+    from dataclasses import dataclass
+
+    @dataclass
+    class Mutant:
+        line: Line
+        index: int
+        status: str
+        tested_against_hash: str | None = field(default=None)
+        id: int = field(default=0)
+
+else:
+    class Mutant(DbEntity):  # type: ignore [valid-type]
+        id: int
+        line = Required(Line)
+        index = Required(int)
+        tested_against_hash = Optional(str, autostrip=False)
+        status = Required(str, autostrip=False)  # really an enum of mutant_statuses
+
+
+def get_mutants(_Mutant: Type[Mutant]) -> Iterable[Mutant]:
+    return Mutant  # type: ignore [call-overload]
 
 
 def init_db(f):
@@ -170,17 +187,17 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms=None, only_this_f
                 else:
                     print(ranges([x.id for x in mutants]))
 
-    print_stuff('Timed out ⏰', select(x for x in Mutant if x.status == BAD_TIMEOUT))
-    print_stuff('Suspicious 🤔', select(x for x in Mutant if x.status == OK_SUSPICIOUS))
-    print_stuff('Survived 🙁', select(x for x in Mutant if x.status == BAD_SURVIVED))
-    print_stuff('Untested/skipped', select(x for x in Mutant if x.status == UNTESTED or x.status == SKIPPED))
+    print_stuff('Timed out ⏰', select(x for x in get_mutants(Mutant) if x.status == BAD_TIMEOUT))
+    print_stuff('Suspicious 🤔', select(x for x in get_mutants(Mutant) if x.status == OK_SUSPICIOUS))
+    print_stuff('Survived 🙁', select(x for x in get_mutants(Mutant) if x.status == BAD_SURVIVED))
+    print_stuff('Untested/skipped', select(x for x in get_mutants(Mutant) if x.status == UNTESTED or x.status == SKIPPED))
 
 
 @init_db
 @db_session
 def print_result_ids_cache(desired_status):
     status = MUTANT_STATUSES[desired_status]
-    mutant_query = select(x for x in Mutant if x.status == status)
+    mutant_query = select(x for x in get_mutants(Mutant) if x.status == status)
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
@@ -251,7 +268,7 @@ def create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy):
 @init_db
 @db_session
 def create_html_report(dict_synonyms, directory):
-    mutants = sorted(list(select(x for x in Mutant)), key=lambda x: x.line.sourcefile.filename)
+    mutants = sorted(list(select(x for x in get_mutants(Mutant))), key=lambda x: x.line.sourcefile.filename)
 
     os.makedirs(directory, exist_ok=True)
 
