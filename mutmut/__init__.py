@@ -64,8 +64,6 @@ class InvalidASTPatternException(Exception):
 
 class ASTPattern:
     def __init__(self, source: str, **definitions: Any):
-        if definitions is None:
-            definitions = {}
         source = source.strip()
 
         self.definitions = definitions
