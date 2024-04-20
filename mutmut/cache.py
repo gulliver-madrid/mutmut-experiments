@@ -14,8 +14,8 @@ from typing import Tuple
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
 from pony.orm import Database, Required, db_session, Set, Optional, select, \
-    PrimaryKey, RowNotFound, ERDiagramError, OperationalError, \
-    Query
+    PrimaryKey, RowNotFound, ERDiagramError, OperationalError
+from pony.orm.core import Query
 
 from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
     OK_KILLED, RelativeMutationID, Context, mutate
@@ -163,7 +163,7 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms=None, only_this_f
     print('    mutmut show <id>')
     print('')
 
-    def print_stuff(title: str, mutant_query: Query[Mutant, Mutant]):
+    def print_stuff(title: str, mutant_query: 'Query[Mutant, Mutant]'):
         # CHECK TYPES START
         assert isinstance(title, str)
         # CHECK TYPES END
