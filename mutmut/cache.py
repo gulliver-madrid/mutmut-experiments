@@ -116,7 +116,7 @@ def hash_of_tests(tests_dirs):
     return m.hexdigest()
 
 
-def get_apply_line(mutant):
+def get_apply_line(mutant: Mutant) -> str:
     apply_line = 'mutmut apply {}'.format(mutant.id)
     return apply_line
 
