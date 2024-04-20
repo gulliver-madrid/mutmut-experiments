@@ -24,6 +24,7 @@ whatthepatch = "0.0.6"
 coverage = "^7.4.4"
 hammett = "^0.9.4"
 mock = ">=2.0.0"
+pony-stubs = "^0.5.2"
 
 [build-system]
 requires = ["poetry-core"]

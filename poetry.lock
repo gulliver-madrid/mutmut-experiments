@@ -238,6 +238,17 @@ files = [
 ]
 
 [[package]]
+name = "pony-stubs"
+version = "0.5.2"
+description = "Type stubs for Pony ORM"
+optional = false
+python-versions = ">=3.7,<4.0"
+files = [
+    {file = "pony-stubs-0.5.2.tar.gz", hash = "sha256:65a2739d4c6848eb00e5d8c74c8f25a92f960809b011e3138694665f8a4a5adc"},
+    {file = "pony_stubs-0.5.2-py3-none-any.whl", hash = "sha256:c446481b1e6699676e8fc5c22b59429c18e00d1e663990cd98dae843acaf395a"},
+]
+
+[[package]]
 name = "pytest"
 version = "8.1.1"
 description = "pytest: simple powerful testing with Python"
@@ -338,4 +349,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "d9343ccde0a36be5c280d6ed141a71db5da9f2f103cf2cc368c624c17bb5886b"
+content-hash = "dc97ccb8b1991fa9860683be525938ff1ea7e979f154241ff581c961daa6df3f"
