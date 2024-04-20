@@ -46,6 +46,7 @@ class Line(db.Entity):
 
 
 class Mutant(db.Entity):
+    id: int
     line = Required(Line)
     index = Required(int)
     tested_against_hash = Optional(str, autostrip=False)
