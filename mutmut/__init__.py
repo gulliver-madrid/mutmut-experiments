@@ -492,9 +492,9 @@ class Context:
     def __init__(
         self,
         source: Optional[str] = None,
-        mutation_id=ALL,
+        mutation_id: RelativeMutationID = ALL,
         dict_synonyms=None,
-        filename=None,
+        filename: str | None = None,
         config: Optional[Config] = None,
         index=0,
     ):
@@ -508,7 +508,7 @@ class Context:
         self.current_line_index = 0
         self.filename = filename
         self.stack = []
-        self.dict_synonyms = (dict_synonyms or []) + ['dict']
+        self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
         self._source_by_line_number = None
         self._pragma_no_mutate_lines = None
         self._path_by_line = None
@@ -525,7 +525,7 @@ class Context:
                 self._set_source(f.read())
         return self._source
 
-    def _set_source(self, source):
+    def _set_source(self, source: str | None) -> None:
         if source and source[-1] != '\n':
             source += '\n'
             self.remove_newline_at_end = True

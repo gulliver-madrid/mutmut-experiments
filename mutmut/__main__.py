@@ -11,12 +11,13 @@ from os.path import exists
 from pathlib import Path
 from shutil import copy
 from time import time
-from typing import List
+from typing import List, Tuple
 
 import click
 from glob2 import glob
 
 from mutmut import (
+    RelativeMutationID,
     mutate_file,
     MUTANT_STATUSES,
     Context,
@@ -61,7 +62,8 @@ def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool):
     :param backup: if :obj:`True` create a backup of the source file
         before applying the mutation
     """
-    filename, mutation_id = filename_and_mutation_id_from_pk(int(mutation_pk))
+    tuple_: Tuple[str, RelativeMutationID] = filename_and_mutation_id_from_pk(int(mutation_pk))
+    filename, mutation_id = tuple_
 
     update_line_numbers(filename)
 

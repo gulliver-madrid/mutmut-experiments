@@ -482,7 +482,7 @@ def mutation_id_from_pk(pk):
 
 @init_db
 @db_session
-def filename_and_mutation_id_from_pk(pk) -> Tuple[str, RelativeMutationID]:
+def filename_and_mutation_id_from_pk(pk: int) -> Tuple[str, RelativeMutationID]:
     mutant = Mutant.get(id=pk)
     if mutant is None:
         raise ValueError("Obtained null mutant for pk: {}".format(pk))
