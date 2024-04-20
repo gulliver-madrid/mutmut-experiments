@@ -29,11 +29,11 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple
+from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple, cast
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
-from parso.tree import Node
+from parso.tree import Node, BaseNode, Leaf
 
 
 __version__ = '2.4.5'
@@ -73,7 +73,7 @@ class ASTPattern:
         self.markers = []
 
         def get_leaf(line: int, column: int, of_type: Any = None):
-            r = self.module.children[0].get_leaf_for_position((line, column))
+            r: Leaf | None = cast(BaseNode, self.module.children[0]).get_leaf_for_position((line, column))
             while of_type is not None and r.type != of_type:
                 r = r.parent
             return r
