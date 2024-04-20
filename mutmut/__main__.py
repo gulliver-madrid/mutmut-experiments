@@ -324,30 +324,6 @@ def do_run(
     assert isinstance(rerun_all, (bool, NoneType)), rerun_all
     # CHECK TYPES END
 
-    # DEBUG START
-    for arg in ["argument",
-                "paths_to_mutate",
-                "disable_mutation_types",
-                "enable_mutation_types",
-                "runner",
-                "tests_dir",
-                "test_time_multiplier",
-                "test_time_base",
-                "swallow_output",
-                "use_coverage",
-                "dict_synonyms",
-                "pre_mutation",
-                "post_mutation",
-                "use_patch_file",
-                "paths_to_exclude",
-                "simple_output",
-                "no_progress",
-                "ci",
-                "rerun_all",]:
-        value = locals()[arg]
-        print(arg, ":", value, f"(type:{type(value)})")
-    # DEBUG END
-
     if use_coverage and use_patch_file:
         raise click.BadArgumentUsage("You can't combine --use-coverage and --use-patch")
 
