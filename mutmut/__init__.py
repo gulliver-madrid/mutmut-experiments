@@ -867,14 +867,18 @@ def tests_pass(config: Config, callback) -> bool:
     return returncode != 1
 
 
-def config_from_file(**defaults):
-    def config_from_pyproject_toml() -> dict:
+def config_from_file(**defaults: Any) -> Callable:
+    """
+    Creates a decorator that loads configurations from pyproject.toml and setup.cfg and applies
+    these configurations to other functions that are declared with it.
+    """
+    def config_from_pyproject_toml() -> dict[str, object]:
         try:
             return toml.load('pyproject.toml')['tool']['mutmut']
         except (FileNotFoundError, KeyError):
             return {}
 
-    def config_from_setup_cfg() -> dict:
+    def config_from_setup_cfg() -> dict[str, object]:
         config_parser = ConfigParser()
         config_parser.read('setup.cfg')
 
@@ -885,9 +889,9 @@ def config_from_file(**defaults):
 
     config = config_from_pyproject_toml() or config_from_setup_cfg()
 
-    def decorator(f):
+    def decorator(f: Callable) -> Callable:
         @wraps(f)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             for k in list(kwargs.keys()):
                 if not kwargs[k]:
                     kwargs[k] = config.get(k, defaults.get(k))
