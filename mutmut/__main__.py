@@ -297,7 +297,7 @@ def html(dict_synonyms, directory):
 
 def do_run(
     argument: None,
-    paths_to_mutate: str | None,
+    paths_to_mutate: str | None | list[str] | tuple[str, ...],
     disable_mutation_types: str | None,
     enable_mutation_types: str | None,
     runner: str | None,
@@ -367,8 +367,9 @@ def do_run(
 
     if paths_to_mutate is None:
         paths_to_mutate = guess_paths_to_mutate()
+    assert isinstance(paths_to_mutate, str)
 
-    def split_paths(paths):
+    def split_paths(paths: str) -> list[str] | None:
         # This method is used to split paths that are separated by commas or colons
         for sep in [',', ':']:
             separated = list(filter(lambda p: Path(p).exists(), paths.split(sep)))

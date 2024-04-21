@@ -16,7 +16,8 @@ from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, overlo
 from junit_xml import TestSuite, TestCase, to_xml_report_string
 from pony.orm import Database, Required, db_session, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
-from pony.orm.core import Query
+if TYPE_CHECKING:
+    from pony.orm import Query
 
 
 from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
@@ -132,7 +133,7 @@ def init_db(f):
     return wrapper
 
 
-def hash_of(filename):
+def hash_of(filename: str):
     with open(filename, 'rb') as f:
         m = hashlib.sha256()
         m.update(f.read())
