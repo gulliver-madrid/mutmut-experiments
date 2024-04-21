@@ -332,7 +332,7 @@ from _name import *
 """)
 
 
-def operator_mutation(value, node, **_):
+def operator_mutation(value, node: Node, **_):
     if import_from_star_pattern.matches(node=node):
         return
 
@@ -384,7 +384,7 @@ def operator_mutation(value, node, **_):
     }.get(value)
 
 
-def and_or_test_mutation(children, node, **_):
+def and_or_test_mutation(children, node: Node, **_):
     children = children[:]
     children[1] = Keyword(
         value={'and': ' or', 'or': ' and'}[children[1].value],
@@ -432,7 +432,7 @@ _name(_any)
 """)
 
 
-def name_mutation(node, value, **_):
+def name_mutation(node: Node, value, **_):
     simple_mutants = {
         'True': 'False',
         'False': 'True',
@@ -509,7 +509,7 @@ class Context:
         assert isinstance(mutation_id, RelativeMutationID)
         self.current_line_index = 0
         self.filename = filename
-        self.stack = []
+        self.stack: list[Node] = []
         self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
         self._source_by_line_number = None
         self._pragma_no_mutate_lines = None
@@ -557,7 +557,7 @@ class Context:
             }
         return self._pragma_no_mutate_lines
 
-    def should_mutate(self, node):
+    def should_mutate(self, node: Node):
         if self.config and node.type not in self.config.mutation_types_to_apply:
             return False
         if self.mutation_id == ALL:
@@ -591,7 +591,7 @@ def mutate(context: Context) -> Tuple[str, int]:
     return mutated_source, len(context.performed_mutation_ids)
 
 
-def mutate_node(node, context: Context):
+def mutate_node(node: Node, context: Context):
     context.stack.append(node)
     try:
         if node.type in ('tfpdef', 'import_from', 'import_name'):
