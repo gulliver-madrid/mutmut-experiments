@@ -10,7 +10,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
-from typing import TYPE_CHECKING, Any, Dict, Iterable, Iterator, List, Tuple, Type
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, overload
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -77,7 +77,21 @@ else:
 
 
 def get_mutants(_Mutant: Type[Mutant]) -> Iterable[Mutant]:
-    return Mutant  # type: ignore [call-overload]
+    return Mutant  # type: ignore [return-value]
+
+
+@overload
+def get_mutant(*, id: int) -> Mutant | None:
+    ...
+
+
+@overload
+def get_mutant(*, line: Line, index: int) -> Mutant | None:
+    ...
+
+
+def get_mutant(**kwargs):  # pyright: ignore
+    return Mutant.get(**kwargs)  # pyright: ignore
 
 
 def init_db(f):
@@ -434,7 +448,8 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]):
 def update_mutant_status(file_to_mutate: str, mutation_id, status, tests_hash):
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
-    mutant = Mutant.get(line=line, index=mutation_id.index)
+    mutant = get_mutant(line=line, index=mutation_id.index)
+    assert mutant, dict(line=line, index=mutation_id.index)
     mutant.status = status
     mutant.tested_against_hash = tests_hash
 
@@ -454,7 +469,7 @@ def get_cached_mutation_statuses(filename: str, mutations, hash_of_tests):
             line_obj_by_line[mutation_id.line] = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
         line = line_obj_by_line[mutation_id.line]
         assert line
-        mutant = Mutant.get(line=line, index=mutation_id.index)
+        mutant = get_mutant(line=line, index=mutation_id.index)
         if mutant is None:
             mutant = get_or_create(Mutant, line=line, index=mutation_id.index, defaults=dict(status=UNTESTED))
 
@@ -481,7 +496,7 @@ def cached_mutation_status(filename, mutation_id, hash_of_tests):
     assert sourcefile
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     assert line
-    mutant = Mutant.get(line=line, index=mutation_id.index)
+    mutant = get_mutant(line=line, index=mutation_id.index)
     if mutant is None:
         mutant = get_or_create(Mutant, line=line, index=mutation_id.index, defaults=dict(status=UNTESTED))
 
@@ -500,15 +515,16 @@ def cached_mutation_status(filename, mutation_id, hash_of_tests):
 
 @init_db
 @db_session
-def mutation_id_from_pk(pk):
-    mutant = Mutant.get(id=pk)
+def mutation_id_from_pk(pk: int):
+    mutant = get_mutant(id=pk)
+    assert mutant, dict(id=pk)
     return RelativeMutationID(line=mutant.line.line, index=mutant.index, line_number=mutant.line.line_number)
 
 
 @init_db
 @db_session
 def filename_and_mutation_id_from_pk(pk: int) -> Tuple[str, RelativeMutationID]:
-    mutant = Mutant.get(id=pk)
+    mutant = get_mutant(id=pk)
     if mutant is None:
         raise ValueError("Obtained null mutant for pk: {}".format(pk))
     return mutant.line.sourcefile.filename, mutation_id_from_pk(pk)
