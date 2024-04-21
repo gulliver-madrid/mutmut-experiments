@@ -24,19 +24,12 @@ if TYPE_CHECKING:
 
 
 from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
-    OK_KILLED, RelativeMutationID, Context, mutate
+    OK_KILLED, RelativeMutationID, Context, StatusStr, mutate
 from mutmut.utils import ranges
 
 
 HashOfTestsStr: TypeAlias = str
-StatusStr = Literal[
-    "killed",
-    "skipped",
-    "survived",
-    "suspicious",
-    "timeout",
-    "untested",
-]
+
 
 db = Database()
 
