@@ -697,6 +697,7 @@ def list_mutations(context: Context):
 
 
 def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
+    assert isinstance(context.filename, str)
     with open(context.filename) as f:
         original = f.read()
     if backup:
@@ -823,6 +824,7 @@ def run_mutation(context: Context, callback) -> str:
         return SKIPPED
 
     finally:
+        assert isinstance(context.filename, str)
         move(context.filename + '.bak', context.filename)
         config.test_command = config._default_test_command  # reset test command to its default in the case it was altered in a hook
 
