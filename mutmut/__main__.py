@@ -327,7 +327,7 @@ def do_run(
     assert isinstance(disable_mutation_types, (str, NoneType)), disable_mutation_types
     assert isinstance(enable_mutation_types, (str, NoneType)), enable_mutation_types
     assert isinstance(paths_to_mutate, (str, NoneType))
-    assert isinstance(runner, (str, NoneType)), runner
+    assert isinstance(runner, str), runner  # guess
     assert isinstance(tests_dir, (str, NoneType))
     assert isinstance(test_time_multiplier, float)
     assert isinstance(test_time_base, float)
