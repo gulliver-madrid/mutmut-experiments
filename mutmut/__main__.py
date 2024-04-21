@@ -161,7 +161,7 @@ def run(
     use_patch_file: str | None,
     paths_to_exclude: str,
     simple_output,
-    no_progress,
+    no_progress: bool,
     ci,
     rerun_all
 ):
@@ -313,7 +313,7 @@ def do_run(
     use_patch_file: str | None,
     paths_to_exclude: str,  # ?
     simple_output: bool | None,
-    no_progress: None,
+    no_progress: bool | None,
     ci: None,
     rerun_all: bool | None,
 ) -> int:
@@ -339,10 +339,12 @@ def do_run(
     assert isinstance(use_patch_file, (str, NoneType)), use_patch_file
     assert isinstance(paths_to_exclude, str)
     assert isinstance(simple_output, (bool, NoneType)), simple_output
-    assert isinstance(no_progress, NoneType), no_progress
+    assert isinstance(no_progress, (bool, NoneType)), no_progress
     assert isinstance(ci, NoneType)
     assert isinstance(rerun_all, (bool, NoneType)), rerun_all
     # CHECK TYPES END
+
+    no_progress = no_progress or False
 
     if use_coverage and use_patch_file:
         raise click.BadArgumentUsage("You can't combine --use-coverage and --use-patch")
@@ -538,7 +540,7 @@ def time_test_suite(
     test_command: str,
     using_testmon: bool,
     current_hash_of_tests: str,
-    no_progress,
+    no_progress: bool,
 ) -> float:
     """Execute a test suite specified by ``test_command`` and record
     the time it took to execute the test suite as a floating point number
