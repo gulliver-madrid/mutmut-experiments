@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from collections.abc import Sequence
+import itertools
 from pathlib import Path
+import sys
+from typing import Callable
 
 
 def ranges(numbers: Sequence[int]) -> str:
@@ -40,3 +43,25 @@ def split_paths(paths: str) -> list[str] | None:
         if separated:
             return separated
     return None
+
+
+spinner = itertools.cycle('⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏')
+
+
+def status_printer() -> Callable[[str], None]:
+    """Manage the printing and in-place updating of a line of characters
+
+    .. note::
+        If the string is longer than a line, then in-place updating may not
+        work (it will print a new line at each refresh).
+    """
+    last_len = [0]
+
+    def p(s: str) -> None:
+        s = next(spinner) + ' ' + s
+        len_s = len(s)
+        output = '\r' + s + (' ' * max(last_len[0] - len_s, 0))
+        sys.stdout.write(output)
+        sys.stdout.flush()
+        last_len[0] = len_s
+    return p

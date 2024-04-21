@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import fnmatch
-import itertools
 import multiprocessing
 import os
 from pathlib import Path
@@ -34,6 +33,8 @@ from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
 from parso.tree import Node, BaseNode, Leaf
+
+from mutmut.utils import status_printer
 
 
 __version__ = '2.4.5'
@@ -901,25 +902,6 @@ def config_from_file(**defaults: Any) -> Callable:
     return decorator
 
 
-def status_printer():
-    """Manage the printing and in-place updating of a line of characters
-
-    .. note::
-        If the string is longer than a line, then in-place updating may not
-        work (it will print a new line at each refresh).
-    """
-    last_len = [0]
-
-    def p(s):
-        s = next(spinner) + ' ' + s
-        len_s = len(s)
-        output = '\r' + s + (' ' * max(last_len[0] - len_s, 0))
-        sys.stdout.write(output)
-        sys.stdout.flush()
-        last_len[0] = len_s
-    return p
-
-
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
     this_dir = os.getcwd().split(os.sep)[-1]
@@ -1325,7 +1307,7 @@ def compute_exit_code(
 
 
 hammett_prefix = 'python -m hammett '
-spinner = itertools.cycle('⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏')
+
 print_status = status_printer()
 
 # List of active multiprocessing queues
