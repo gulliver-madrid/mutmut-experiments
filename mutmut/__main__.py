@@ -382,7 +382,8 @@ def do_run(
             'To specify multiple paths, separate them with commas or colons (i.e: --paths-to-mutate=path1/,path2/path3/,path4/).'
         )
 
-    tests_dirs = []
+    tests_dirs: list[str] = []
+    assert tests_dir is not None
     test_paths = split_paths(tests_dir)
     if test_paths is None:
         raise FileNotFoundError(
@@ -392,7 +393,10 @@ def do_run(
         tests_dirs.extend(glob(p, recursive=True))
 
     for p in paths_to_mutate:
-        for pt in split_paths(tests_dir):
+        paths_splitted = split_paths(tests_dir)
+        assert paths_splitted is not None
+        for pt in paths_splitted:
+            assert pt is not None
             tests_dirs.extend(glob(p + '/**/' + pt, recursive=True))
     del tests_dir
     current_hash_of_tests = hash_of_tests(tests_dirs)

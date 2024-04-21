@@ -142,11 +142,12 @@ def hash_of(filename: str):
         return m.hexdigest()
 
 
-def hash_of_tests(tests_dirs):
+def hash_of_tests(tests_dirs: list[str]):
+    assert isinstance(tests_dirs, list)
     m = hashlib.sha256()
     found_something = False
     for tests_dir in tests_dirs:
-        for root, dirs, files in os.walk(tests_dir):
+        for root, _dirs, files in os.walk(tests_dir):
             for filename in files:
                 if not filename.endswith('.py'):
                     continue
