@@ -39,6 +39,7 @@ from mutmut.utils import status_printer
 
 __version__ = '2.4.5'
 
+
 # mutmut_config es la configuracion en forma de archivo python que define el usuario
 
 if os.getcwd() not in sys.path:
@@ -474,27 +475,6 @@ mutations_by_type: Final[Mapping[str, Mapping[str, Any]]] = {
 # TODO: detect regexes and mutate them in nasty ways? Maybe mutate all strings as if they are regexes
 
 
-def should_exclude(context: Context, config: Optional[Config]):
-    if config is None or config.covered_lines_by_filename is None:
-        return False
-
-    try:
-        covered_lines = config.covered_lines_by_filename[context.filename]
-    except KeyError:
-        if config.coverage_data is not None:
-            covered_lines = config.coverage_data.get(os.path.abspath(context.filename))
-            config.covered_lines_by_filename[context.filename] = covered_lines
-        else:
-            covered_lines = None
-
-    if covered_lines is None:
-        return True
-    current_line = context.current_line_index + 1
-    if current_line not in covered_lines:
-        return True
-    return False
-
-
 class Context:
     def __init__(
         self,
@@ -522,8 +502,29 @@ class Context:
         self.config = config
         self.skip = False
 
-    def exclude_line(self):
-        return self.current_line_index in self.pragma_no_mutate_lines or should_exclude(context=self, config=self.config)
+    def exclude_line(self) -> bool:
+        return self.current_line_index in self.pragma_no_mutate_lines or self. should_exclude()
+
+    def should_exclude(self) -> bool:
+        config = self.config
+        if config is None or config.covered_lines_by_filename is None:
+            return False
+
+        try:
+            covered_lines = config.covered_lines_by_filename[self.filename]
+        except KeyError:
+            if config.coverage_data is not None:
+                covered_lines = config.coverage_data.get(os.path.abspath(self.filename))
+                config.covered_lines_by_filename[self.filename] = covered_lines
+            else:
+                covered_lines = None
+
+        if covered_lines is None:
+            return True
+        current_line = self.current_line_index + 1
+        if current_line not in covered_lines:
+            return True
+        return False
 
     @property
     def source(self):
@@ -670,7 +671,7 @@ def mutate_node(node: Node, context: Context):
         context.stack.pop()
 
 
-def mutate_list_of_nodes(node, context: Context):
+def mutate_list_of_nodes(node: Node, context: Context):
     return_annotation_started = False
 
     for child_node in node.children:
