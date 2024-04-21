@@ -956,7 +956,7 @@ class Progress:
             self.skipped)
         )
 
-    def register(self, status):
+    def register(self, status: str) -> None:
         if status == BAD_SURVIVED:
             self.surviving_mutants += 1
         elif status == BAD_TIMEOUT:
