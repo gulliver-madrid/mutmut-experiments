@@ -220,8 +220,8 @@ def print_result_ids_cache(desired_status):
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
-def get_unified_diff(argument, dict_synonyms: str | list[str] | None, update_cache=True, source: str | None = None):
-    filename, mutation_id = filename_and_mutation_id_from_pk(argument)
+def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cache=True, source: str | None = None):
+    filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
         with open(filename) as f:
             source = f.read()
