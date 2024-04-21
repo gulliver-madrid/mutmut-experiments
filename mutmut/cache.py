@@ -10,7 +10,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, TypeAlias, TypeVar, overload
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -23,6 +23,8 @@ if TYPE_CHECKING:
 from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
     OK_KILLED, RelativeMutationID, Context, mutate
 from mutmut.utils import ranges
+
+HashOfTestsStr: TypeAlias = str
 
 db = Database()
 
@@ -460,7 +462,7 @@ def update_mutant_status(file_to_mutate: str, mutation_id, status, tests_hash):
 
 @init_db
 @db_session
-def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: str):
+def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashOfTestsStr):
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
 
@@ -495,7 +497,8 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
 
 @init_db
 @db_session
-def cached_mutation_status(filename, mutation_id, hash_of_tests):
+def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr):
+    assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)

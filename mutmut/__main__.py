@@ -537,7 +537,7 @@ def time_test_suite(
     swallow_output: bool,
     test_command: str,
     using_testmon: bool,
-    current_hash_of_tests,
+    current_hash_of_tests: str,
     no_progress,
 ) -> float:
     """Execute a test suite specified by ``test_command`` and record
@@ -558,9 +558,9 @@ def time_test_suite(
     print('1. Running tests without mutations')
     start_time = time()
 
-    output = []
+    output: list[str] = []
 
-    def feedback(line):
+    def feedback(line: str):
         if not swallow_output:
             print(line)
         if not no_progress:
