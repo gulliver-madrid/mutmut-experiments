@@ -927,7 +927,7 @@ def guess_paths_to_mutate() -> str:
 
 
 class Progress:
-    def __init__(self, total, output_legend, no_progress=False):
+    def __init__(self, total: int, output_legend: Mapping[str, str], no_progress: bool | None = False):
         self.total = total
         self.output_legend = output_legend
         self.progress = 0
