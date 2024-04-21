@@ -10,7 +10,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, overload
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, TypeVar, overload
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -357,7 +357,10 @@ def create_html_report(dict_synonyms, directory):
         index_file.write('</table></body></html>')
 
 
-def get_or_create(model, defaults=None, **params):
+T = TypeVar('T')
+
+
+def get_or_create(model: Type[T], defaults=None, **params) -> T:
     if defaults is None:
         defaults = {}
     obj = model.get(**params)
@@ -457,13 +460,13 @@ def update_mutant_status(file_to_mutate: str, mutation_id, status, tests_hash):
 
 @init_db
 @db_session
-def get_cached_mutation_statuses(filename: str, mutations, hash_of_tests):
+def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: str):
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
 
-    line_obj_by_line = {}
+    line_obj_by_line: dict[str, Line] = {}
 
-    result = {}
+    result: dict[RelativeMutationID, str] = {}
 
     for mutation_id in mutations:
         if mutation_id.line not in line_obj_by_line:

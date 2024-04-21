@@ -38,6 +38,8 @@ from mutmut.utils import status_printer
 
 __version__ = '2.4.5'
 
+# mutmut_config es la configuracion en forma de archivo python que define el usuario
+
 if os.getcwd() not in sys.path:
     sys.path.insert(0, os.getcwd())
 try:
@@ -768,13 +770,14 @@ def run_mutation(context: Context, callback) -> str:
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
     """
     from mutmut.cache import cached_mutation_status
+    assert context.config is not None
     cached_status = cached_mutation_status(context.filename, context.mutation_id, context.config.hash_of_tests)
 
     if cached_status != UNTESTED and context.config.total != 1:
         return cached_status
 
     config = context.config
-    if hasattr(mutmut_config, 'pre_mutation'):
+    if mutmut_config is not None and hasattr(mutmut_config, 'pre_mutation'):
         context.current_line_index = context.mutation_id.line_number
         try:
             mutmut_config.pre_mutation(context=context)
