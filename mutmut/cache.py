@@ -10,6 +10,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
+from types import NoneType
 from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, TypeAlias, TypeVar, overload
 
 
@@ -228,7 +229,11 @@ def get_unified_diff(argument, dict_synonyms, update_cache=True, source=None):
     return _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache)
 
 
-def _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache):
+def _get_unified_diff(source, filename, mutation_id, dict_synonyms: str | list[str] | None, update_cache):
+    assert isinstance(dict_synonyms, (str, list, NoneType))
+    if isinstance(dict_synonyms, str):
+        assert dict_synonyms == ''
+        dict_synonyms = None
 
     if update_cache:
         update_line_numbers(filename)

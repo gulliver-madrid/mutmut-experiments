@@ -246,10 +246,11 @@ def apply(mutation_id, backup, dict_synonyms):
 @config_from_file(
     dict_synonyms='',
 )
-def show(id_or_file, dict_synonyms):
+def show(id_or_file: str | None, dict_synonyms: str):
     """
     Show a mutation diff.
     """
+    assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
     if not id_or_file:
         print_result_cache()
         sys.exit(0)

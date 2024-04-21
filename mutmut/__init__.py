@@ -499,7 +499,7 @@ class Context:
         self,
         source: Optional[str] = None,
         mutation_id: RelativeMutationID = ALL,
-        dict_synonyms=None,
+        dict_synonyms: list[str] | None = None,
         filename: str | None = None,
         config: Optional[Config] = None,
         index=0,
