@@ -11,12 +11,14 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Tuple, Type, TypeAlias, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Literal, Tuple, Type, TypeAlias, TypeVar, overload
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
 from pony.orm import Database, Required, db_session, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
+
+
 if TYPE_CHECKING:
     from pony.orm import Query
 
@@ -25,7 +27,16 @@ from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SK
     OK_KILLED, RelativeMutationID, Context, mutate
 from mutmut.utils import ranges
 
+
 HashOfTestsStr: TypeAlias = str
+StatusStr = Literal[
+    "killed",
+    "skipped",
+    "survived",
+    "suspicious",
+    "timeout",
+    "untested",
+]
 
 db = Database()
 
@@ -214,7 +225,7 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] 
 
 @init_db
 @db_session
-def print_result_ids_cache(desired_status):
+def print_result_ids_cache(desired_status: StatusStr) -> None:
     status = MUTANT_STATUSES[desired_status]
     mutant_query = select(x for x in get_mutants(Mutant) if x.status == status)
     print(" ".join(str(mutant.id) for mutant in mutant_query))
