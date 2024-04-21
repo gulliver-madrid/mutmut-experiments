@@ -981,7 +981,8 @@ def check_coverage_data_filepaths(coverage_data: Mapping[FilePathStr, ContextsBy
             raise ValueError('Filepaths in .coverage not recognized, try recreating the .coverage file manually.')
 
 
-def get_mutations_by_file_from_cache(mutation_pk):
+def get_mutations_by_file_from_cache(mutation_pk: Any):
+    """No code uses this function"""
     from mutmut.cache import filename_and_mutation_id_from_pk
     filename, mutation_id = filename_and_mutation_id_from_pk(int(mutation_pk))
     return {filename: [mutation_id]}
