@@ -473,7 +473,7 @@ mutations_by_type: Final[Mapping[str, Mapping[str, Any]]] = {
 # TODO: detect regexes and mutate them in nasty ways? Maybe mutate all strings as if they are regexes
 
 
-def should_exclude(context, config: Optional[Config]):
+def should_exclude(context: Context, config: Optional[Config]):
     if config is None or config.covered_lines_by_filename is None:
         return False
 
@@ -502,14 +502,14 @@ class Context:
         dict_synonyms: list[str] | None = None,
         filename: str | None = None,
         config: Optional[Config] = None,
-        index=0,
+        index: int = 0,
     ):
         self.index = index
         self.remove_newline_at_end = False
         self._source = None
         self._set_source(source)
         self.mutation_id = mutation_id
-        self.performed_mutation_ids = []
+        self.performed_mutation_ids: list[RelativeMutationID] = []
         assert isinstance(mutation_id, RelativeMutationID)
         self.current_line_index = 0
         self.filename = filename
@@ -527,6 +527,7 @@ class Context:
     @property
     def source(self):
         if self._source is None:
+            assert self.filename
             with open(self.filename) as f:
                 self._set_source(f.read())
         return self._source
@@ -540,6 +541,7 @@ class Context:
     @property
     def source_by_line_number(self):
         if self._source_by_line_number is None:
+            assert self.source is not None
             self._source_by_line_number = self.source.split('\n')
         return self._source_by_line_number
 
