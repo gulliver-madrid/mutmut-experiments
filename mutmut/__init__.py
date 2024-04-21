@@ -28,7 +28,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple, TypeAlias, cast
+from typing import Any, Callable, Dict, Final, Iterator, List, Literal, Mapping, Optional, Set, Tuple, TypeAlias, cast
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
@@ -52,6 +52,15 @@ except ImportError:
 
 FilePathStr: TypeAlias = str
 ContextsByLineNo: TypeAlias = Dict[int, List[str]]
+
+StatusStr = Literal[
+    "killed",
+    "skipped",
+    "survived",
+    "suspicious",
+    "timeout",
+    "untested",
+]
 
 
 @dataclass(frozen=True)
@@ -190,7 +199,7 @@ BAD_SURVIVED = 'bad_survived'
 SKIPPED = 'skipped'
 
 
-MUTANT_STATUSES = {
+MUTANT_STATUSES: Final[Mapping[StatusStr, str]] = {
     "killed": OK_KILLED,
     "timeout": BAD_TIMEOUT,
     "suspicious": OK_SUSPICIOUS,
