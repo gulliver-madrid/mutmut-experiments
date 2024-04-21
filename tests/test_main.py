@@ -443,6 +443,8 @@ def test_full_run_one_surviving_mutant_junit(filesystem):
 # y por tanto todos sean sospechosos
 # pero como no funciona el timeout todos tienen tiempo y salen exitosos
 
+# xfail or xpass?
+
 
 @pytest.mark.xfail(reason="unknown reason (probably due to timeout not working)")
 def test_full_run_all_suspicious_mutant(filesystem):

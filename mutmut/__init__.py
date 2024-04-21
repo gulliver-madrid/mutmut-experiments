@@ -28,7 +28,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple, cast
+from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Set, Tuple, TypeAlias, cast
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
@@ -36,9 +36,7 @@ from parso.tree import Node, BaseNode, Leaf
 
 from mutmut.utils import status_printer
 
-
 __version__ = '2.4.5'
-
 
 if os.getcwd() not in sys.path:
     sys.path.insert(0, os.getcwd())
@@ -46,6 +44,10 @@ try:
     import mutmut_config
 except ImportError:
     mutmut_config = None
+
+
+FilePathStr: TypeAlias = str
+ContextsByLineNo: TypeAlias = Dict[int, List[str]]
 
 
 @dataclass(frozen=True)
@@ -973,7 +975,7 @@ class Progress:
         self.print()
 
 
-def check_coverage_data_filepaths(coverage_data):
+def check_coverage_data_filepaths(coverage_data: Mapping[FilePathStr, ContextsByLineNo]) -> None:
     for filepath in coverage_data:
         if not os.path.exists(filepath):
             raise ValueError('Filepaths in .coverage not recognized, try recreating the .coverage file manually.')
@@ -1182,7 +1184,7 @@ def run_mutation_tests(
             update_mutant_status(file_to_mutate=filename, mutation_id=mutation_id, status=status, tests_hash=config.hash_of_tests)
 
 
-def read_coverage_data() -> Dict[str, Dict[int, List[str]]]:
+def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
     """
     Reads the coverage database and returns a dictionary which maps the filenames to the covered lines and their contexts.
     """
@@ -1194,7 +1196,10 @@ def read_coverage_data() -> Dict[str, Dict[int, List[str]]]:
     cov = Coverage('.coverage')
     cov.load()
     data = cov.get_data()
-    return {filepath: data.contexts_by_lineno(filepath) for filepath in data.measured_files()}
+    return {
+        filepath: data.contexts_by_lineno(filepath)
+        for filepath in data.measured_files()
+    }
 
 
 def read_patch_data(patch_file_path: str | Path) -> Any:
