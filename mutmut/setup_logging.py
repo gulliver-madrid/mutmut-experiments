@@ -38,3 +38,24 @@ def configure_logger(name: str, level: int = logging.DEBUG) -> logging.Logger:
 
 def format_var(name: str, obj: object) -> str:
     return name + "=" + pformat(obj, width=120)
+
+
+logger = configure_logger(__name__)
+
+
+def inspect_stack() -> None:
+    import inspect
+    logger.info("\n\n---start---")
+
+    stack = inspect.stack()
+    # Imprime cada entrada en el stack
+    logger.info("Rastro de llamadas:")
+    for level in stack[:]:
+        frame = level.frame
+        info = inspect.getframeinfo(frame)
+        # Se muestra quien llamo a esta funcion
+        logger.info(f"Funcion {level.function} en {info.filename} linea {info.lineno}")
+
+    # Es importante limpiar los frames del stack para prevenir referencias ciclicas que pueden causar fugas de memoria.
+    del stack
+    logger.info("---end---\n\n")
