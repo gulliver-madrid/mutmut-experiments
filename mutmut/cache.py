@@ -187,11 +187,11 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms=None, only_this_f
         if mutant_list:
             print('')
             print("{} ({})".format(title, len(mutant_list)))
-            for filename, mutants in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
+            for filename, mutants_iterator in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
                 if only_this_file and filename != only_this_file:
                     continue
 
-                mutants = list(mutants)
+                mutants = list(mutants_iterator)
                 print('')
                 print("---- {} ({}) ----".format(filename, len(mutants)))
                 print('')
