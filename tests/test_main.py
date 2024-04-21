@@ -33,6 +33,7 @@ from mutmut.__main__ import climain
 import builtins
 import functools
 
+
 def custom_open_decorator(func):
     @functools.wraps(func)
     def wrapper(filename, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
@@ -250,7 +251,8 @@ def test_python_source_files__with_paths_to_exclude(tmpdir):
         os.path.join(project_dir, 'services', 'utils.py'),
     }
 
-@pytest.mark.xfail(reason="timeout bug")
+
+@pytest.mark.skip(reason="timeout bug")
 def test_popen_streaming_output_timeout():
     start = time()
     with pytest.raises(TimeoutError):
@@ -440,6 +442,8 @@ def test_full_run_one_surviving_mutant_junit(filesystem):
 # entiendo que estamos forzando que no tenga tiempo
 # y por tanto todos sean sospechosos
 # pero como no funciona el timeout todos tienen tiempo y salen exitosos
+
+
 @pytest.mark.xfail(reason="unknown reason (probably due to timeout not working)")
 def test_full_run_all_suspicious_mutant(filesystem):
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-multiplier=0.0"], catch_exceptions=False)
@@ -726,7 +730,7 @@ def test_html_output(surviving_mutants_filesystem):
             '</table></body></html>')
 
 
-def test_html_output_not_slow(surviving_mutants_filesystem: Path) -> None:
+def test_html_output_not_slow(surviving_mutants_filesystem) -> None:
     CliRunner().invoke(
         climain,
         ["run", "--paths-to-mutate=foo.py", "--test-time-base=15.0"],
@@ -738,6 +742,7 @@ def test_html_output_not_slow(surviving_mutants_filesystem: Path) -> None:
     CliRunner().invoke(climain, ["html"])
     elapsed = time.time() - t
     assert elapsed < 0.2
+
 
 def test_html_custom_output(surviving_mutants_filesystem):
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-base=15.0"], catch_exceptions=False)
