@@ -169,7 +169,7 @@ def get_apply_line(mutant: Mutant) -> str:
 
 @init_db
 @db_session
-def print_result_cache(show_diffs: bool = False, dict_synonyms=None, only_this_file=None):
+def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] | None = None, only_this_file: str | None = None):
     # CHECK TYPES START
     assert isinstance(show_diffs, bool)
     # CHECK TYPES END
@@ -220,7 +220,7 @@ def print_result_ids_cache(desired_status):
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
-def get_unified_diff(argument, dict_synonyms, update_cache=True, source=None):
+def get_unified_diff(argument, dict_synonyms: str | list[str] | None, update_cache=True, source: str | None = None):
     filename, mutation_id = filename_and_mutation_id_from_pk(argument)
     if source is None:
         with open(filename) as f:
@@ -229,11 +229,13 @@ def get_unified_diff(argument, dict_synonyms, update_cache=True, source=None):
     return _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache)
 
 
-def _get_unified_diff(source, filename, mutation_id, dict_synonyms: str | list[str] | None, update_cache):
+def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMutationID, dict_synonyms: str | list[str] | None, update_cache):
     assert isinstance(dict_synonyms, (str, list, NoneType))
     if isinstance(dict_synonyms, str):
         assert dict_synonyms == ''
         dict_synonyms = None
+
+    assert isinstance(source, (str, None))
 
     if update_cache:
         update_line_numbers(filename)
