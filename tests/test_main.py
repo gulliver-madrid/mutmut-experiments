@@ -21,7 +21,6 @@ from click.testing import CliRunner
 
 from mutmut import (
     compute_exit_code,
-    mutations_by_type,
     popen_streaming_output,
     Progress,
     python_source_files,
@@ -29,10 +28,11 @@ from mutmut import (
     __version__,
 )
 from mutmut.__main__ import climain
+from mutmut.mutations import mutations_by_type
 from mutmut.status import MUTANT_STATUSES
 
-
 # fix open to use unicode
+
 
 def custom_open_decorator(func):
     @functools.wraps(func)

@@ -20,7 +20,6 @@ from mutmut import (
     mutate_file,
     Context,
     __version__,
-    mutations_by_type,
     mutmut_config,
     config_from_file,
     guess_paths_to_mutate,
@@ -40,12 +39,17 @@ from mutmut import (
 from mutmut.cache import (
     create_html_report,
     cached_hash_of_tests,
-)
-from mutmut.cache import print_result_cache, print_result_ids_cache, \
-    hash_of_tests, \
-    filename_and_mutation_id_from_pk, cached_test_time, set_cached_test_time, \
-    update_line_numbers, print_result_cache_junitxml, get_unified_diff
+    print_result_cache,
+    print_result_ids_cache,
+    hash_of_tests,
+    filename_and_mutation_id_from_pk,
+    cached_test_time,
+    set_cached_test_time,
+    update_line_numbers,
+    print_result_cache_junitxml,
+    get_unified_diff)
 
+from mutmut.mutations import mutations_by_type
 
 # CHECK TYPES START
 from types import NoneType
@@ -84,7 +88,7 @@ null_out = open(os.devnull, 'w')
 DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
 
 
-@click.group(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.group(context_settings=dict(help_option_names=['-h', '--help']))
 def climain():
     """
     -----------------------------\n
@@ -106,36 +110,36 @@ def climain():
     pass
 
 
-@climain.command()
+@ climain.command()
 def version():
     """Show the version and exit."""
     print("mutmut version {}".format(__version__))
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('argument', nargs=1, required=False)
-@click.option('--paths-to-mutate', type=click.STRING)
-@click.option('--disable-mutation-types', type=click.STRING, help='Skip the given types of mutations.')
-@click.option('--enable-mutation-types', type=click.STRING, help='Only perform given types of mutations.')
-@click.option('--paths-to-exclude', type=click.STRING)
-@click.option('--runner')
-@click.option('--use-coverage', is_flag=True, default=False)
-@click.option('--use-patch-file', help='Only mutate lines added/changed in the given patch file')
-@click.option('--rerun-all', is_flag=True, default=False, help='If you modified the test_command in the pre_mutation hook, '
-                                                               'the default test_command (specified by the "runner" option) '
-                                                               'will be executed if the mutant survives with your modified test_command.')
-@click.option('--tests-dir')
-@click.option('-m', '--test-time-multiplier', default=2.0, type=float)
-@click.option('-b', '--test-time-base', default=0.0, type=float)
-@click.option('-s', '--swallow-output', help='turn off output capture', is_flag=True)
-@click.option('--dict-synonyms')
-@click.option('--pre-mutation')
-@click.option('--post-mutation')
-@click.option('--simple-output', is_flag=True, default=False, help="Swap emojis in mutmut output to plain text alternatives.")
-@click.option('--no-progress', is_flag=True, default=False, help="Disable real-time progress indicator")
-@click.option('--CI', is_flag=True, default=False, help="Returns an exit code of 0 for all successful runs and an exit code of 1 for fatal errors.")
-@config_from_file(
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.argument('argument', nargs=1, required=False)
+@ click.option('--paths-to-mutate', type=click.STRING)
+@ click.option('--disable-mutation-types', type=click.STRING, help='Skip the given types of mutations.')
+@ click.option('--enable-mutation-types', type=click.STRING, help='Only perform given types of mutations.')
+@ click.option('--paths-to-exclude', type=click.STRING)
+@ click.option('--runner')
+@ click.option('--use-coverage', is_flag=True, default=False)
+@ click.option('--use-patch-file', help='Only mutate lines added/changed in the given patch file')
+@ click.option('--rerun-all', is_flag=True, default=False, help='If you modified the test_command in the pre_mutation hook, '
+               'the default test_command (specified by the "runner" option) '
+               'will be executed if the mutant survives with your modified test_command.')
+@ click.option('--tests-dir')
+@ click.option('-m', '--test-time-multiplier', default=2.0, type=float)
+@ click.option('-b', '--test-time-base', default=0.0, type=float)
+@ click.option('-s', '--swallow-output', help='turn off output capture', is_flag=True)
+@ click.option('--dict-synonyms')
+@ click.option('--pre-mutation')
+@ click.option('--post-mutation')
+@ click.option('--simple-output', is_flag=True, default=False, help="Swap emojis in mutmut output to plain text alternatives.")
+@ click.option('--no-progress', is_flag=True, default=False, help="Disable real-time progress indicator")
+@ click.option('--CI', is_flag=True, default=False, help="Returns an exit code of 0 for all successful runs and an exit code of 1 for fatal errors.")
+@ config_from_file(
     dict_synonyms='',
     paths_to_exclude='',
     runner=DEFAULT_RUNNER,
@@ -202,7 +206,7 @@ def run(
                     simple_output, no_progress, ci, rerun_all))
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
 def results():
     """
     Print the results.
@@ -211,8 +215,8 @@ def results():
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('status', nargs=1, required=True)
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.argument('status', nargs=1, required=True)
 def result_ids(status: str):
     """
     Print the IDs of the specified mutant classes (separated by spaces).\n
@@ -226,11 +230,11 @@ def result_ids(status: str):
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('mutation-id', nargs=1, required=True)
-@click.option('--backup/--no-backup', default=False)
-@click.option('--dict-synonyms')
-@config_from_file(
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.argument('mutation-id', nargs=1, required=True)
+@ click.option('--backup/--no-backup', default=False)
+@ click.option('--dict-synonyms')
+@ config_from_file(
     dict_synonyms='',
 )
 def apply(mutation_id, backup, dict_synonyms):
@@ -241,10 +245,10 @@ def apply(mutation_id, backup, dict_synonyms):
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.argument('id-or-file', nargs=1, required=False)
-@click.option('--dict-synonyms')
-@config_from_file(
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.argument('id-or-file', nargs=1, required=False)
+@ click.option('--dict-synonyms')
+@ config_from_file(
     dict_synonyms='',
 )
 def show(id_or_file: str | None, dict_synonyms: str):
@@ -268,11 +272,11 @@ def show(id_or_file: str | None, dict_synonyms: str):
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('--dict-synonyms')
-@click.option('--suspicious-policy', type=click.Choice(['ignore', 'skipped', 'error', 'failure']), default='ignore')
-@click.option('--untested-policy', type=click.Choice(['ignore', 'skipped', 'error', 'failure']), default='ignore')
-@config_from_file(
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.option('--dict-synonyms')
+@ click.option('--suspicious-policy', type=click.Choice(['ignore', 'skipped', 'error', 'failure']), default='ignore')
+@ click.option('--untested-policy', type=click.Choice(['ignore', 'skipped', 'error', 'failure']), default='ignore')
+@ config_from_file(
     dict_synonyms='',
 )
 def junitxml(dict_synonyms, suspicious_policy, untested_policy):
@@ -283,10 +287,10 @@ def junitxml(dict_synonyms, suspicious_policy, untested_policy):
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-@click.option('--dict-synonyms')
-@click.option('-d', '--directory', help='Write the output files to DIR.')
-@config_from_file(
+@ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
+@ click.option('--dict-synonyms')
+@ click.option('-d', '--directory', help='Write the output files to DIR.')
+@ config_from_file(
     dict_synonyms='',
     directory='html',
 )
