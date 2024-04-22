@@ -18,6 +18,7 @@ from junit_xml import TestSuite, TestCase, to_xml_report_string
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
+from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
 
 
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
 from mutmut import RelativeMutationID, Context, mutate
 from mutmut.utils import ranges
 
+logger = configure_logger(__name__)
 
 HashOfTestsStr: TypeAlias = str
 
@@ -399,7 +401,7 @@ def get_or_create(model: Type[T], defaults=None, **params) -> T:
         return obj
 
 
-def sequence_ops(a, b):
+def sequence_ops(a: list[str], b: list[str]):
     sequence_matcher = SequenceMatcher(a=a, b=b)
 
     for tag, i1, i2, j1, j2 in sequence_matcher.get_opcodes():
@@ -456,7 +458,7 @@ def update_line_numbers(filename: str) -> None:
 
 @init_db
 @db_session
-def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]):
+def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]) -> None:
     for filename, mutation_ids in mutations_by_file.items():
         hash = hash_of(filename)
         sourcefile = get_or_create(SourceFile, filename=filename)
@@ -474,7 +476,7 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]):
 
 @init_db
 @db_session
-def update_mutant_status(file_to_mutate: str, mutation_id, status, tests_hash):
+def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: str, tests_hash: str) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     mutant = get_mutant(line=line, index=mutation_id.index)
@@ -485,7 +487,7 @@ def update_mutant_status(file_to_mutate: str, mutation_id, status, tests_hash):
 
 @init_db
 @db_session
-def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashOfTestsStr):
+def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashOfTestsStr) -> dict[RelativeMutationID, str]:
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
 
@@ -520,11 +522,11 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
 
 @init_db
 @db_session
-def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr):
+def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr) -> str:
     assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
-    line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
+    line: Line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     assert line
     mutant = get_mutant(line=line, index=mutation_id.index)
     if mutant is None:
@@ -545,7 +547,7 @@ def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_
 
 @init_db
 @db_session
-def mutation_id_from_pk(pk: int):
+def mutation_id_from_pk(pk: int) -> RelativeMutationID:
     mutant = get_mutant(id=pk)
     assert mutant, dict(id=pk)
     return RelativeMutationID(line=mutant.line.line, index=mutant.index, line_number=mutant.line.line_number)
@@ -562,20 +564,20 @@ def filename_and_mutation_id_from_pk(pk: int) -> Tuple[str, RelativeMutationID]:
 
 @init_db
 @db_session
-def cached_test_time():
+def cached_test_time() -> float | None:
     d = MiscData.get(key='baseline_time_elapsed')
     return float(d.value) if d else None
 
 
 @init_db
 @db_session
-def set_cached_test_time(baseline_time_elapsed, current_hash_of_tests):
+def set_cached_test_time(baseline_time_elapsed: float, current_hash_of_tests: str) -> None:
     get_or_create(MiscData, key='baseline_time_elapsed').value = str(baseline_time_elapsed)
     get_or_create(MiscData, key='hash_of_tests').value = current_hash_of_tests
 
 
 @init_db
 @db_session
-def cached_hash_of_tests():
-    d = MiscData.get(key='hash_of_tests')
+def cached_hash_of_tests() -> str | None:
+    d: MiscData = MiscData.get(key='hash_of_tests')
     return d.value if d else None
