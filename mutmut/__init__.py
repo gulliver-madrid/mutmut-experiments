@@ -25,6 +25,7 @@ from threading import (
     Thread,
 )
 from time import time
+from types import NoneType
 from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, Tuple, TypeAlias
 
 from parso import parse
@@ -310,7 +311,10 @@ def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     return original, mutated
 
 
-MutantQueueItem: TypeAlias = tuple[Literal["mutant"], Context] | tuple[Literal["end"], None]
+MutantQueueItem: TypeAlias = (
+    tuple[Literal["mutant"], Context]
+    | tuple[Literal["end"], None]
+)
 MutantQueue: TypeAlias = 'multiprocessing.Queue[MutantQueueItem]'
 
 
@@ -348,8 +352,18 @@ def queue_mutants(
         mutants_queue.put(('end', None))
 
 
-def check_mutants(mutants_queue: MutantQueue, results_queue, cycle_process_after):
-    def feedback(line):
+ResultQueueItem: TypeAlias = (
+    tuple[Literal["status"], str, str | None, RelativeMutationID]
+    | tuple[Literal["progress"], str, None, None]
+    | tuple[Literal["end", "cycle"], None, None, None]
+)
+ResultQueue: TypeAlias = 'multiprocessing.Queue[ResultQueueItem]'
+
+
+def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_process_after: int) -> None:
+    assert isinstance(cycle_process_after, int)
+
+    def feedback(line: str):
         results_queue.put(('progress', line, None, None))
 
     did_cycle = False
@@ -361,8 +375,8 @@ def check_mutants(mutants_queue: MutantQueue, results_queue, cycle_process_after
             if command == 'end':
                 break
 
+            assert context
             status = run_mutation(context, feedback)
-
             results_queue.put(('status', status, context.filename, context.mutation_id))
             count += 1
             if count == cycle_process_after:
