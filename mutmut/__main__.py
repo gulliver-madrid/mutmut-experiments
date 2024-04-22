@@ -10,13 +10,14 @@ from io import (
 from os.path import exists
 from shutil import copy
 from time import time
-from typing import List, Tuple
+from typing import List, Tuple, cast
 
 import click
 from glob2 import glob
 
 from mutmut import (
     RelativeMutationID,
+    StatusStr,
     mutate_file,
     MUTANT_STATUSES,
     Context,
@@ -213,7 +214,7 @@ def results():
 
 @climain.command(context_settings=dict(help_option_names=['-h', '--help']))
 @click.argument('status', nargs=1, required=True)
-def result_ids(status):
+def result_ids(status: str):
     """
     Print the IDs of the specified mutant classes (separated by spaces).\n
     result-ids survived (or any other of: killed,timeout,suspicious,skipped,untested)\n
@@ -221,6 +222,7 @@ def result_ids(status):
     if not status or status not in MUTANT_STATUSES:
         raise click.BadArgumentUsage(f'The result-ids command needs a status class of mutants '
                                      f'(one of : {set(MUTANT_STATUSES.keys())}) but was {status}')
+    status = cast(StatusStr, status)
     print_result_ids_cache(status)
     sys.exit(0)
 
