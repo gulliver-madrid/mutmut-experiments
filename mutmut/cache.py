@@ -11,20 +11,21 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Literal, Tuple, Type, TypeAlias, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Tuple, Type, TypeAlias, TypeVar, overload
 from typing_extensions import ParamSpec
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
+from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
+
 
 if TYPE_CHECKING:
     from pony.orm import Query
 
 
-from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
-    OK_KILLED, RelativeMutationID, Context, StatusStr, mutate
+from mutmut import RelativeMutationID, Context, mutate
 from mutmut.utils import ranges
 
 

@@ -17,9 +17,7 @@ from glob2 import glob
 
 from mutmut import (
     RelativeMutationID,
-    StatusStr,
     mutate_file,
-    MUTANT_STATUSES,
     Context,
     __version__,
     mutations_by_type,
@@ -52,6 +50,7 @@ from mutmut.cache import print_result_cache, print_result_ids_cache, \
 # CHECK TYPES START
 from types import NoneType
 
+from mutmut.status import MUTANT_STATUSES, StatusStr
 from mutmut.utils import split_paths
 # CHECK TYPES END
 
