@@ -418,7 +418,7 @@ def do_run(
         "skipped": "🔇",
     }
     if simple_output:
-        output_legend = {key: key.upper() for (key, value) in output_legend.items()}
+        output_legend = {key: key.upper() for key in output_legend.keys()}
 
     print("""
 - Mutation testing starting -
