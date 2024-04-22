@@ -9,7 +9,7 @@ import re
 import shlex
 import subprocess
 import sys
-import toml
+from types import NoneType
 from configparser import ConfigParser
 from copy import copy as copy_obj
 from dataclasses import dataclass, field
@@ -28,11 +28,13 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Tuple, TypeAlias, cast
+from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Sequence, Tuple, TypeAlias, cast
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
-from parso.tree import Node, BaseNode, Leaf
+from parso.python.prefix import PrefixPart
+from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
+import toml
 
 from mutmut.config import Config
 from mutmut.setup_logging import configure_logger
@@ -80,15 +82,19 @@ class ASTPattern:
 
         self.module: Module = parse(source)
 
-        self.markers = []
+        self.markers: list[dict[str, Any]] = []
 
         def get_leaf(line: int, column: int, of_type: Any = None):
-            r: Leaf | None = cast(BaseNode, self.module.children[0]).get_leaf_for_position((line, column))
+            first = self.module.children[0]
+            assert isinstance(first, BaseNode)
+            r = first.get_leaf_for_position((line, column))
+            assert isinstance(r, (Leaf, NoneType))
             while of_type is not None and r.type != of_type:
                 r = r.parent
             return r
 
-        def parse_markers(node: Node):
+        def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
+            assert isinstance(node, (PrefixPart, Module, NodeOrLeaf))
             if hasattr(node, '_split_prefix'):
                 for x in node._split_prefix():
                     parse_markers(x)
@@ -115,14 +121,21 @@ class ASTPattern:
         if len(pattern_nodes) != 1:
             raise InvalidASTPatternException("Found more than one match node. Match nodes are nodes with an empty name or with the explicit name 'match'")
         self.pattern = pattern_nodes[0]
+        assert isinstance(self.pattern, NodeOrLeaf)  # guess
         self.marker_type_by_id = {id(x['node']): x['marker_type'] for x in self.markers}
 
-    def matches(self, node: Node, pattern=None, skip_child=None):
+    def matches(self, node: NodeOrLeaf, pattern: NodeOrLeaf | None = None, skip_child: NodeOrLeaf | None = None) -> bool:
+
+        assert isinstance(node, NodeOrLeaf)
+        assert isinstance(pattern, (NodeOrLeaf, NoneType))
+        assert isinstance(skip_child, (NodeOrLeaf, NoneType))
         if pattern is None:
             pattern = self.pattern
 
         check_value = True
         check_children = True
+
+        assert pattern is not None
 
         # Match type based on the name, so _keyword matches all keywords.
         # Special case for _all that matches everything
@@ -185,7 +198,8 @@ class SkipException(Exception):
     pass
 
 
-def number_mutation(value, **_):
+def number_mutation(value: str, **_):
+    assert isinstance(value, str)
     suffix = ''
     if value.upper().endswith('L'):  # pragma: no cover (python 2 specific)
         suffix = value[-1]
@@ -228,7 +242,8 @@ def number_mutation(value, **_):
     return result
 
 
-def string_mutation(value, **_):
+def string_mutation(value: str, **_):
+    assert isinstance(value, str)
     prefix = value[:min(x for x in [value.find('"'), value.find("'")] if x != -1)]
     value = value[len(prefix):]
 
@@ -239,9 +254,11 @@ def string_mutation(value, **_):
     return prefix + value[0] + 'XX' + value[1:-1] + 'XX' + value[-1]
 
 
-def fstring_mutation(children, **_):
-    fstring_start: FStringStart = children[0]
-    fstring_end: FStringEnd = children[-1]
+def fstring_mutation(children: list[NodeOrLeaf], **_):
+    fstring_start = children[0]
+    fstring_end = children[-1]
+    assert isinstance(fstring_start, FStringStart)
+    assert isinstance(fstring_end, FStringEnd)
 
     children = children[:]  # we need to copy the list here, to not get in place mutation on the next line!
 
@@ -256,15 +273,19 @@ def fstring_mutation(children, **_):
     return children
 
 
-def partition_node_list(nodes, value):
+def partition_node_list(nodes: list[NodeOrLeaf], value: str) -> Tuple[list[NodeOrLeaf], Leaf, list[NodeOrLeaf]]:
+    assert isinstance(value, str)
     for i, n in enumerate(nodes):
-        if hasattr(n, 'value') and n.value == value:
-            return nodes[:i], n, nodes[i + 1:]
+        assert isinstance(n, NodeOrLeaf)
+        if hasattr(n, 'value'):
+            assert isinstance(n, Leaf)
+            if n.value == value:
+                return nodes[:i], n, nodes[i + 1:]
 
     assert False, "didn't find node to split on"
 
 
-def lambda_mutation(children, **_):
+def lambda_mutation(children: list[NodeOrLeaf], **_):
     pre, op, post = partition_node_list(children, value=':')
 
     if len(post) == 1 and getattr(post[0], 'value', None) == 'None':
@@ -276,11 +297,13 @@ def lambda_mutation(children, **_):
 NEWLINE = {'formatting': [], 'indent': '', 'type': 'endl', 'value': ''}
 
 
-def argument_mutation(children: list[Node], context: Context, **_):
+def argument_mutation(children: list[NodeOrLeaf], context: Context, **_):
     """Mutate the arguments one by one from dict(a=b) to dict(aXXX=b).
 
     This is similar to the mutation of dict literals in the form {'a': b}.
     """
+
+    assert all(isinstance(child, NodeOrLeaf) for child in children)
     if len(context.stack) >= 3 and context.stack[-3].type in ('power', 'atom_expr'):
         stack_pos_of_power_node = -3
     elif len(context.stack) >= 4 and context.stack[-4].type in ('power', 'atom_expr'):
@@ -323,7 +346,8 @@ from _name import *
 """)
 
 
-def operator_mutation(value, node: Node, **_):
+def operator_mutation(value: str, node: Leaf, **_):
+    assert isinstance(node, Leaf)
     if import_from_star_pattern.matches(node=node):
         return
 
@@ -375,7 +399,9 @@ def operator_mutation(value, node: Node, **_):
     }.get(value)
 
 
-def and_or_test_mutation(children, node: Node, **_):
+def and_or_test_mutation(children: list[Leaf], node: Node, **_):
+    assert isinstance(node, Node)
+    assert all(isinstance(child, Leaf) for child in children)
     children = children[:]
     children[1] = Keyword(
         value={'and': ' or', 'or': ' and'}[children[1].value],
@@ -384,8 +410,10 @@ def and_or_test_mutation(children, node: Node, **_):
     return children
 
 
-def expression_mutation(children, **_):
-    def handle_assignment(children):
+def expression_mutation(children: list[NodeOrLeaf], **_):
+    assert all(isinstance(child, NodeOrLeaf) for child in children)
+
+    def handle_assignment(children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
         mutation_index = -1  # we mutate the last value to handle multiple assignement
         if getattr(children[mutation_index], 'value', '---') != 'None':
             x = ' None'
@@ -406,7 +434,8 @@ def expression_mutation(children, **_):
     return children
 
 
-def decorator_mutation(children, **_):
+def decorator_mutation(children: Sequence[NodeOrLeaf], **_):
+    assert all(isinstance(child, NodeOrLeaf) for child in children), children
     assert children[-1].type == 'newline'
     return children[-1:]
 
@@ -423,7 +452,9 @@ _name(_any)
 """)
 
 
-def name_mutation(node: Node, value, **_):
+def name_mutation(node: Leaf | None, value: str, **_):
+    assert isinstance(value, str)
+    assert isinstance(node, (Leaf, NoneType))  # guess
     simple_mutants = {
         'True': 'False',
         'False': 'True',
@@ -433,6 +464,8 @@ def name_mutation(node: Node, value, **_):
     }
     if value in simple_mutants:
         return simple_mutants[value]
+
+    assert node is not None  # guess
 
     if array_subscript_pattern.matches(node=node):
         return 'None'
@@ -479,7 +512,7 @@ class Context:
         assert isinstance(mutation_id, RelativeMutationID)
         self.current_line_index = 0
         self.filename = filename
-        self.stack: list[Node] = []
+        self.stack: list[NodeOrLeaf] = []
         self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
         self._source_by_line_number = None
         self._pragma_no_mutate_lines = None
@@ -550,7 +583,8 @@ class Context:
             }
         return self._pragma_no_mutate_lines
 
-    def should_mutate(self, node: Node):
+    def should_mutate(self, node: NodeOrLeaf) -> bool:
+        assert isinstance(node, NodeOrLeaf)
         if self.config and node.type not in self.config.mutation_types_to_apply:
             return False
         if self.mutation_id == ALL:
@@ -584,7 +618,8 @@ def mutate(context: Context) -> Tuple[str, int]:
     return mutated_source, len(context.performed_mutation_ids)
 
 
-def mutate_node(node: Node, context: Context):
+def mutate_node(node: NodeOrLeaf, context: Context) -> None:
+    assert isinstance(node, NodeOrLeaf)
     context.stack.append(node)
     try:
         if node.type in ('tfpdef', 'import_from', 'import_name'):
@@ -656,7 +691,8 @@ def mutate_node(node: Node, context: Context):
         context.stack.pop()
 
 
-def mutate_list_of_nodes(node: Node, context: Context):
+def mutate_list_of_nodes(node: NodeOrLeaf, context: Context) -> None:
+    assert isinstance(node, NodeOrLeaf)
     return_annotation_started = False
 
     for child_node in node.children:
