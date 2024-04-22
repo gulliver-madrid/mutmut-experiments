@@ -279,7 +279,7 @@ def show(id_or_file: str | None, dict_synonyms: str):
 @ config_from_file(
     dict_synonyms='',
 )
-def junitxml(dict_synonyms, suspicious_policy, untested_policy):
+def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
     """
     Show a mutation diff with junitxml format.
     """
@@ -294,7 +294,7 @@ def junitxml(dict_synonyms, suspicious_policy, untested_policy):
     dict_synonyms='',
     directory='html',
 )
-def html(dict_synonyms, directory):
+def html(dict_synonyms: str, directory: str):
     """
     Generate a HTML report of surviving mutants.
     """
