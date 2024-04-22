@@ -25,7 +25,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Iterator, List, Mapping, Optional, Tuple, TypeAlias
+from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, Tuple, TypeAlias
 
 from parso import parse
 from parso.tree import NodeOrLeaf
@@ -310,11 +310,15 @@ def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     return original, mutated
 
 
+MutantQueueItem: TypeAlias = tuple[Literal["mutant"], Context] | tuple[Literal["end"], None]
+MutantQueue: TypeAlias = 'multiprocessing.Queue[MutantQueueItem]'
+
+
 def queue_mutants(
     *,
     progress: Progress,
     config: Config,
-    mutants_queue,
+    mutants_queue: MutantQueue,
     mutations_by_file: Dict[str, List[RelativeMutationID]],
 ):
     from mutmut.cache import get_cached_mutation_statuses
@@ -344,7 +348,7 @@ def queue_mutants(
         mutants_queue.put(('end', None))
 
 
-def check_mutants(mutants_queue, results_queue, cycle_process_after):
+def check_mutants(mutants_queue: MutantQueue, results_queue, cycle_process_after):
     def feedback(line):
         results_queue.put(('progress', line, None, None))
 
