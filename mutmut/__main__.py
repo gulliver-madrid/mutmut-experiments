@@ -471,12 +471,19 @@ Legend for output:
             assert use_patch_file
             covered_lines_by_filename = read_patch_data(use_patch_file)
 
-    mutations_by_file = {}
+    mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
     paths_to_exclude = paths_to_exclude or ''
+    paths_to_exclude_as_list: list[str]
     if paths_to_exclude:
-        paths_to_exclude = [path.strip() for path in paths_to_exclude.replace(',', '\n').split('\n')]
-        paths_to_exclude = [x for x in paths_to_exclude if x]
+        # here paths_to_exclude_ becames a list[str]
+        paths_to_exclude_as_list = [
+            path.strip()
+            for path in paths_to_exclude.replace(',', '\n').split('\n')
+        ]
+        paths_to_exclude_as_list = [x for x in paths_to_exclude_as_list if x]
+    else:
+        paths_to_exclude_as_list = []
 
     config = Config(
         total=0,  # we'll fill this in later!
@@ -500,7 +507,7 @@ Legend for output:
         rerun_all=rerun_all
     )
 
-    parse_run_argument(argument, config, dict_synonyms, mutations_by_file, paths_to_exclude, paths_to_mutate, tests_dirs)
+    parse_run_argument(argument, config, dict_synonyms, mutations_by_file, paths_to_exclude_as_list, paths_to_mutate, tests_dirs)
 
     config.total = sum(len(mutations) for mutations in mutations_by_file.values())
 
@@ -521,7 +528,20 @@ Legend for output:
         close_active_queues()
 
 
-def parse_run_argument(argument, config, dict_synonyms, mutations_by_file, paths_to_exclude, paths_to_mutate, tests_dirs):
+def parse_run_argument(
+        argument: str | None,
+        config: Config,
+        dict_synonyms: list[str] | str,
+        mutations_by_file: dict[str, list[RelativeMutationID]],
+        paths_to_exclude: list[str],
+        paths_to_mutate: list[str],
+        tests_dirs: list[str]):
+    assert isinstance(mutations_by_file, dict)
+    assert isinstance(dict_synonyms, (list, str))
+    assert isinstance(paths_to_exclude, list)
+    assert isinstance(paths_to_mutate, list)
+    assert isinstance(tests_dirs, list)
+    # argument is the mutation id or a path to a file to mutate
     if argument is None:
         for path in paths_to_mutate:
             for filename in python_source_files(path, tests_dirs, paths_to_exclude):
