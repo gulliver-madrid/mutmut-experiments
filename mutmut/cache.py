@@ -11,11 +11,11 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Literal, Tuple, Type, TypeAlias, TypeVar, overload
-
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Literal, Tuple, Type, TypeAlias, TypeVar, overload
+from typing_extensions import ParamSpec
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
-from pony.orm import Database, Required, db_session, Set, Optional, select, \
+from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
 
@@ -29,6 +29,16 @@ from mutmut.utils import ranges
 
 
 HashOfTestsStr: TypeAlias = str
+
+# Used for db_session and init_db
+P = ParamSpec('P')
+T = TypeVar('T')
+
+if TYPE_CHECKING:
+    def db_session(f: Callable[P, T]) -> Callable[P, T]:
+        ...
+else:
+    from pony.orm import db_session
 
 
 db = Database()
@@ -102,9 +112,9 @@ def get_mutant(**kwargs):  # pyright: ignore
     return Mutant.get(**kwargs)  # pyright: ignore
 
 
-def init_db(f):
+def init_db(f: Callable[P, T]) -> Callable[P, T]:
     @wraps(f)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs):
         if db.provider is None:
             cache_filename = os.path.join(os.getcwd(), '.mutmut-cache')
             db.bind(provider='sqlite', filename=cache_filename, create_db=True)
