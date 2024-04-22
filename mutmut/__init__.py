@@ -25,8 +25,7 @@ from threading import (
     Thread,
 )
 from time import time
-from types import NoneType
-from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, Tuple, TypeAlias
+from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias
 
 from parso import parse
 from parso.tree import NodeOrLeaf
@@ -470,7 +469,10 @@ def tests_pass(config: Config, callback) -> bool:
     return returncode != 1
 
 
-def config_from_file(**defaults: Any) -> Callable:
+P = ParamSpec('P')
+
+
+def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[P, None]]:
     """
     Creates a decorator that loads configurations from pyproject.toml and setup.cfg and applies
     these configurations to other functions that are declared with it.
@@ -492,9 +494,9 @@ def config_from_file(**defaults: Any) -> Callable:
 
     config = config_from_pyproject_toml() or config_from_setup_cfg()
 
-    def decorator(f: Callable) -> Callable:
+    def decorator(f: Callable[P, None]) -> Callable[P, None]:
         @wraps(f)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> None:
             for k in list(kwargs.keys()):
                 if not kwargs[k]:
                     kwargs[k] = config.get(k, defaults.get(k))

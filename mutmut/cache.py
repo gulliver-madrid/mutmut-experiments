@@ -117,7 +117,7 @@ def get_mutant(**kwargs):  # pyright: ignore
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
     @wraps(f)
-    def wrapper(*args: P.args, **kwargs: P.kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if db.provider is None:
             cache_filename = os.path.join(os.getcwd(), '.mutmut-cache')
             db.bind(provider='sqlite', filename=cache_filename, create_db=True)
