@@ -28,7 +28,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Final, Iterator, List, Literal, Mapping, Optional, Set, Tuple, TypeAlias, cast
+from typing import Any, Callable, Dict, Final, Iterator, List, Mapping, Optional, Tuple, TypeAlias, cast
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
@@ -36,6 +36,7 @@ from parso.tree import Node, BaseNode, Leaf
 
 from mutmut.config import Config
 from mutmut.setup_logging import configure_logger
+from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED
 from mutmut.utils import status_printer
 
 __version__ = '2.4.5'
@@ -54,15 +55,6 @@ except ImportError:
 
 FilePathStr: TypeAlias = str
 ContextsByLineNo: TypeAlias = Dict[int, List[str]]
-
-StatusStr = Literal[
-    "killed",
-    "skipped",
-    "survived",
-    "suspicious",
-    "timeout",
-    "untested",
-]
 
 
 @dataclass(frozen=True)
@@ -191,24 +183,6 @@ dunder_whitelist = [
 
 class SkipException(Exception):
     pass
-
-
-UNTESTED = 'untested'
-OK_KILLED = 'ok_killed'
-OK_SUSPICIOUS = 'ok_suspicious'
-BAD_TIMEOUT = 'bad_timeout'
-BAD_SURVIVED = 'bad_survived'
-SKIPPED = 'skipped'
-
-
-MUTANT_STATUSES: Final[Mapping[StatusStr, str]] = {
-    "killed": OK_KILLED,
-    "timeout": BAD_TIMEOUT,
-    "suspicious": OK_SUSPICIOUS,
-    "survived": BAD_SURVIVED,
-    "skipped": SKIPPED,
-    "untested": UNTESTED,
-}
 
 
 def number_mutation(value, **_):

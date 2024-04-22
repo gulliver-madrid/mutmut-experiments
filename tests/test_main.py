@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import functools
+import builtins
 import os
 import subprocess
 import sys
@@ -24,15 +26,13 @@ from mutmut import (
     Progress,
     python_source_files,
     read_coverage_data,
-    MUTANT_STATUSES,
     __version__,
 )
 from mutmut.__main__ import climain
+from mutmut.status import MUTANT_STATUSES
+
 
 # fix open to use unicode
-import builtins
-import functools
-
 
 def custom_open_decorator(func):
     @functools.wraps(func)
