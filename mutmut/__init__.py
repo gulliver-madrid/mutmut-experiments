@@ -35,10 +35,12 @@ from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, M
 from parso.tree import Node, BaseNode, Leaf
 
 from mutmut.config import Config
+from mutmut.setup_logging import configure_logger
 from mutmut.utils import status_printer
 
 __version__ = '2.4.5'
 
+logger = configure_logger(__name__)
 
 # mutmut_config es la configuracion en forma de archivo python que define el usuario
 
@@ -300,7 +302,7 @@ def lambda_mutation(children, **_):
 NEWLINE = {'formatting': [], 'indent': '', 'type': 'endl', 'value': ''}
 
 
-def argument_mutation(children, context: Context, **_):
+def argument_mutation(children: list[Node], context: Context, **_):
     """Mutate the arguments one by one from dict(a=b) to dict(aXXX=b).
 
     This is similar to the mutation of dict literals in the form {'a': b}.
@@ -322,7 +324,7 @@ def argument_mutation(children, context: Context, **_):
             return children
 
 
-def keyword_mutation(value, context: Context, **_):
+def keyword_mutation(value: str, context: Context, **_):
     if len(context.stack) > 2 and context.stack[-2].type in ('comp_op', 'sync_comp_for') and value in ('in', 'is'):
         return
 
