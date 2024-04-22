@@ -276,15 +276,15 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
     return output
 
 
-def print_result_cache_junitxml(dict_synonyms, suspicious_policy, untested_policy):
+def print_result_cache_junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
     print(create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy))
 
 
 @init_db
 @db_session
-def create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy):
-    test_cases = []
-    mutant_list = list(select(x for x in Mutant))
+def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
+    test_cases: list[TestCase] = []
+    mutant_list = list(select(x for x in get_mutants(Mutant)))
     for filename, mutants in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
         for mutant in mutants:
             tc = TestCase("Mutant #{}".format(mutant.id), file=filename, line=mutant.line.line_number + 1, stdout=mutant.line.line)
@@ -309,7 +309,7 @@ def create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy):
 
 @init_db
 @db_session
-def create_html_report(dict_synonyms, directory):
+def create_html_report(dict_synonyms: str, directory: str):
     mutants = sorted(list(select(x for x in get_mutants(Mutant))), key=lambda x: x.line.sourcefile.filename)
 
     os.makedirs(directory, exist_ok=True)
@@ -331,7 +331,7 @@ def create_html_report(dict_synonyms, directory):
 
             os.makedirs(dirname(report_filename), exist_ok=True)
             with open(join(report_filename + '.html'), 'w') as f:
-                mutants_by_status = defaultdict(list)
+                mutants_by_status: dict[str, list[Mutant]] = defaultdict(list)
                 for mutant in mutants:
                     mutants_by_status[mutant.status].append(mutant)
 
@@ -352,7 +352,7 @@ def create_html_report(dict_synonyms, directory):
                     len(mutants_by_status[BAD_SURVIVED]),
                 ))
 
-                def print_diffs(status):
+                def print_diffs(status: str) -> None:
                     mutants = mutants_by_status[status]
                     for mutant in sorted(mutants, key=lambda m: m.id):
                         diff = _get_unified_diff(source, filename, RelativeMutationID(mutant.line.line, mutant.index, mutant.line.line_number), dict_synonyms, update_cache=False)
@@ -382,9 +382,6 @@ def create_html_report(dict_synonyms, directory):
                 f.write('</body></html>')
 
         index_file.write('</table></body></html>')
-
-
-T = TypeVar('T')
 
 
 def get_or_create(model: Type[T], defaults=None, **params) -> T:
