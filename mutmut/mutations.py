@@ -4,12 +4,15 @@ from __future__ import annotations
 import re
 from types import NoneType
 from dataclasses import dataclass, field
-from typing import Any, Final, Mapping, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Sequence, Tuple
 
 from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
+
+if TYPE_CHECKING:
+    from mutmut import Context
 
 
 @dataclass(frozen=True)
@@ -132,7 +135,7 @@ class SkipException(Exception):
     pass
 
 
-def number_mutation(value: str, **_):
+def number_mutation(value: str, **_) -> str:
     assert isinstance(value, str)
     suffix = ''
     if value.upper().endswith('L'):  # pragma: no cover (python 2 specific)
@@ -176,7 +179,7 @@ def number_mutation(value: str, **_):
     return result
 
 
-def string_mutation(value: str, **_):
+def string_mutation(value: str, **_) -> str:
     assert isinstance(value, str)
     prefix = value[:min(x for x in [value.find('"'), value.find("'")] if x != -1)]
     value = value[len(prefix):]
@@ -188,7 +191,7 @@ def string_mutation(value: str, **_):
     return prefix + value[0] + 'XX' + value[1:-1] + 'XX' + value[-1]
 
 
-def fstring_mutation(children: list[NodeOrLeaf], **_):
+def fstring_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
     fstring_start = children[0]
     fstring_end = children[-1]
     assert isinstance(fstring_start, FStringStart)
@@ -219,7 +222,7 @@ def partition_node_list(nodes: list[NodeOrLeaf], value: str) -> Tuple[list[NodeO
     assert False, "didn't find node to split on"
 
 
-def lambda_mutation(children: list[NodeOrLeaf], **_):
+def lambda_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
     pre, op, post = partition_node_list(children, value=':')
 
     if len(post) == 1 and getattr(post[0], 'value', None) == 'None':
@@ -280,7 +283,7 @@ from _name import *
 """)
 
 
-def operator_mutation(value: str, node: Leaf, **_):
+def operator_mutation(value: str, node: Leaf, **_) -> str | list[str] | None:
     assert isinstance(node, Leaf)
     if import_from_star_pattern.matches(node=node):
         return
@@ -333,7 +336,7 @@ def operator_mutation(value: str, node: Leaf, **_):
     }.get(value)
 
 
-def and_or_test_mutation(children: list[Leaf], node: Node, **_):
+def and_or_test_mutation(children: list[Leaf], node: Node, **_) -> list[Leaf]:
     assert isinstance(node, Node)
     assert all(isinstance(child, Leaf) for child in children)
     children = children[:]
@@ -344,7 +347,7 @@ def and_or_test_mutation(children: list[Leaf], node: Node, **_):
     return children
 
 
-def expression_mutation(children: list[NodeOrLeaf], **_):
+def expression_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
     assert all(isinstance(child, NodeOrLeaf) for child in children)
 
     def handle_assignment(children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
@@ -368,7 +371,7 @@ def expression_mutation(children: list[NodeOrLeaf], **_):
     return children
 
 
-def decorator_mutation(children: Sequence[NodeOrLeaf], **_):
+def decorator_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
     assert all(isinstance(child, NodeOrLeaf) for child in children), children
     assert children[-1].type == 'newline'
     return children[-1:]
@@ -386,7 +389,7 @@ _name(_any)
 """)
 
 
-def name_mutation(node: Leaf | None, value: str, **_):
+def name_mutation(node: Leaf | None, value: str, **_) -> str | None:
     assert isinstance(value, str)
     assert isinstance(node, (Leaf, NoneType))  # guess
     simple_mutants = {
@@ -408,7 +411,7 @@ def name_mutation(node: Leaf | None, value: str, **_):
         return 'None'
 
 
-mutations_by_type: Final[Mapping[str, Mapping[str, Any]]] = {
+mutations_by_type: Final[Mapping[str, Mapping[str, Callable[..., Any]]]] = {
     'operator': dict(value=operator_mutation),
     'keyword': dict(value=keyword_mutation),
     'number': dict(value=number_mutation),

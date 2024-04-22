@@ -369,7 +369,7 @@ def do_run(
     if invalid_types:
         raise click.BadArgumentUsage(f"The following are not valid mutation types: {', '.join(sorted(invalid_types))}. Valid mutation types are: {', '.join(mutations_by_type.keys())}")
 
-    dict_synonyms = [x.strip() for x in dict_synonyms.split(',')]
+    dict_synonyms_as_list = [x.strip() for x in dict_synonyms.split(',')]
 
     if use_coverage and not exists('.coverage'):
         raise FileNotFoundError('No .coverage file found. You must generate a coverage file to use this feature.')
@@ -492,7 +492,7 @@ Legend for output:
         covered_lines_by_filename=covered_lines_by_filename,
         coverage_data=coverage_data,
         baseline_time_elapsed=baseline_time_elapsed,
-        dict_synonyms=dict_synonyms,
+        dict_synonyms=dict_synonyms_as_list,
         using_testmon=using_testmon,
         tests_dirs=tests_dirs,
         hash_of_tests=current_hash_of_tests,
