@@ -143,10 +143,27 @@ def version():
     post_mutation=None,
     use_patch_file=None,
 )
-def run(argument, paths_to_mutate, disable_mutation_types, enable_mutation_types, runner,
-        tests_dir, test_time_multiplier, test_time_base, swallow_output, use_coverage,
-        dict_synonyms, pre_mutation, post_mutation, use_patch_file, paths_to_exclude,
-        simple_output, no_progress, ci, rerun_all):
+def run(
+    argument,
+    paths_to_mutate,
+    disable_mutation_types,
+    enable_mutation_types,
+    runner,
+    tests_dir,
+    test_time_multiplier,
+    test_time_base,
+    swallow_output,
+    use_coverage,
+    dict_synonyms,
+    pre_mutation,
+    post_mutation,
+    use_patch_file,
+    paths_to_exclude,
+    simple_output,
+    no_progress,
+    ci,
+    rerun_all
+):
     """
     Runs mutmut. You probably want to start with just trying this. If you supply a mutation ID mutmut will check just this mutant.
 
