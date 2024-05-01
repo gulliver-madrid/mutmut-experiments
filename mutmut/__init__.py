@@ -28,7 +28,8 @@ from time import time
 from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias
 
 from parso import parse
-from parso.tree import NodeOrLeaf
+from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
+from parso.python.tree import ExprStmt
 import toml
 
 from mutmut.config import Config
@@ -204,17 +205,27 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if node.type in ('tfpdef', 'import_from', 'import_name'):
             return
 
-        if node.type == 'atom_expr' and node.children and node.children[0].type == 'name' and node.children[0].value == '__import__':
-            return
+        if node.type == 'atom_expr':
+            assert isinstance(node, Node)
+            if node.children:
+                first_child = node.children[0]
+                if first_child.type == 'name':
+                    assert isinstance(first_child, Leaf)
+                    if first_child.value == '__import__':
+                        return
 
         if node.start_pos[0] - 1 != context.current_line_index:
             context.current_line_index = node.start_pos[0] - 1
             context.index = 0  # indexes are unique per line, so start over here!
 
         if node.type == 'expr_stmt':
-            if node.children[0].type == 'name' and node.children[0].value.startswith('__') and node.children[0].value.endswith('__'):
-                if node.children[0].value[2:-2] in dunder_whitelist:
-                    return
+            assert isinstance(node, ExprStmt)
+            if node.children:
+                first_child = node.children[0]
+                if first_child.type == 'name':
+                    assert isinstance(first_child, Leaf)
+                    if first_child.value.startswith('__') and first_child.value.endswith('__') and first_child.value[2:-2] in dunder_whitelist:
+                        return
 
         # Avoid mutating pure annotations
         if node.type == 'annassign' and len(node.children) == 2:
@@ -270,8 +281,8 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
         context.stack.pop()
 
 
-def mutate_list_of_nodes(node: NodeOrLeaf, context: Context) -> None:
-    assert isinstance(node, NodeOrLeaf)
+def mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
+    assert isinstance(node, BaseNode)
     return_annotation_started = False
 
     for child_node in node.children:
