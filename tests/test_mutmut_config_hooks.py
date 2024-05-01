@@ -4,9 +4,11 @@ import subprocess
 
 import pytest
 
+from helpers import FileSystemPath
+
 
 @pytest.fixture
-def basic_filesystem(tmpdir):
+def basic_filesystem(tmpdir: FileSystemPath):
     source_file = tmpdir / "foo.py"
     source_file.write("def add(a, b): return a + b")
     tests_dir = tmpdir / "tests"
@@ -35,7 +37,7 @@ def pre_mutation_ast(context):
 
 
 @pytest.fixture
-def set_working_dir_and_path(basic_filesystem):
+def set_working_dir_and_path(basic_filesystem: FileSystemPath):
     original_dir = os.path.abspath(os.getcwd())
     original_path = sys.path[:]
 
@@ -52,9 +54,11 @@ def set_working_dir_and_path(basic_filesystem):
 # Por algun motivo aqui se usa python -m mutmut run, en vez de simplemente
 # run como en otros tests.
 # Pero cambiando eso sale el error: FileNotFoundError: [WinError 2] El sistema no puede encontrar el archivo especificado
+
+
 @pytest.mark.xfail(reason="unknown reason, probably mutmut not found")
 @pytest.mark.usefixtures("set_working_dir_and_path")
-def test_hooks(basic_filesystem):
+def test_hooks(basic_filesystem: FileSystemPath):
     try:
         subprocess.check_output(["python", "-m", "mutmut", "run", "--paths-to-mutate=foo.py"])
     except subprocess.CalledProcessError as e:
