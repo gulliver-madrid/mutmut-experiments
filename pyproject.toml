@@ -28,6 +28,7 @@ pony-stubs = "^0.5.2"
 types-toml = "^0.10.8.20240310"
 mypy = "^1.9.0"
 typing-extensions = "^4.11.0"
+types-whatthepatch = "^1.0.2.5"
 
 [build-system]
 requires = ["poetry-core"]
