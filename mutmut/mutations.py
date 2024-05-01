@@ -31,6 +31,10 @@ def is_operator(node: NodeOrLeaf) -> TypeGuard[Operator]:
     return node.type == 'operator'
 
 
+def is_name_node(node: NodeOrLeaf) -> TypeGuard[Name]:
+    return node.type == 'name'
+
+
 class ASTPattern:
     def __init__(self, source: str, **definitions: Any):
         source = source.strip()
@@ -53,7 +57,7 @@ class ASTPattern:
         def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
             assert isinstance(node, (PrefixPart, Module, NodeOrLeaf))
             if hasattr(node, '_split_prefix'):
-                logger.info("slpit prefix:" + str(type(node)))
+                # logger.info("slpit prefix:" + str(type(node)))
                 assert isinstance(node, PythonLeaf), type(node)
                 for x in node._split_prefix():  # pyright: ignore [reportPrivateUsage]
                     parse_markers(x)
@@ -103,10 +107,9 @@ class ASTPattern:
         # Match type based on the name, so _keyword matches all keywords.
         # Special case for _all that matches everything
         if (
-            pattern.type == 'name'
-            and isinstance(pattern, Leaf)  # always
+           is_name_node(pattern)
             and pattern.value.startswith('_') and pattern.value[1:] in ('any', node.type)
-        ):
+           ):
             check_value = False
 
         # The advanced case where we've explicitly marked up a node with
@@ -269,13 +272,11 @@ def argument_mutation(children: list[NodeOrLeaf], context: Context, **_):
     power_node = context.stack[stack_pos_of_power_node]
     assert isinstance(power_node, BaseNode)
     if (
-        power_node.children[0].type == 'name'
-        and isinstance(power_node.children[0], Leaf)  # always true
+        is_name_node(power_node.children[0])
         and power_node.children[0].value in context.dict_synonyms
     ):
         c = children[0]
-        if c.type == 'name':
-            assert isinstance(c, Leaf)
+        if is_name_node(c):
             children = children[:]
             children[0] = Name(c.value + 'XX', start_pos=c.start_pos, prefix=c.prefix)
             return children

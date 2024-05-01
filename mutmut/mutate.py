@@ -10,7 +10,7 @@ from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
 from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context, RelativeMutationID
-from mutmut.mutations import is_operator, mutations_by_type
+from mutmut.mutations import is_name_node, is_operator, mutations_by_type
 from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 
@@ -79,8 +79,7 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
             assert isinstance(node, Node)
             if node.children:
                 first_child = node.children[0]
-                if first_child.type == 'name':
-                    assert isinstance(first_child, Leaf)
+                if is_name_node(first_child):
                     if first_child.value == '__import__':
                         return
 
@@ -92,8 +91,7 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
             assert isinstance(node, ExprStmt)
             if node.children:
                 first_child = node.children[0]
-                if first_child.type == 'name':
-                    assert isinstance(first_child, Leaf)
+                if is_name_node(first_child):
                     if first_child.value.startswith('__') and first_child.value.endswith('__') and first_child.value[2:-2] in dunder_whitelist:
                         return
 
