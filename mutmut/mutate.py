@@ -9,8 +9,8 @@ from typing import Any, Final, Tuple
 from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
 from parso.python.tree import ExprStmt
 
-from mutmut.context import ALL, Context
-from mutmut.mutations import RelativeMutationID, is_operator, mutations_by_type
+from mutmut.context import ALL, Context, RelativeMutationID
+from mutmut.mutations import is_operator, mutations_by_type
 from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 

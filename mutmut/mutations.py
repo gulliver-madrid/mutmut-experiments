@@ -3,18 +3,16 @@ from __future__ import annotations
 
 import re
 from types import NoneType
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Tuple, TypedDict, TypeGuard
+from typing import Any, Callable, Final, Mapping, Tuple, TypedDict, TypeGuard
 
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, Operator, PythonLeaf
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
+from mutmut.context import Context
 from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 
-if TYPE_CHECKING:
-    from mutmut import Context
 
 logger = configure_logger(__name__)
 
@@ -23,14 +21,6 @@ class Marker(TypedDict):
     node: NodeOrLeaf
     marker_type: str | None
     name: str
-
-
-@dataclass(frozen=True)
-class RelativeMutationID:
-    line: str
-    index: int
-    line_number: int
-    filename: Optional[str] = field(default=None, compare=False, hash=False)
 
 
 class InvalidASTPatternException(Exception):
