@@ -391,6 +391,17 @@ files = [
 ]
 
 [[package]]
+name = "types-whatthepatch"
+version = "1.0.2.5"
+description = "Typing stubs for whatthepatch"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-whatthepatch-1.0.2.5.tar.gz", hash = "sha256:1cefe3348d6c5333e61945ccc35f486eef5443d2029764ebc953387196cca70a"},
+    {file = "types_whatthepatch-1.0.2.5-py3-none-any.whl", hash = "sha256:67ab2aa011e528ebc67bcdbc05fa826ac1be244c30a9878540a9121c23a32693"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.11.0"
 description = "Backported and Experimental Type Hints for Python 3.8+"
@@ -429,4 +440,4 @@ test = ["pytest (>=6.0.0)", "setuptools (>=65)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "aedce40ac7cb53bed25eec193b985f97bf8906ed3d83959a7cd4137196cc86a9"
+content-hash = "86ddaa49f9b4266e04fb26a89676892509e190e0113459710f3bb00069d36489"
