@@ -3,14 +3,15 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, Final, Tuple
+from typing import Any, Final, Tuple, TypeGuard
 
 from parso import parse
 from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
-from parso.python.tree import ExprStmt
+from parso.python.tree import ExprStmt, Operator
 
 from mutmut.context import ALL, Context
 from mutmut.mutations import RelativeMutationID, mutations_by_type
+from mutmut.setup_logging import configure_logger
 
 # mutmut_config es la configuracion en forma de archivo python que define el usuario
 mutmut_config: Any
@@ -22,6 +23,7 @@ try:
 except ImportError:
     mutmut_config = None
 
+logger = configure_logger(__name__)
 
 # We have a global whitelist for constants of the pattern __all__, __version__, etc
 
@@ -99,6 +101,7 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
             return
 
         if hasattr(node, 'children'):
+            assert isinstance(node, BaseNode)
             mutate_list_of_nodes(node, context=context)
 
             # this is just an optimization to stop early
@@ -148,15 +151,19 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
         context.stack.pop()
 
 
+def is_operator(node: NodeOrLeaf) -> TypeGuard[Operator]:
+    return node.type == 'operator'
+
+
 def mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
     assert isinstance(node, BaseNode)
     return_annotation_started = False
 
     for child_node in node.children:
-        if child_node.type == 'operator' and child_node.value == '->':
+        if is_operator(child_node) and child_node.value == '->':
             return_annotation_started = True
 
-        if return_annotation_started and child_node.type == 'operator' and child_node.value == ':':
+        if return_annotation_started and is_operator(child_node) and child_node.value == ':':
             return_annotation_started = False
 
         if return_annotation_started:
