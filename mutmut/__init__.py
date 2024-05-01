@@ -31,9 +31,9 @@ from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Option
 import toml
 
 from mutmut.config import Config
-from mutmut.context import Context
+from mutmut.context import Context, RelativeMutationID
 from mutmut.mutate import list_mutations, mutate, mutmut_config
-from mutmut.mutations import RelativeMutationID, SkipException
+from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED
 from mutmut.utils import status_printer

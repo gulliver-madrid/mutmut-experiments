@@ -11,16 +11,15 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, overload
 from typing_extensions import ParamSpec
 
-from junit_xml import TestSuite, TestCase, to_xml_report_string
+from junit_xml import TestSuite, TestCase, to_xml_report_string  # pyright: ignore [reportUnknownVariableType]
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
-from mutmut.context import Context
+from mutmut.context import Context, RelativeMutationID
 from mutmut.mutate import mutate
-from mutmut.mutations import RelativeMutationID
 from mutmut.utils import ranges
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr

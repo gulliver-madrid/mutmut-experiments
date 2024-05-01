@@ -3,13 +3,12 @@
 import pytest
 
 
-from mutmut.context import ALL, Context
+from mutmut.context import ALL, Context, RelativeMutationID
 from mutmut.mutate import mutate, list_mutations
 from mutmut.mutations import (
     array_subscript_pattern,
     function_call_pattern,
-    ASTPattern,
-    RelativeMutationID
+    ASTPattern
 )
 from mutmut.parse import parse
 

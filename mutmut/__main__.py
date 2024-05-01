@@ -49,7 +49,7 @@ from mutmut.cache import (
     print_result_cache_junitxml,
     get_unified_diff)
 from mutmut.config import Config
-from mutmut.mutations import RelativeMutationID
+from mutmut.context import RelativeMutationID
 
 
 def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:

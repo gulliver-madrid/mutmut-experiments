@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+from dataclasses import dataclass, field
 import os
 from io import (
     open,
@@ -10,7 +11,14 @@ from typing import Optional
 from parso.tree import NodeOrLeaf
 
 from mutmut.config import Config
-from mutmut.mutations import RelativeMutationID
+
+
+@dataclass(frozen=True)
+class RelativeMutationID:
+    line: str
+    index: int
+    line_number: int
+    filename: Optional[str] = field(default=None, compare=False, hash=False)
 
 
 ALL = RelativeMutationID(filename='%all%', line='%all%', index=-1, line_number=-1)
