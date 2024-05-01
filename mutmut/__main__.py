@@ -18,7 +18,6 @@ from glob2 import glob
 from mutmut import (
     RelativeMutationID,
     mutate_file,
-    Context,
     __version__,
     mutmut_config,
     config_from_file,
@@ -48,6 +47,7 @@ from mutmut.cache import (
     update_line_numbers,
     print_result_cache_junitxml,
     get_unified_diff)
+from mutmut.context import Context
 
 from mutmut.mutations import mutations_by_type
 
