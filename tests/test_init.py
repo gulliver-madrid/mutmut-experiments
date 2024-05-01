@@ -12,8 +12,8 @@ from mutmut import (
     close_active_queues,
     read_patch_data,
     OK_KILLED,
-    Context,
     mutate)
+from mutmut.context import Context
 from mutmut.mutations import (
     partition_node_list,
     name_mutation)

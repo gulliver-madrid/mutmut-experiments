@@ -26,7 +26,8 @@ if TYPE_CHECKING:
     from pony.orm import Query
 
 
-from mutmut import RelativeMutationID, Context, mutate
+from mutmut import RelativeMutationID, mutate
+from mutmut.context import Context
 from mutmut.utils import ranges
 
 logger = configure_logger(__name__)
