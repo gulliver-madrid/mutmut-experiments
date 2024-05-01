@@ -5,7 +5,7 @@ import builtins
 import os
 import subprocess
 import sys
-from typing import Iterator
+from typing import Any, Iterator
 import xml.etree.ElementTree as ET
 from os import (
     mkdir,
@@ -32,24 +32,14 @@ from mutmut import (
 from mutmut.__main__ import climain
 from mutmut.mutations import mutations_by_type
 from mutmut.status import MUTANT_STATUSES
+from tests.helpers import open_utf8
 
 FileSystemPath = Path  # it's actually a pytest LocalPath, API is similar but not exactly the same
 # more info: https://stackoverflow.com/questions/40784950/pathlib-path-and-py-test-localpath
 
-# fix open to use unicode
 
+builtins.open = open_utf8
 
-def custom_open_decorator(func):
-    @functools.wraps(func)
-    def wrapper(filename, mode='r', buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
-        if 'b' not in mode:
-            encoding = encoding if encoding is not None else 'utf-8'
-        return func(filename, mode, buffering, encoding, errors, newline, closefd, opener)
-    return wrapper
-
-
-builtins.open = custom_open_decorator(builtins.open)
-# end fix open
 
 file_to_mutate_lines = [
     "def foo(a, b):",
