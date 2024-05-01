@@ -237,7 +237,7 @@ def result_ids(status: str) -> NoReturn:
 @ config_from_file(
     dict_synonyms='',
 )
-def apply(mutation_id, backup, dict_synonyms) -> NoReturn:
+def apply(mutation_id: str, backup: bool, dict_synonyms: List[str]) -> NoReturn:
     """
     Apply a mutation on disk.
     """

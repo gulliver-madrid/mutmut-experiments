@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import fnmatch
 import multiprocessing
+from multiprocessing.context import SpawnProcess
 import os
 from pathlib import Path
 import shlex
@@ -47,6 +48,8 @@ logger = configure_logger(__name__)
 
 FilePathStr: TypeAlias = str
 ContextsByLineNo: TypeAlias = Dict[int, List[str]]
+
+StrConsumer = Callable[[str], None]
 
 
 def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
@@ -139,7 +142,7 @@ def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_
             results_queue.put(('end', None, None, None))
 
 
-def run_mutation(context: Context, callback: Callable[[str], None]) -> str:
+def run_mutation(context: Context, callback: StrConsumer) -> str:
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
     """
@@ -204,7 +207,7 @@ def run_mutation(context: Context, callback: Callable[[str], None]) -> str:
                 callback(result)
 
 
-def tests_pass(config: Config, callback) -> bool:
+def tests_pass(config: Config, callback: StrConsumer) -> bool:
     """
     :return: :obj:`True` if the tests pass, otherwise :obj:`False`
     """
@@ -415,7 +418,7 @@ def popen_streaming_output(
     return process.returncode
 
 
-def hammett_tests_pass(config: Config, callback) -> bool:
+def hammett_tests_pass(config: Config, callback: StrConsumer) -> bool:
     # noinspection PyUnresolvedReferences
     from hammett import main_cli
     modules_before = set(sys.modules.keys())
@@ -500,7 +503,7 @@ def run_mutation_tests(
     results_queue = mp_ctx.Queue(maxsize=100)
     add_to_active_queues(results_queue)
 
-    def create_worker():
+    def create_worker() -> SpawnProcess:
         t = mp_ctx.Process(
             target=check_mutants,
             name='check_mutants',
