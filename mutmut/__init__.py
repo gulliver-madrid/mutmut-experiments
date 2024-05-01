@@ -28,15 +28,12 @@ from threading import (
 from time import time
 from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias
 
-from parso import parse
-from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
-from parso.python.tree import ExprStmt
 import toml
 
 from mutmut.config import Config
-from mutmut.context import ALL, Context
+from mutmut.context import Context
 from mutmut.mutate import list_mutations, mutate, mutmut_config
-from mutmut.mutations import RelativeMutationID, SkipException, mutations_by_type
+from mutmut.mutations import RelativeMutationID, SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED
 from mutmut.utils import status_printer
