@@ -11,6 +11,9 @@ from typing import Optional
 from parso.tree import NodeOrLeaf
 
 from mutmut.config import Config
+from mutmut.setup_logging import configure_logger
+
+logger = configure_logger(__name__)
 
 
 @dataclass(frozen=True)
@@ -47,7 +50,7 @@ class Context:
         self.filename = filename
         self.stack: list[NodeOrLeaf] = []
         self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
-        self._source_by_line_number = None
+        self._source_by_line_number: list[str] | None = None
         self._pragma_no_mutate_lines = None
         self._path_by_line = None
         self.config = config
@@ -60,6 +63,8 @@ class Context:
         config = self.config
         if config is None or config.covered_lines_by_filename is None:
             return False
+
+        assert self.filename is not None
 
         try:
             covered_lines = config.covered_lines_by_filename[self.filename]

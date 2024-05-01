@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from mutmut.setup_logging import configure_logger
 from mutmut.utils import split_paths
 from mutmut.status import MUTANT_STATUSES, StatusStr
 from types import NoneType
@@ -14,7 +15,7 @@ from io import open
 from os.path import exists
 from shutil import copy
 from time import time
-from typing import List, NoReturn, Tuple, cast
+from typing import Dict, List, Mapping, NoReturn, Optional, Tuple, TypeGuard, cast
 
 import click
 from glob2 import glob
@@ -51,6 +52,8 @@ from mutmut.cache import (
 from mutmut.config import Config
 from mutmut.context import RelativeMutationID
 
+logger = configure_logger(__name__)
+
 
 def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
     """Apply a specified mutant to the source code
@@ -79,6 +82,25 @@ def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
 null_out = open(os.devnull, 'w')
 
 DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
+
+CoveredLinesByFilename = Optional[Dict[str, set[Optional[int]]]]
+
+
+def is_covered_lines_by_filename(obj: object) -> TypeGuard[CoveredLinesByFilename]:
+    if obj is None:
+        return True
+    if not isinstance(obj, dict):
+        return False
+    d = cast(Mapping[object, object], obj)
+    if not all(isinstance(k, str) for k in d.keys()):
+        return False
+    for v in d.values():
+        if not isinstance(v, set):
+            return False
+        covered_lines = cast(frozenset[object], v)
+        if not all(isinstance(item, (int, NoneType)) for item in covered_lines):
+            return False
+    return True
 
 
 @ click.group(context_settings=dict(help_option_names=['-h', '--help']))
@@ -140,6 +162,8 @@ def version() -> NoReturn:
     pre_mutation=None,
     post_mutation=None,
     use_patch_file=None,
+
+
 )
 def run(
     argument: str | None,
@@ -460,7 +484,7 @@ Legend for output:
         copy('.testmondata', '.testmondata-initial')
 
     # if we're running in a mode with externally whitelisted lines
-    covered_lines_by_filename = None
+    covered_lines_by_filename: object = None
     coverage_data = None
     if use_coverage or use_patch_file:
         covered_lines_by_filename = {}
@@ -470,6 +494,8 @@ Legend for output:
         else:
             assert use_patch_file
             covered_lines_by_filename = read_patch_data(use_patch_file)
+
+    assert is_covered_lines_by_filename(covered_lines_by_filename)
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
@@ -571,6 +597,8 @@ def time_test_suite(
     using_testmon: bool,
     current_hash_of_tests: str,
     no_progress: bool,
+
+
 ) -> float:
     """Execute a test suite specified by ``test_command`` and record
     the time it took to execute the test suite as a floating point number
