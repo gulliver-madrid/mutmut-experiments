@@ -11,7 +11,7 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Tuple, Type, TypeAlias, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
 from typing_extensions import ParamSpec
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -154,14 +154,14 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-def hash_of(filename: str):
+def hash_of(filename: str) -> str:
     with open(filename, 'rb') as f:
         m = hashlib.sha256()
         m.update(f.read())
         return m.hexdigest()
 
 
-def hash_of_tests(tests_dirs: list[str]):
+def hash_of_tests(tests_dirs: list[str]) -> str:
     assert isinstance(tests_dirs, list)
     m = hashlib.sha256()
     found_something = False
@@ -187,7 +187,7 @@ def get_apply_line(mutant: Mutant) -> str:
 
 @init_db
 @db_session
-def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] | None = None, only_this_file: str | None = None):
+def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] | None = None, only_this_file: str | None = None) -> None:
     # CHECK TYPES START
     assert isinstance(show_diffs, bool)
     # CHECK TYPES END
@@ -198,7 +198,7 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] 
     print('    mutmut show <id>')
     print('')
 
-    def print_stuff(title: str, mutant_query: 'Query[Mutant, Mutant]'):
+    def print_stuff(title: str, mutant_query: 'Query[Mutant, Mutant]') -> None:
         # CHECK TYPES START
         assert isinstance(title, str)
         # CHECK TYPES END
@@ -238,7 +238,8 @@ def print_result_ids_cache(desired_status: StatusStr) -> None:
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
-def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cache=True, source: str | None = None):
+def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cache: bool = True, source: str | None = None):
+    assert isinstance(update_cache, bool)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
         with open(filename) as f:
@@ -247,7 +248,7 @@ def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cach
     return _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache)
 
 
-def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMutationID, dict_synonyms: str | list[str] | None, update_cache):
+def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMutationID, dict_synonyms: str | list[str] | None, update_cache: bool) -> str:
     assert isinstance(dict_synonyms, (str, list, NoneType))
     if isinstance(dict_synonyms, str):
         assert dict_synonyms == ''
@@ -277,13 +278,15 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
     return output
 
 
-def print_result_cache_junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
-    print(create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy))
+def print_result_cache_junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> None:
+    report = create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy)
+    assert isinstance(report, str)
+    print(report)
 
 
 @init_db
 @db_session
-def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
+def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> str:
     test_cases: list[TestCase] = []
     mutant_list = list(select(x for x in get_mutants(Mutant)))
     for filename, mutants in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
@@ -310,7 +313,7 @@ def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_
 
 @init_db
 @db_session
-def create_html_report(dict_synonyms: str, directory: str):
+def create_html_report(dict_synonyms: str, directory: str) -> None:
     mutants = sorted(list(select(x for x in get_mutants(Mutant))), key=lambda x: x.line.sourcefile.filename)
 
     os.makedirs(directory, exist_ok=True)
@@ -385,7 +388,7 @@ def create_html_report(dict_synonyms: str, directory: str):
         index_file.write('</table></body></html>')
 
 
-def get_or_create(model: Type[T], defaults=None, **params) -> T:
+def get_or_create(model: Type[T], defaults: Mapping[str, Any] | None = None, **params) -> T:
     if defaults is None:
         defaults = {}
     obj = model.get(**params)
