@@ -11,7 +11,7 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
 from typing_extensions import ParamSpec
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -254,7 +254,7 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
         assert dict_synonyms == ''
         dict_synonyms = None
 
-    assert isinstance(source, (str, None))
+    assert isinstance(source, (str, NoneType))
 
     if update_cache:
         update_line_numbers(filename)
@@ -388,7 +388,7 @@ def create_html_report(dict_synonyms: str, directory: str) -> None:
         index_file.write('</table></body></html>')
 
 
-def get_or_create(model: Type[T], defaults: Mapping[str, Any] | None = None, **params) -> T:
+def get_or_create(model: Type[T], defaults: Mapping[str, Any] | None = None, **params: Any) -> T:
     if defaults is None:
         defaults = {}
     obj = model.get(**params)
@@ -402,7 +402,7 @@ def get_or_create(model: Type[T], defaults: Mapping[str, Any] | None = None, **p
         return obj
 
 
-def sequence_ops(a: list[str], b: list[str]):
+def sequence_ops(a: list[str], b: list[str]) -> Iterator[Any]:
     sequence_matcher = SequenceMatcher(a=a, b=b)
 
     for tag, i1, i2, j1, j2 in sequence_matcher.get_opcodes():
@@ -553,6 +553,7 @@ def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_
 def mutation_id_from_pk(pk: int) -> RelativeMutationID:
     mutant = get_mutant(id=pk)
     assert mutant, dict(id=pk)
+    assert isinstance(mutant.line.line, str)  # always true?
     return RelativeMutationID(line=mutant.line.line, index=mutant.index, line_number=mutant.line.line_number)
 
 
