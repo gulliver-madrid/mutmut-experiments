@@ -3,14 +3,14 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, Final, Tuple, TypeGuard
+from typing import Any, Final, Tuple
 
 from parso import parse
 from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
-from parso.python.tree import ExprStmt, Operator
+from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context
-from mutmut.mutations import RelativeMutationID, mutations_by_type
+from mutmut.mutations import RelativeMutationID, is_operator, mutations_by_type
 from mutmut.setup_logging import configure_logger
 
 # mutmut_config es la configuracion en forma de archivo python que define el usuario
@@ -149,10 +149,6 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
                     return
     finally:
         context.stack.pop()
-
-
-def is_operator(node: NodeOrLeaf) -> TypeGuard[Operator]:
-    return node.type == 'operator'
 
 
 def mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
