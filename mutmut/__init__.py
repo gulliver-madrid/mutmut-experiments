@@ -294,7 +294,7 @@ class Progress:
         self.suspicious_mutants = 0
         self.no_progress = no_progress
 
-    def print(self):
+    def print(self) -> None:
         if self.no_progress:
             return
         print_status('{}/{}  {} {}  {} {}  {} {}  {} {}  {} {}'.format(
@@ -476,7 +476,7 @@ def run_mutation_tests(
     config: Config,
     progress: Progress,
     mutations_by_file: Dict[str, List[RelativeMutationID]],
-):
+) -> None:
     from mutmut.cache import update_mutant_status
 
     # Need to explicitly use the spawn method for python < 3.8 on macOS
@@ -577,7 +577,7 @@ def add_mutations_by_file(
     filename: str,
     dict_synonyms: List[str],
     config: Optional[Config],
-):
+) -> None:
     with open(filename) as f:
         source = f.read()
     context = Context(

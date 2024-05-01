@@ -10,7 +10,7 @@ from io import (
 from os.path import exists
 from shutil import copy
 from time import time
-from typing import List, Tuple, cast
+from typing import List, NoReturn, Tuple, cast
 
 import click
 from glob2 import glob
@@ -58,7 +58,7 @@ from mutmut.utils import split_paths
 # CHECK TYPES END
 
 
-def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool):
+def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
     """Apply a specified mutant to the source code
 
     :param mutation_pk: mutmut cache primary key of the mutant to apply
@@ -88,7 +88,7 @@ DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
 
 
 @ click.group(context_settings=dict(help_option_names=['-h', '--help']))
-def climain():
+def climain() -> None:
     """
     -----------------------------\n
     Ejecutando mutmut-experiments\n
@@ -110,7 +110,7 @@ def climain():
 
 
 @ climain.command()
-def version():
+def version() -> NoReturn:
     """Show the version and exit."""
     print("mutmut version {}".format(__version__))
     sys.exit(0)
@@ -167,7 +167,7 @@ def run(
     no_progress: bool,
     ci,
     rerun_all
-):
+) -> NoReturn:
     """
     Runs mutmut. You probably want to start with just trying this. If you supply a mutation ID mutmut will check just this mutant.
 
@@ -208,7 +208,7 @@ def run(
 
 
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-def results():
+def results() -> NoReturn:
     """
     Print the results.
     """
@@ -218,7 +218,7 @@ def results():
 
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
 @ click.argument('status', nargs=1, required=True)
-def result_ids(status: str):
+def result_ids(status: str) -> NoReturn:
     """
     Print the IDs of the specified mutant classes (separated by spaces).\n
     result-ids survived (or any other of: killed,timeout,suspicious,skipped,untested)\n
@@ -238,7 +238,7 @@ def result_ids(status: str):
 @ config_from_file(
     dict_synonyms='',
 )
-def apply(mutation_id, backup, dict_synonyms):
+def apply(mutation_id, backup, dict_synonyms) -> NoReturn:
     """
     Apply a mutation on disk.
     """
@@ -252,7 +252,7 @@ def apply(mutation_id, backup, dict_synonyms):
 @ config_from_file(
     dict_synonyms='',
 )
-def show(id_or_file: str | None, dict_synonyms: str):
+def show(id_or_file: str | None, dict_synonyms: str) -> NoReturn:
     """
     Show a mutation diff.
     """
@@ -280,7 +280,7 @@ def show(id_or_file: str | None, dict_synonyms: str):
 @ config_from_file(
     dict_synonyms='',
 )
-def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
+def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> NoReturn:
     """
     Show a mutation diff with junitxml format.
     """
@@ -295,7 +295,7 @@ def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str):
     dict_synonyms='',
     directory='html',
 )
-def html(dict_synonyms: str, directory: str):
+def html(dict_synonyms: str, directory: str) -> NoReturn:
     """
     Generate a HTML report of surviving mutants.
     """
