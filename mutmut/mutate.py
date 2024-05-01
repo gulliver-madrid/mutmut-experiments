@@ -5,12 +5,13 @@ import os
 import sys
 from typing import Any, Final, Tuple
 
-from parso import parse
+
 from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
 from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context
 from mutmut.mutations import RelativeMutationID, is_operator, mutations_by_type
+from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 
 # mutmut_config es la configuracion en forma de archivo python que define el usuario

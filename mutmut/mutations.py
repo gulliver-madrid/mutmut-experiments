@@ -6,11 +6,11 @@ from types import NoneType
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Tuple, TypedDict, TypeGuard
 
-from parso import parse
 from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, Operator
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
+from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 
 if TYPE_CHECKING:

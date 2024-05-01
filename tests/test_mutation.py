@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-from parso import parse
+
 
 from mutmut.context import ALL, Context
 from mutmut.mutate import mutate, list_mutations
@@ -11,6 +11,7 @@ from mutmut.mutations import (
     ASTPattern,
     RelativeMutationID
 )
+from mutmut.parse import parse
 
 
 def test_matches_py3() -> None:
