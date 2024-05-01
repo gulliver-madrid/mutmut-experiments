@@ -283,10 +283,10 @@ def argument_mutation(children: list[NodeOrLeaf], context: Context, **_):
 
 def keyword_mutation(value: str, context: Context, **_: Any) -> str | None:
     if len(context.stack) > 2 and context.stack[-2].type in ('comp_op', 'sync_comp_for') and value in ('in', 'is'):
-        return
+        return None
 
     if len(context.stack) > 1 and context.stack[-2].type == 'for_stmt':
-        return
+        return None
 
     return {
         # 'not': 'not not',
@@ -309,28 +309,28 @@ from _name import *
 def operator_mutation(value: str, node: Leaf, **_) -> str | list[str] | None:
     assert isinstance(node, Leaf)
     if import_from_star_pattern.matches(node=node):
-        return
+        return None
 
     if (
         value in ('*', '**')
         and node.parent  # always true
         and node.parent.type == 'param'
     ):
-        return
+        return None
 
     if (
         value == '*'
         and node.parent  # always true
         and node.parent.type == 'parameters'
     ):
-        return
+        return None
 
     if (
         value in ('*', '**')
         and node.parent  # always true
         and node.parent.type in ('argument', 'arglist')
     ):
-        return
+        return None
 
     return {
         '+': '-',
@@ -371,7 +371,7 @@ def operator_mutation(value: str, node: Leaf, **_) -> str | list[str] | None:
     }.get(value)
 
 
-def and_or_test_mutation(children: list[Leaf], node: Node, **_) -> list[Leaf]:
+def and_or_test_mutation(children: list[Leaf], node: Node, **_: Any) -> list[Leaf]:
     assert isinstance(node, Node)
     assert all(isinstance(child, Leaf) for child in children)
     children = children[:]
@@ -382,7 +382,7 @@ def and_or_test_mutation(children: list[Leaf], node: Node, **_) -> list[Leaf]:
     return children
 
 
-def expression_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
+def expression_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
     assert all(isinstance(child, NodeOrLeaf) for child in children)
 
     def handle_assignment(children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
@@ -406,7 +406,7 @@ def expression_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
     return children
 
 
-def decorator_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
+def decorator_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
     assert all(isinstance(child, NodeOrLeaf) for child in children), children
     assert children[-1].type == 'newline'
     return children[-1:]

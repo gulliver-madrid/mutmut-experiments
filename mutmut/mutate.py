@@ -53,7 +53,7 @@ def mutate(context: Context) -> Tuple[str, int]:
         print('----------------------------------')
         raise
     mutate_list_of_nodes(result, context=context)
-    mutated_source = result.get_code().replace(' not not ', ' ')
+    mutated_source: str = result.get_code().replace(' not not ', ' ')
     if context.remove_newline_at_end:
         assert mutated_source[-1] == '\n'
         mutated_source = mutated_source[:-1]
