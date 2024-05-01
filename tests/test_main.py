@@ -4,7 +4,7 @@ import builtins
 import os
 import subprocess
 import sys
-from typing import Iterator
+from typing import Any, Iterator
 import xml.etree.ElementTree as ET
 from os import (
     mkdir,
@@ -150,7 +150,7 @@ def test_compute_return_code() -> None:
     # mock of Config for ease of testing
     class MockProgress(Progress):
         def __init__(self, killed_mutants: int, surviving_mutants: int,
-                     surviving_mutants_timeout: int, suspicious_mutants: int, **_):
+                     surviving_mutants_timeout: int, suspicious_mutants: int, **_: Any):
             super(MockProgress, self).__init__(total=0, output_legend={}, no_progress=False)
             self.killed_mutants = killed_mutants
             self.surviving_mutants = surviving_mutants
