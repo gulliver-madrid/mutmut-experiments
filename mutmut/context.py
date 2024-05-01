@@ -25,6 +25,8 @@ ALL = RelativeMutationID(filename='%all%', line='%all%', index=-1, line_number=-
 
 
 class Context:
+    mutated_source: str
+
     def __init__(
         self,
         source: Optional[str] = None,

@@ -11,10 +11,10 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
 from typing_extensions import ParamSpec
 
-from junit_xml import TestSuite, TestCase, to_xml_report_string  # pyright: ignore [reportUnknownVariableType]
+from junit_xml import TestSuite, TestCase, to_xml_report_string  # pyright: ignore [reportUnknownVariableType,reportMissingTypeStubs]
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
@@ -264,7 +264,7 @@ def print_result_ids_cache(desired_status: StatusStr) -> None:
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
-def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cache: bool = True, source: str | None = None):
+def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cache: bool = True, source: str | None = None) -> str:
     assert isinstance(update_cache, bool)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
@@ -428,7 +428,7 @@ def get_or_create(model: Type[T], defaults: Mapping[str, Any] | None = None, **p
         return obj
 
 
-def sequence_ops(a: list[str], b: list[str]) -> Iterator[Any]:
+def sequence_ops(a: list[str], b: list[str]) -> Iterator[tuple[str, str, int | None, str | None, int | None]]:
     sequence_matcher = SequenceMatcher(a=a, b=b)
 
     for tag, i1, i2, j1, j2 in sequence_matcher.get_opcodes():
@@ -449,6 +449,10 @@ def update_line_numbers(filename: str) -> None:
 
     cached_lines = [x.line for x in cached_line_objects]
 
+    # type checking
+    assert (isinstance(line, str) for line in cached_lines)
+    cached_lines = cast(list[str], cached_lines)
+
     with open(filename) as f:
         existing_lines = [x.strip('\n') for x in f.readlines()]
 
@@ -457,15 +461,16 @@ def update_line_numbers(filename: str) -> None:
             Line(sourcefile=sourcefile, line=line, line_number=i)
         return
 
-    for command, a, a_index, b, b_index in sequence_ops(cached_lines, existing_lines):
-        assert isinstance(a_index, int)
+    for command, _a, a_index, b, b_index in sequence_ops(cached_lines, existing_lines):
         if command == 'equal':
+            assert isinstance(a_index, int)
             if a_index != b_index:
                 cached_obj = cached_line_objects[a_index]
                 assert cached_obj.line == existing_lines[b_index]
                 cached_obj.line_number = b_index
 
         elif command == 'delete':
+            assert isinstance(a_index, int)
             cached_line_objects[a_index].delete()
 
         elif command == 'insert':
