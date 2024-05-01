@@ -155,8 +155,8 @@ def run(
     enable_mutation_types: str,
     runner: str | None,
     tests_dir: str,
-    test_time_multiplier: float,
-    test_time_base: float,
+    test_time_multiplier: float | None,
+    test_time_base: float | None,
     swallow_output: bool | None,
     use_coverage: bool,
     dict_synonyms: str,
@@ -195,6 +195,8 @@ def run(
     With --CI flag enabled, the exit code will always be
     1 for a fatal error or 0 for any other case.
     """
+    assert isinstance(test_time_base, (float, NoneType))
+    assert isinstance(test_time_multiplier, (float, NoneType))
     if test_time_base is None:  # click sets the default=0.0 to None
         test_time_base = 0.0
     if test_time_multiplier is None:  # click sets the default=0.0 to None
@@ -309,8 +311,8 @@ def do_run(
     enable_mutation_types: str | None,
     runner: str | None,
     tests_dir: str | None,
-    test_time_multiplier: float,  # ?
-    test_time_base: float,  # ?
+    test_time_multiplier: float,
+    test_time_base: float,
     swallow_output: bool | None,
     use_coverage: bool | None,
     dict_synonyms: str,  # ?
