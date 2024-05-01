@@ -18,9 +18,9 @@ from junit_xml import TestSuite, TestCase, to_xml_report_string
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
-from mutmut import RelativeMutationID
 from mutmut.context import Context
 from mutmut.mutate import mutate
+from mutmut.mutations import RelativeMutationID
 from mutmut.utils import ranges
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
