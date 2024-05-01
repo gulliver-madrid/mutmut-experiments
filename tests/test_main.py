@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import functools
 import builtins
 import os
 import subprocess
 import sys
-from typing import Any, Iterator
+from typing import Iterator
 import xml.etree.ElementTree as ET
 from os import (
     mkdir,
@@ -32,7 +31,8 @@ from mutmut import (
 from mutmut.__main__ import climain
 from mutmut.mutations import mutations_by_type
 from mutmut.status import MUTANT_STATUSES
-from tests.helpers import open_utf8
+
+from helpers import open_utf8
 
 FileSystemPath = Path  # it's actually a pytest LocalPath, API is similar but not exactly the same
 # more info: https://stackoverflow.com/questions/40784950/pathlib-path-and-py-test-localpath

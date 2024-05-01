@@ -19,7 +19,6 @@ from mutmut import (
     RelativeMutationID,
     mutate_file,
     __version__,
-    mutmut_config,
     config_from_file,
     guess_paths_to_mutate,
     Config,
@@ -48,7 +47,7 @@ from mutmut.cache import (
     print_result_cache_junitxml,
     get_unified_diff)
 from mutmut.context import Context
-
+from mutmut.mutate import mutmut_config
 from mutmut.mutations import mutations_by_type
 
 # CHECK TYPES START

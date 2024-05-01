@@ -3,8 +3,9 @@
 import pytest
 from parso import parse
 
-from mutmut import mutate, list_mutations, RelativeMutationID
+from mutmut import RelativeMutationID
 from mutmut.context import ALL, Context
+from mutmut.mutate import mutate, list_mutations
 from mutmut.mutations import (
     array_subscript_pattern, function_call_pattern, ASTPattern)
 
