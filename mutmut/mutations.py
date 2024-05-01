@@ -4,10 +4,10 @@ from __future__ import annotations
 import re
 from types import NoneType
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Tuple, TypedDict
+from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Tuple, TypedDict, TypeGuard
 
 from parso import parse
-from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, PythonNode
+from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, Operator
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
@@ -35,6 +35,10 @@ class RelativeMutationID:
 
 class InvalidASTPatternException(Exception):
     pass
+
+
+def is_operator(node: NodeOrLeaf) -> TypeGuard[Operator]:
+    return node.type == 'operator'
 
 
 class ASTPattern:
@@ -373,11 +377,11 @@ def expression_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
 
         return children
 
-    if children[0].type == 'operator' and children[0].value == ':':
+    if is_operator(children[0]) and children[0].value == ':':
         if len(children) > 2 and children[2].value == '=':
             children = children[:]  # we need to copy the list here, to not get in place mutation on the next line!
             children[1:] = handle_assignment(children[1:])
-    elif children[1].type == 'operator' and children[1].value == '=':
+    elif is_operator(children[1]) and children[1].value == '=':
         children = handle_assignment(children)
 
     return children
