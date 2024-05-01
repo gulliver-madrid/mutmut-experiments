@@ -538,9 +538,11 @@ def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_
         # suite will mean it's still killed
         return OK_KILLED
 
-    if mutant.tested_against_hash != hash_of_tests or \
-            mutant.tested_against_hash == NO_TESTS_FOUND or \
-            hash_of_tests == NO_TESTS_FOUND:
+    if (
+        mutant.tested_against_hash != hash_of_tests
+        or mutant.tested_against_hash == NO_TESTS_FOUND
+        or hash_of_tests == NO_TESTS_FOUND
+    ):
         return UNTESTED
 
     return mutant.status
