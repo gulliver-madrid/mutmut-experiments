@@ -1,12 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from mutmut.utils import split_paths
+from mutmut.status import MUTANT_STATUSES, StatusStr
+from types import NoneType
+from mutmut.mutations import mutations_by_type
+from mutmut.mutate import mutmut_config
+from mutmut.context import Context
 import os
 import sys
 import traceback
-from io import (
-    open,
-)
+from io import open
 from os.path import exists
 from shutil import copy
 from time import time
@@ -16,12 +20,10 @@ import click
 from glob2 import glob
 
 from mutmut import (
-    RelativeMutationID,
     mutate_file,
     __version__,
     config_from_file,
     guess_paths_to_mutate,
-    Config,
     Progress,
     check_coverage_data_filepaths,
     popen_streaming_output,
@@ -46,16 +48,8 @@ from mutmut.cache import (
     update_line_numbers,
     print_result_cache_junitxml,
     get_unified_diff)
-from mutmut.context import Context
-from mutmut.mutate import mutmut_config
-from mutmut.mutations import mutations_by_type
-
-# CHECK TYPES START
-from types import NoneType
-
-from mutmut.status import MUTANT_STATUSES, StatusStr
-from mutmut.utils import split_paths
-# CHECK TYPES END
+from mutmut.config import Config
+from mutmut.mutations import RelativeMutationID
 
 
 def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
