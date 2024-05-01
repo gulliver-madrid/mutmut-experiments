@@ -1,7 +1,7 @@
 from mutmut.cache import sequence_ops
 
 
-def test_sequence_ops():
+def test_sequence_ops() -> None:
     a = [
         'a',
         'b',
