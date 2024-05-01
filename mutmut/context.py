@@ -82,22 +82,22 @@ class Context:
         self._source = source
 
     @property
-    def source_by_line_number(self):
+    def source_by_line_number(self) -> list[str]:
         if self._source_by_line_number is None:
             assert self.source is not None
             self._source_by_line_number = self.source.split('\n')
         return self._source_by_line_number
 
     @property
-    def current_source_line(self):
+    def current_source_line(self) -> str:
         return self.source_by_line_number[self.current_line_index]
 
     @property
-    def mutation_id_of_current_index(self):
+    def mutation_id_of_current_index(self) -> RelativeMutationID:
         return RelativeMutationID(filename=self.filename, line=self.current_source_line, index=self.index, line_number=self.current_line_index)
 
     @property
-    def pragma_no_mutate_lines(self):
+    def pragma_no_mutate_lines(self) -> set[int]:
         if self._pragma_no_mutate_lines is None:
             self._pragma_no_mutate_lines = {
                 i
