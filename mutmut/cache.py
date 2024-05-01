@@ -73,8 +73,6 @@ if TYPE_CHECKING:
         @staticmethod
         def get(**kwargs: Any) -> 'SourceFile':
             ...
-
-
 else:
     class SourceFile(DbEntity):  # type: ignore [valid-type]
         filename = Required(str, autostrip=False)
@@ -126,7 +124,7 @@ else:
         status = Required(str, autostrip=False)  # really an enum of mutant_statuses
 
 
-def get_mutants(_Mutant: Type[Mutant]) -> Iterable[Mutant]:
+def get_mutants() -> Iterable[Mutant]:
     return Mutant  # type: ignore [return-value]
 
 
@@ -141,7 +139,7 @@ def get_mutant(*, line: Line, index: int) -> Mutant | None:
 
 
 def get_mutant(**kwargs):  # pyright: ignore
-    return Mutant.get(**kwargs)  # pyright: ignore
+    return Mutant.get(**kwargs)  # type: ignore [attr-defined] # pyright: ignore
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
@@ -252,17 +250,17 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] 
                 else:
                     print(ranges([x.id for x in mutants]))
 
-    print_stuff('Timed out ⏰', select(x for x in get_mutants(Mutant) if x.status == BAD_TIMEOUT))
-    print_stuff('Suspicious 🤔', select(x for x in get_mutants(Mutant) if x.status == OK_SUSPICIOUS))
-    print_stuff('Survived 🙁', select(x for x in get_mutants(Mutant) if x.status == BAD_SURVIVED))
-    print_stuff('Untested/skipped', select(x for x in get_mutants(Mutant) if x.status == UNTESTED or x.status == SKIPPED))
+    print_stuff('Timed out ⏰', select(x for x in get_mutants() if x.status == BAD_TIMEOUT))
+    print_stuff('Suspicious 🤔', select(x for x in get_mutants() if x.status == OK_SUSPICIOUS))
+    print_stuff('Survived 🙁', select(x for x in get_mutants() if x.status == BAD_SURVIVED))
+    print_stuff('Untested/skipped', select(x for x in get_mutants() if x.status == UNTESTED or x.status == SKIPPED))
 
 
 @init_db
 @db_session
 def print_result_ids_cache(desired_status: StatusStr) -> None:
     status = MUTANT_STATUSES[desired_status]
-    mutant_query = select(x for x in get_mutants(Mutant) if x.status == status)
+    mutant_query = select(x for x in get_mutants() if x.status == status)
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
@@ -316,7 +314,7 @@ def print_result_cache_junitxml(dict_synonyms: str, suspicious_policy: str, unte
 @db_session
 def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> str:
     test_cases: list[TestCase] = []
-    mutant_list = list(select(x for x in get_mutants(Mutant)))
+    mutant_list = list(select(x for x in get_mutants()))
     for filename, mutants in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
         for mutant in mutants:
             tc = TestCase("Mutant #{}".format(mutant.id), file=filename, line=mutant.line.line_number + 1, stdout=mutant.line.line)
@@ -342,7 +340,7 @@ def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_
 @init_db
 @db_session
 def create_html_report(dict_synonyms: str, directory: str) -> None:
-    mutants = sorted(list(select(x for x in get_mutants(Mutant))), key=lambda x: x.line.sourcefile.filename)
+    mutants = sorted(list(select(x for x in get_mutants())), key=lambda x: x.line.sourcefile.filename)
 
     os.makedirs(directory, exist_ok=True)
 
