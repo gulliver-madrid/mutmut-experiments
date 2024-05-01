@@ -32,10 +32,7 @@ from mutmut.__main__ import climain
 from mutmut.mutations import mutations_by_type
 from mutmut.status import MUTANT_STATUSES
 
-from helpers import open_utf8
-
-FileSystemPath = Path  # it's actually a pytest LocalPath, API is similar but not exactly the same
-# more info: https://stackoverflow.com/questions/40784950/pathlib-path-and-py-test-localpath
+from helpers import FileSystemPath, open_utf8
 
 
 builtins.open = open_utf8
