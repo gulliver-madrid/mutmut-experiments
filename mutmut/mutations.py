@@ -45,14 +45,15 @@ class ASTPattern:
 
         self.markers: list[Marker] = []
 
-        def get_leaf(line: int, column: int, of_type: Any = None) -> NodeOrLeaf:
+        def get_leaf(line: int, column: int, of_type: str | None = None) -> NodeOrLeaf:
+            assert isinstance(of_type, (str, NoneType))
             first = self.module.children[0]
             assert isinstance(first, BaseNode)
-            r = first.get_leaf_for_position((line, column))
-            while of_type is not None and r.type != of_type:
-                r = r.parent
-            assert isinstance(r, NodeOrLeaf), type(r)
-            return r
+            node: Any = first.get_leaf_for_position((line, column))  # pyright: ignore [reportUnknownMemberType]
+            assert isinstance(node, NodeOrLeaf)
+            while of_type is not None and node.type != of_type:
+                node = node.parent
+            return node
 
         def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
             assert isinstance(node, (PrefixPart, Module, NodeOrLeaf))
