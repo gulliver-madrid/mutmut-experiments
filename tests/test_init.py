@@ -10,13 +10,14 @@ from mutmut import (
     run_mutation_tests,
     check_mutants,
     close_active_queues,
-    read_patch_data,
-    OK_KILLED,
-    mutate)
+    read_patch_data
+)
 from mutmut.context import Context
+from mutmut.mutate import mutate
 from mutmut.mutations import (
     partition_node_list,
     name_mutation)
+from mutmut.status import OK_KILLED
 
 
 def test_partition_node_list_no_nodes() -> None:
