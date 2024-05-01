@@ -68,11 +68,12 @@ class Context:
         return False
 
     @property
-    def source(self):
+    def source(self) -> str:
         if self._source is None:
             assert self.filename
             with open(self.filename) as f:
                 self._set_source(f.read())
+        assert self._source is not None
         return self._source
 
     def _set_source(self, source: str | None) -> None:

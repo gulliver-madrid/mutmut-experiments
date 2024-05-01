@@ -6,7 +6,7 @@ from types import NoneType
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Tuple, TypedDict, TypeGuard
 
-from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, Operator
+from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, Operator, PythonLeaf
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
@@ -63,15 +63,19 @@ class ASTPattern:
         def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
             assert isinstance(node, (PrefixPart, Module, NodeOrLeaf))
             if hasattr(node, '_split_prefix'):
-                for x in node._split_prefix():
+                logger.info("slpit prefix:" + str(type(node)))
+                assert isinstance(node, PythonLeaf), type(node)
+                for x in node._split_prefix():  # pyright: ignore [reportPrivateUsage]
                     parse_markers(x)
 
             if hasattr(node, 'children'):
+                assert isinstance(node, BaseNode)
                 for x in node.children:
                     parse_markers(x)
 
             if node.type == 'comment':
                 line, column = node.start_pos
+                assert isinstance(node, PrefixPart), node
                 for match in re.finditer(r'\^(?P<value>[^\^]*)', node.value):
                     name = match.groupdict()['value'].strip()
                     d = definitions.get(name, {})
@@ -108,7 +112,11 @@ class ASTPattern:
 
         # Match type based on the name, so _keyword matches all keywords.
         # Special case for _all that matches everything
-        if pattern.type == 'name' and pattern.value.startswith('_') and pattern.value[1:] in ('any', node.type):
+        if (
+            pattern.type == 'name'
+            and isinstance(pattern, Leaf)  # always
+            and pattern.value.startswith('_') and pattern.value[1:] in ('any', node.type)
+        ):
             check_value = False
 
         # The advanced case where we've explicitly marked up a node with
@@ -124,6 +132,8 @@ class ASTPattern:
 
         # Match children
         if check_children and hasattr(pattern, 'children'):
+            assert isinstance(pattern, BaseNode)
+            assert isinstance(node, BaseNode)
             if len(pattern.children) != len(node.children):
                 return False
 
@@ -136,6 +146,8 @@ class ASTPattern:
 
         # Node value
         if check_value and hasattr(pattern, 'value'):
+            assert isinstance(pattern, Leaf)
+            assert isinstance(node, Leaf)
             if pattern.value != node.value:
                 return False
 
@@ -151,7 +163,7 @@ class SkipException(Exception):
     pass
 
 
-def number_mutation(value: str, **_) -> str:
+def number_mutation(value: str, **_: Any) -> str:
     assert isinstance(value, str)
     suffix = ''
     if value.upper().endswith('L'):  # pragma: no cover (python 2 specific)
@@ -195,7 +207,7 @@ def number_mutation(value: str, **_) -> str:
     return result
 
 
-def string_mutation(value: str, **_) -> str:
+def string_mutation(value: str, **_: Any) -> str:
     assert isinstance(value, str)
     prefix = value[:min(x for x in [value.find('"'), value.find("'")] if x != -1)]
     value = value[len(prefix):]
@@ -207,7 +219,7 @@ def string_mutation(value: str, **_) -> str:
     return prefix + value[0] + 'XX' + value[1:-1] + 'XX' + value[-1]
 
 
-def fstring_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
+def fstring_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
     fstring_start = children[0]
     fstring_end = children[-1]
     assert isinstance(fstring_start, FStringStart)
@@ -238,7 +250,7 @@ def partition_node_list(nodes: list[NodeOrLeaf], value: str | None) -> Tuple[lis
     assert False, "didn't find node to split on"
 
 
-def lambda_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
+def lambda_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
     pre, op, post = partition_node_list(children, value=':')
 
     if len(post) == 1 and getattr(post[0], 'value', None) == 'None':
@@ -265,16 +277,21 @@ def argument_mutation(children: list[NodeOrLeaf], context: Context, **_):
         return
 
     power_node = context.stack[stack_pos_of_power_node]
-
-    if power_node.children[0].type == 'name' and power_node.children[0].value in context.dict_synonyms:
+    assert isinstance(power_node, BaseNode)
+    if (
+        power_node.children[0].type == 'name'
+        and isinstance(power_node.children[0], Leaf)  # always true
+        and power_node.children[0].value in context.dict_synonyms
+    ):
         c = children[0]
         if c.type == 'name':
+            assert isinstance(c, Leaf)
             children = children[:]
             children[0] = Name(c.value + 'XX', start_pos=c.start_pos, prefix=c.prefix)
             return children
 
 
-def keyword_mutation(value: str, context: Context, **_):
+def keyword_mutation(value: str, context: Context, **_: Any) -> str | None:
     if len(context.stack) > 2 and context.stack[-2].type in ('comp_op', 'sync_comp_for') and value in ('in', 'is'):
         return
 
@@ -304,13 +321,25 @@ def operator_mutation(value: str, node: Leaf, **_) -> str | list[str] | None:
     if import_from_star_pattern.matches(node=node):
         return
 
-    if value in ('*', '**') and node.parent.type == 'param':
+    if (
+        value in ('*', '**')
+        and node.parent  # always true
+        and node.parent.type == 'param'
+    ):
         return
 
-    if value == '*' and node.parent.type == 'parameters':
+    if (
+        value == '*'
+        and node.parent  # always true
+        and node.parent.type == 'parameters'
+    ):
         return
 
-    if value in ('*', '**') and node.parent.type in ('argument', 'arglist'):
+    if (
+        value in ('*', '**')
+        and node.parent  # always true
+        and node.parent.type in ('argument', 'arglist')
+    ):
         return
 
     return {
@@ -405,7 +434,7 @@ _name(_any)
 """)
 
 
-def name_mutation(node: Leaf | None, value: str, **_) -> str | None:
+def name_mutation(node: Leaf | None, value: str, **_: Any) -> str | None:
     assert isinstance(value, str)
     assert isinstance(node, (Leaf, NoneType))  # guess
     simple_mutants = {

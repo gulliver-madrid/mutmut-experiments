@@ -65,10 +65,22 @@ class MiscData(DbEntity):
     value = Optional(str, autostrip=False)
 
 
-class SourceFile(DbEntity):  # type: ignore [valid-type]
-    filename = Required(str, autostrip=False)
-    hash = Optional(str)
-    lines = Set('Line')
+if TYPE_CHECKING:
+    class SourceFile:
+        filename: str
+        hash: str | None
+        lines: Set['Line']
+
+        @staticmethod
+        def get(**kwargs: Any) -> 'SourceFile':
+            ...
+
+
+else:
+    class SourceFile(DbEntity):  # type: ignore [valid-type]
+        filename = Required(str, autostrip=False)
+        hash = Optional(str)
+        lines = Set('Line')
 
 
 if TYPE_CHECKING:
@@ -83,6 +95,9 @@ if TYPE_CHECKING:
 
         @staticmethod
         def get(*, sourcefile: Any, line: str, line_number: int) -> 'Line':
+            ...
+
+        def delete(self) -> None:
             ...
 else:
     class Line(DbEntity):  # type: ignore [valid-type]
@@ -446,6 +461,7 @@ def update_line_numbers(filename: str) -> None:
         return
 
     for command, a, a_index, b, b_index in sequence_ops(cached_lines, existing_lines):
+        assert isinstance(a_index, int)
         if command == 'equal':
             if a_index != b_index:
                 cached_obj = cached_line_objects[a_index]
