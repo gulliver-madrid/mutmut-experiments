@@ -4,15 +4,25 @@ from __future__ import annotations
 import re
 from types import NoneType
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Sequence, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Final, Mapping, Optional, Tuple, TypedDict
 
 from parso import parse
-from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module
+from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, Module, PythonNode
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
+from mutmut.setup_logging import configure_logger
+
 if TYPE_CHECKING:
     from mutmut import Context
+
+logger = configure_logger(__name__)
+
+
+class Marker(TypedDict):
+    node: NodeOrLeaf
+    marker_type: str | None
+    name: str
 
 
 @dataclass(frozen=True)
@@ -35,15 +45,15 @@ class ASTPattern:
 
         self.module: Module = parse(source)
 
-        self.markers: list[dict[str, Any]] = []
+        self.markers: list[Marker] = []
 
-        def get_leaf(line: int, column: int, of_type: Any = None):
+        def get_leaf(line: int, column: int, of_type: Any = None) -> NodeOrLeaf:
             first = self.module.children[0]
             assert isinstance(first, BaseNode)
             r = first.get_leaf_for_position((line, column))
-            assert isinstance(r, (Leaf, NoneType))
             while of_type is not None and r.type != of_type:
                 r = r.parent
+            assert isinstance(r, NodeOrLeaf), type(r)
             return r
 
         def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
@@ -62,9 +72,11 @@ class ASTPattern:
                     name = match.groupdict()['value'].strip()
                     d = definitions.get(name, {})
                     assert set(d.keys()) | {'of_type', 'marker_type'} == {'of_type', 'marker_type'}
-                    self.markers.append(dict(
+                    marker_type = d.get('marker_type')
+                    assert isinstance(marker_type, (NoneType, str)), type(marker_type)
+                    self.markers.append(Marker(
                         node=get_leaf(line - 1, column + match.start(), of_type=d.get('of_type')),
-                        marker_type=d.get('marker_type'),
+                        marker_type=marker_type,
                         name=name,
                     ))
 
