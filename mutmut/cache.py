@@ -71,11 +71,25 @@ class SourceFile(DbEntity):  # type: ignore [valid-type]
     lines = Set('Line')
 
 
-class Line(DbEntity):  # type: ignore [valid-type]
-    sourcefile = Required(SourceFile)
-    line = Optional(str, autostrip=False)
-    line_number = Required(int)
-    mutants = Set('Mutant')
+if TYPE_CHECKING:
+    class Line:
+        sourcefile: SourceFile
+        line: str | None
+        line_number: int
+        mutants: Set['Mutant']
+
+        def __init__(self, *, sourcefile: Any, line: str, line_number: int) -> None:
+            ...
+
+        @staticmethod
+        def get(*, sourcefile: Any, line: str, line_number: int) -> 'Line':
+            ...
+else:
+    class Line(DbEntity):  # type: ignore [valid-type]
+        sourcefile = Required(SourceFile)
+        line = Optional(str, autostrip=False)
+        line_number = Required(int)
+        mutants = Set('Mutant')
 
 
 if TYPE_CHECKING:
