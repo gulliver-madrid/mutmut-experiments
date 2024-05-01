@@ -671,13 +671,13 @@ hammett_prefix = 'python -m hammett '
 print_status = status_printer()
 
 # List of active multiprocessing queues
-_active_queues = []
+_active_queues: list['multiprocessing.Queue[Any]'] = []
 
 
-def add_to_active_queues(queue):
+def add_to_active_queues(queue: 'multiprocessing.Queue[Any]') -> None:
     _active_queues.append(queue)
 
 
-def close_active_queues():
+def close_active_queues() -> None:
     for queue in _active_queues:
         queue.close()
