@@ -210,8 +210,8 @@ def fstring_mutation(children: list[NodeOrLeaf], **_) -> list[NodeOrLeaf]:
     return children
 
 
-def partition_node_list(nodes: list[NodeOrLeaf], value: str) -> Tuple[list[NodeOrLeaf], Leaf, list[NodeOrLeaf]]:
-    assert isinstance(value, str)
+def partition_node_list(nodes: list[NodeOrLeaf], value: str | None) -> Tuple[list[NodeOrLeaf], Leaf, list[NodeOrLeaf]]:
+    assert isinstance(value, (str, NoneType))
     for i, n in enumerate(nodes):
         assert isinstance(n, NodeOrLeaf)
         if hasattr(n, 'value'):
