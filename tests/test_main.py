@@ -370,7 +370,7 @@ To show a mutant:
 """.strip()
 
 
-def test_no_rerun_if_not_specified(filesystem) -> None:
+def test_no_rerun_if_not_specified(filesystem: Path) -> None:
     mutmut_config = filesystem / "mutmut_config.py"
     mutmut_config.write("""
 def pre_mutation(context):
@@ -396,7 +396,7 @@ Survived 🙁 (14)
 """.strip()
 
 
-def test_full_run_one_surviving_mutant(filesystem) -> None:
+def test_full_run_one_surviving_mutant(filesystem: Path) -> None:
     with open(os.path.join(str(filesystem), "tests", "test_foo.py"), 'w') as f:
         f.write(test_file_contents.replace('assert foo(2, 2) is False', ''))
 
@@ -423,7 +423,7 @@ Survived 🙁 (1)
 """.strip()
 
 
-def test_full_run_one_surviving_mutant_junit(filesystem) -> None:
+def test_full_run_one_surviving_mutant_junit(filesystem: Path) -> None:
     with open(os.path.join(str(filesystem), "tests", "test_foo.py"), 'w') as f:
         f.write(test_file_contents.replace('assert foo(2, 2) is False\n', ''))
 
@@ -449,7 +449,7 @@ def test_full_run_one_surviving_mutant_junit(filesystem) -> None:
 
 
 @pytest.mark.xfail(reason="unknown reason (probably due to timeout not working)")
-def test_full_run_all_suspicious_mutant(filesystem) -> None:
+def test_full_run_all_suspicious_mutant(filesystem: Path) -> None:
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-multiplier=0.0"], catch_exceptions=False)
     print(repr(result.output))
     assert result.exit_code == 8
