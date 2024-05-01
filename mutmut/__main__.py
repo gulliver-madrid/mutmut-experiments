@@ -305,7 +305,7 @@ def html(dict_synonyms: str, directory: str):
 
 
 def do_run(
-    argument: None,
+    argument: str | None,
     paths_to_mutate: str | None | list[str] | tuple[str, ...],
     disable_mutation_types: str | None,
     enable_mutation_types: str | None,
@@ -331,7 +331,7 @@ def do_run(
     """
 
     # CHECK TYPES START
-    assert isinstance(argument, NoneType)
+    assert isinstance(argument, (str, NoneType))
     assert isinstance(disable_mutation_types, (str, NoneType)), disable_mutation_types
     assert isinstance(enable_mutation_types, (str, NoneType)), enable_mutation_types
     assert isinstance(paths_to_mutate, (str, NoneType))
