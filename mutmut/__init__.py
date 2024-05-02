@@ -598,6 +598,7 @@ def add_mutations_by_file(
     dict_synonyms: List[str],
     config: Optional[Config],
 ) -> None:
+    assert isinstance(dict_synonyms, list)
     with open(filename) as f:
         source = f.read()
     context = Context(
