@@ -7,7 +7,7 @@ class Config:
     swallow_output: bool
     test_command: str
     _default_test_command: str = field(init=False)
-    covered_lines_by_filename: Optional[Dict[str, set[Optional[int]]]]
+    covered_lines_by_filename: Optional[Dict[str, Optional[list[Optional[int]]]]]
     baseline_time_elapsed: float
     test_time_multiplier: float
     test_time_base: float

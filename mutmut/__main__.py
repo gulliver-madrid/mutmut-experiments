@@ -496,6 +496,11 @@ Legend for output:
             covered_lines_by_filename = read_patch_data(use_patch_file)
 
     assert is_covered_lines_by_filename(covered_lines_by_filename)
+    covered_lines_by_filename_using_lists: Dict[str, list[int | None]] | None = None
+    if covered_lines_by_filename is None:
+        covered_lines_by_filename_using_lists = None
+    else:
+        covered_lines_by_filename_using_lists = {k: list(v)for k, v in covered_lines_by_filename.items()}
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
@@ -515,7 +520,7 @@ Legend for output:
         total=0,  # we'll fill this in later!
         swallow_output=not swallow_output,
         test_command=runner,
-        covered_lines_by_filename=covered_lines_by_filename,
+        covered_lines_by_filename=covered_lines_by_filename_using_lists,
         coverage_data=coverage_data,
         baseline_time_elapsed=baseline_time_elapsed,
         dict_synonyms=dict_synonyms_as_list,
