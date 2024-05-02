@@ -399,7 +399,11 @@ def expression_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf
         return children
 
     if is_operator(children[0]) and children[0].value == ':':
-        if len(children) > 2 and children[2].value == '=':
+        if (
+            len(children) > 2
+            and is_operator(children[2])  # always true
+            and children[2].value == '='
+        ):
             children = children[:]  # we need to copy the list here, to not get in place mutation on the next line!
             children[1:] = handle_assignment(children[1:])
     elif is_operator(children[1]) and children[1].value == '=':
