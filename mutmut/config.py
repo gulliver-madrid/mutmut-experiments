@@ -16,8 +16,8 @@ class Config:
     using_testmon: bool
     tests_dirs: List[str]
     hash_of_tests: str
-    post_mutation: str
-    pre_mutation: str
+    post_mutation: str | None
+    pre_mutation: str | None
     coverage_data: Dict[str, Dict[int, List[str]]] | None
     paths_to_mutate: List[str]
     mutation_types_to_apply: Set[str]

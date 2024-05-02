@@ -197,7 +197,6 @@ def run_mutation(context: Context, callback: StrConsumer) -> str:
         assert isinstance(context.filename, str)
         move(context.filename + '.bak', context.filename)
         config.test_command = config._default_test_command  # reset test command to its default in the case it was altered in a hook
-
         if config.post_mutation:
             result = subprocess.check_output(config.post_mutation, shell=True).decode().strip()
             if result and not config.swallow_output:
