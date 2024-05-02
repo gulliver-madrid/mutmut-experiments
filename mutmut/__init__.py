@@ -26,7 +26,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias
+from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias, TypeGuard, cast
 
 import toml
 
@@ -557,7 +557,25 @@ def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
     }
 
 
-def read_patch_data(patch_file_path: str | Path) -> Any:
+CoveredLinesByFilename = Dict[str, set[int]]
+
+
+def is_covered_lines_by_filename(obj: object) -> TypeGuard[CoveredLinesByFilename]:
+    if not isinstance(obj, dict):
+        return False
+    d = cast(Mapping[object, object], obj)
+    if not all(isinstance(k, str) for k in d.keys()):
+        return False
+    for v in d.values():
+        if not isinstance(v, set):
+            return False
+        covered_lines = cast(frozenset[object], v)
+        if not all(isinstance(item, int) for item in covered_lines):
+            return False
+    return True
+
+
+def read_patch_data(patch_file_path: str | Path) -> CoveredLinesByFilename:
     try:
         # noinspection PyPackageRequirements
         import whatthepatch
@@ -566,10 +584,12 @@ def read_patch_data(patch_file_path: str | Path) -> Any:
     with open(patch_file_path) as f:
         diffs = whatthepatch.parse_patch(f.read())
 
-    return {
+    result = {
         os.path.normpath(diff.header.new_path): {change.new for change in diff.changes if change.old is None}
         for diff in diffs if diff.changes
     }
+    assert is_covered_lines_by_filename(result)
+    return result
 
 
 def add_mutations_by_file(
