@@ -200,6 +200,7 @@ def run(
     assert isinstance(no_progress, (bool, NoneType)), type(no_progress)
     assert isinstance(ci, (bool, NoneType)), type(ci)
     assert isinstance(rerun_all, (bool, NoneType)), type(rerun_all)
+    assert isinstance(dict_synonyms, str)
     if test_time_base is None:  # click sets the default=0.0 to None
         test_time_base = 0.0
     if test_time_multiplier is None:  # click sets the default=0.0 to None
@@ -261,19 +262,20 @@ def show(id_or_file: str | None, dict_synonyms: str) -> NoReturn:
     Show a mutation diff.
     """
     assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
+    dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
     if not id_or_file:
         print_result_cache()
         sys.exit(0)
 
     if id_or_file == 'all':
-        print_result_cache(show_diffs=True, dict_synonyms=dict_synonyms)
+        print_result_cache(show_diffs=True, dict_synonyms=dict_synonyms_as_list)
         sys.exit(0)
 
     if os.path.isfile(id_or_file):
-        print_result_cache(show_diffs=True, only_this_file=id_or_file)
+        print_result_cache(show_diffs=True, only_this_file=id_or_file, dict_synonyms=dict_synonyms_as_list)
         sys.exit(0)
     assert isinstance(id_or_file, str)
-    print(get_unified_diff(id_or_file, dict_synonyms))
+    print(get_unified_diff(id_or_file, dict_synonyms_as_list))
     sys.exit(0)
 
 
@@ -288,7 +290,8 @@ def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -
     """
     Show a mutation diff with junitxml format.
     """
-    print_result_cache_junitxml(dict_synonyms, suspicious_policy, untested_policy)
+    dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
+    print_result_cache_junitxml(dict_synonyms_as_list, suspicious_policy, untested_policy)
     sys.exit(0)
 
 
@@ -303,8 +306,13 @@ def html(dict_synonyms: str, directory: str) -> NoReturn:
     """
     Generate a HTML report of surviving mutants.
     """
-    create_html_report(dict_synonyms, directory)
+    dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
+    create_html_report(dict_synonyms_as_list, directory)
     sys.exit(0)
+
+
+def dict_synonyms_to_list(dict_synonyms: str) -> list[str]:
+    return [x.strip() for x in dict_synonyms.split(',')]
 
 
 def do_run(
@@ -318,7 +326,7 @@ def do_run(
     test_time_base: float,
     swallow_output: bool | None,
     use_coverage: bool | None,
-    dict_synonyms: str,  # ?
+    dict_synonyms: str,
     pre_mutation: str | None,
     post_mutation: str | None,
     use_patch_file: str | None,
@@ -374,7 +382,7 @@ def do_run(
     if invalid_types:
         raise click.BadArgumentUsage(f"The following are not valid mutation types: {', '.join(sorted(invalid_types))}. Valid mutation types are: {', '.join(mutations_by_type.keys())}")
 
-    dict_synonyms_as_list = [x.strip() for x in dict_synonyms.split(',')]
+    dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
 
     if use_coverage and not exists('.coverage'):
         raise FileNotFoundError('No .coverage file found. You must generate a coverage file to use this feature.')
@@ -514,7 +522,7 @@ Legend for output:
         rerun_all=rerun_all
     )
 
-    parse_run_argument(argument, config, dict_synonyms, mutations_by_file, paths_to_exclude_as_list, paths_to_mutate, tests_dirs)
+    parse_run_argument(argument, config, dict_synonyms_as_list, mutations_by_file, paths_to_exclude_as_list, paths_to_mutate, tests_dirs)
 
     config.total = sum(len(mutations) for mutations in mutations_by_file.values())
 
@@ -538,13 +546,13 @@ Legend for output:
 def parse_run_argument(
         argument: str | None,
         config: Config,
-        dict_synonyms: list[str] | str,
+        dict_synonyms: list[str],
         mutations_by_file: dict[str, list[RelativeMutationID]],
         paths_to_exclude: list[str],
         paths_to_mutate: list[str],
         tests_dirs: list[str]) -> None:
     assert isinstance(mutations_by_file, dict)
-    assert isinstance(dict_synonyms, (list, str))
+    assert isinstance(dict_synonyms, (list))
     assert isinstance(paths_to_exclude, list)
     assert isinstance(paths_to_mutate, list)
     assert isinstance(tests_dirs, list)

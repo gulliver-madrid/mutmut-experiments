@@ -212,8 +212,9 @@ def get_apply_line(mutant: Mutant) -> str:
 
 @init_db
 @db_session
-def print_result_cache(show_diffs: bool = False, dict_synonyms: str | list[str] | None = None, only_this_file: str | None = None) -> None:
+def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], only_this_file: str | None = None) -> None:
     # CHECK TYPES START
+    assert isinstance(dict_synonyms, list)
     assert isinstance(show_diffs, bool)
     # CHECK TYPES END
     print('To apply a mutant on disk:')
@@ -263,9 +264,10 @@ def print_result_ids_cache(desired_status: StatusStr) -> None:
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
-def get_unified_diff(pk: int | str, dict_synonyms: str | list[str] | None, update_cache: bool = True, source: str | None = None) -> str:
+def get_unified_diff(pk: int | str, dict_synonyms: list[str], update_cache: bool = True, source: str | None = None) -> str:
     assert isinstance(pk, (int, str))
     assert isinstance(update_cache, bool)
+    assert isinstance(dict_synonyms, list)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
         with open(filename) as f:
@@ -274,12 +276,8 @@ def get_unified_diff(pk: int | str, dict_synonyms: str | list[str] | None, updat
     return _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache)
 
 
-def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMutationID, dict_synonyms: str | list[str] | None, update_cache: bool) -> str:
-    assert isinstance(dict_synonyms, (str, list, NoneType))
-    if isinstance(dict_synonyms, str):
-        assert dict_synonyms == ''
-        dict_synonyms = None
-
+def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMutationID, dict_synonyms: list[str], update_cache: bool) -> str:
+    assert isinstance(dict_synonyms, list)
     assert isinstance(source, (str, NoneType))
 
     if update_cache:
@@ -304,7 +302,8 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
     return output
 
 
-def print_result_cache_junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> None:
+def print_result_cache_junitxml(dict_synonyms: list[str], suspicious_policy: str, untested_policy: str) -> None:
+    assert isinstance(dict_synonyms, list)
     report = create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy)
     assert isinstance(report, str)
     print(report)
@@ -312,7 +311,7 @@ def print_result_cache_junitxml(dict_synonyms: str, suspicious_policy: str, unte
 
 @init_db
 @db_session
-def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> str:
+def create_junitxml_report(dict_synonyms: list[str], suspicious_policy: str, untested_policy: str) -> str:
     test_cases: list[TestCase] = []
     mutant_list = list(select(x for x in get_mutants()))
     for filename, mutants in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
@@ -339,7 +338,7 @@ def create_junitxml_report(dict_synonyms: str, suspicious_policy: str, untested_
 
 @init_db
 @db_session
-def create_html_report(dict_synonyms: str, directory: str) -> None:
+def create_html_report(dict_synonyms: list[str], directory: str) -> None:
     mutants = sorted(list(select(x for x in get_mutants())), key=lambda x: x.line.sourcefile.filename)
 
     os.makedirs(directory, exist_ok=True)
