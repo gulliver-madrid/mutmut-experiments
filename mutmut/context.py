@@ -67,15 +67,15 @@ class Context:
         assert self.filename is not None
         covered_lines: list[int | None]
 
-        try:
+        if self.filename in config.covered_lines_by_filename:
             covered_lines = list(config.covered_lines_by_filename[self.filename] or set())
-        except KeyError:
-            if config.coverage_data is None:
-                covered_lines = []
-            else:
-                covered_lines_as_dict = config.coverage_data.get(os.path.abspath(self.filename), {})
-                covered_lines = list(covered_lines_as_dict.keys())
-                config.covered_lines_by_filename[self.filename] = covered_lines
+        elif config.coverage_data is None:
+            covered_lines = []
+        else:
+            abspath = os.path.abspath(self.filename)
+            covered_lines_as_dict = config.coverage_data.get(abspath, {})
+            covered_lines = list(covered_lines_as_dict.keys())
+            config.covered_lines_by_filename[self.filename] = covered_lines
 
         if not covered_lines:
             return True
