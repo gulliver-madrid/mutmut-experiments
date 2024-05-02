@@ -83,12 +83,10 @@ null_out = open(os.devnull, 'w')
 
 DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
 
-CoveredLinesByFilename = Optional[Dict[str, set[Optional[int]]]]
+CoveredLinesByFilename = Dict[str, set[int]]
 
 
 def is_covered_lines_by_filename(obj: object) -> TypeGuard[CoveredLinesByFilename]:
-    if obj is None:
-        return True
     if not isinstance(obj, dict):
         return False
     d = cast(Mapping[object, object], obj)
@@ -98,7 +96,7 @@ def is_covered_lines_by_filename(obj: object) -> TypeGuard[CoveredLinesByFilenam
         if not isinstance(v, set):
             return False
         covered_lines = cast(frozenset[object], v)
-        if not all(isinstance(item, (int, NoneType)) for item in covered_lines):
+        if not all(isinstance(item, int) for item in covered_lines):
             return False
     return True
 
@@ -495,12 +493,12 @@ Legend for output:
             assert use_patch_file
             covered_lines_by_filename = read_patch_data(use_patch_file)
 
-    assert is_covered_lines_by_filename(covered_lines_by_filename)
-    covered_lines_by_filename_using_lists: Dict[str, list[int | None]] | None = None
+        assert is_covered_lines_by_filename(covered_lines_by_filename)
+    covered_lines_by_filename_using_lists: Dict[str, list[int]] | None = None
     if covered_lines_by_filename is None:
         covered_lines_by_filename_using_lists = None
     else:
-        covered_lines_by_filename_using_lists = {k: list(v)for k, v in covered_lines_by_filename.items()}
+        covered_lines_by_filename_using_lists = {k: list(v) for k, v in covered_lines_by_filename.items()}
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
