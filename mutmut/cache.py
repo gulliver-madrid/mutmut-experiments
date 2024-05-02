@@ -133,8 +133,8 @@ def get_mutant(*, line: Line, index: int) -> Mutant | None:
     ...
 
 
-def get_mutant(**kwargs):  # pyright: ignore
-    return Mutant.get(**kwargs)  # type: ignore [attr-defined] # pyright: ignore
+def get_mutant(**kwargs: Any) -> Mutant | None:
+    return Mutant.get(**kwargs)
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
@@ -462,6 +462,7 @@ def update_line_numbers(filename: str) -> None:
     for command, _a, a_index, b, b_index in sequence_ops(cached_lines, existing_lines):
         if command == 'equal':
             assert isinstance(a_index, int)
+            assert isinstance(b_index, int)
             if a_index != b_index:
                 cached_obj = cached_line_objects[a_index]
                 assert cached_obj.line == existing_lines[b_index]
@@ -473,12 +474,14 @@ def update_line_numbers(filename: str) -> None:
 
         elif command == 'insert':
             if b is not None:
+                assert isinstance(b_index, int)
                 Line(sourcefile=sourcefile, line=b, line_number=b_index)
 
         elif command == 'replace':
             if a_index is not None:
                 cached_line_objects[a_index].delete()
             if b is not None:
+                assert isinstance(b_index, int)
                 Line(sourcefile=sourcefile, line=b, line_number=b_index)
 
         else:

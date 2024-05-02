@@ -4,5 +4,5 @@ import pytest
 
 
 @pytest.fixture
-def testdata():
+def testdata() -> Path:
     return Path(__file__).parent / "testdata"
