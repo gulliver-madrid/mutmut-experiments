@@ -256,7 +256,7 @@ def lambda_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
 # unused: NEWLINE = {'formatting': [], 'indent': '', 'type': 'endl', 'value': ''}
 
 
-def argument_mutation(children: list[NodeOrLeaf], context: Context, **_):
+def argument_mutation(children: list[NodeOrLeaf], context: Context, **_: Any) -> list[NodeOrLeaf] | None:
     """Mutate the arguments one by one from dict(a=b) to dict(aXXX=b).
 
     This is similar to the mutation of dict literals in the form {'a': b}.
@@ -308,7 +308,7 @@ from _name import *
 """)
 
 
-def operator_mutation(value: str, node: Leaf, **_) -> str | list[str] | None:
+def operator_mutation(value: str, node: Leaf, **_: Any) -> str | list[str] | None:
     assert isinstance(node, Leaf)
     if import_from_star_pattern.matches(node=node):
         return None
