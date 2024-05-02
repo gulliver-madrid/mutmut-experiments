@@ -500,6 +500,8 @@ Legend for output:
     else:
         paths_to_exclude_as_list = []
 
+    ci = bool(ci)
+
     config = Config(
         total=0,  # we'll fill this in later!
         swallow_output=not swallow_output,
@@ -519,7 +521,7 @@ Legend for output:
         mutation_types_to_apply=mutation_types_to_apply,
         no_progress=no_progress,
         ci=ci,
-        rerun_all=rerun_all
+        rerun_all=bool(rerun_all)
     )
 
     parse_run_argument(argument, config, dict_synonyms_as_list, mutations_by_file, paths_to_exclude_as_list, paths_to_mutate, tests_dirs)
