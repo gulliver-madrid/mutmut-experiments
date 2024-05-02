@@ -482,7 +482,7 @@ Legend for output:
         copy('.testmondata', '.testmondata-initial')
 
     # if we're running in a mode with externally whitelisted lines
-    covered_lines_by_filename: object = None
+    covered_lines_by_filename: Dict[str, list[int]] | None = None
     coverage_data = None
     if use_coverage or use_patch_file:
         covered_lines_by_filename = {}
@@ -491,14 +491,10 @@ Legend for output:
             check_coverage_data_filepaths(coverage_data)
         else:
             assert use_patch_file
-            covered_lines_by_filename = read_patch_data(use_patch_file)
-
-        assert is_covered_lines_by_filename(covered_lines_by_filename)
-    covered_lines_by_filename_using_lists: Dict[str, list[int]] | None = None
-    if covered_lines_by_filename is None:
-        covered_lines_by_filename_using_lists = None
-    else:
-        covered_lines_by_filename_using_lists = {k: list(v) for k, v in covered_lines_by_filename.items()}
+            raw_covered_lines_by_filename = read_patch_data(use_patch_file)
+            assert raw_covered_lines_by_filename is not None
+            assert is_covered_lines_by_filename(raw_covered_lines_by_filename)
+            covered_lines_by_filename = {k: list(v) for k, v in raw_covered_lines_by_filename.items()}
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
@@ -518,7 +514,7 @@ Legend for output:
         total=0,  # we'll fill this in later!
         swallow_output=not swallow_output,
         test_command=runner,
-        covered_lines_by_filename=covered_lines_by_filename_using_lists,
+        covered_lines_by_filename=covered_lines_by_filename,
         coverage_data=coverage_data,
         baseline_time_elapsed=baseline_time_elapsed,
         dict_synonyms=dict_synonyms_as_list,
