@@ -117,7 +117,6 @@ if TYPE_CHECKING:
 
 else:
     class Mutant(DbEntity):  # type: ignore [valid-type]
-        id: int
         line = Required(Line)
         index = Required(int)
         tested_against_hash = Optional(str, autostrip=False)
@@ -129,7 +128,7 @@ def get_mutants() -> Iterable[Mutant]:
 
 
 @overload
-def get_mutant(*, id: int) -> Mutant | None:
+def get_mutant(*, id: int | str) -> Mutant | None:
     ...
 
 
@@ -264,7 +263,8 @@ def print_result_ids_cache(desired_status: StatusStr) -> None:
     print(" ".join(str(mutant.id) for mutant in mutant_query))
 
 
-def get_unified_diff(pk: int, dict_synonyms: str | list[str] | None, update_cache: bool = True, source: str | None = None) -> str:
+def get_unified_diff(pk: int | str, dict_synonyms: str | list[str] | None, update_cache: bool = True, source: str | None = None) -> str:
+    assert isinstance(pk, (int, str))
     assert isinstance(update_cache, bool)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
@@ -582,7 +582,9 @@ def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_
 
 @init_db
 @db_session
-def mutation_id_from_pk(pk: int) -> RelativeMutationID:
+def mutation_id_from_pk(pk: int | str) -> RelativeMutationID:
+    if not isinstance(pk, (int, str)):  # pyright: ignore [reportUnnecessaryIsInstance]
+        raise ValueError("mutation_id_from_pk:", type(pk))
     mutant = get_mutant(id=pk)
     assert mutant, dict(id=pk)
     assert isinstance(mutant.line.line, str)  # always true?
@@ -591,7 +593,9 @@ def mutation_id_from_pk(pk: int) -> RelativeMutationID:
 
 @init_db
 @db_session
-def filename_and_mutation_id_from_pk(pk: int) -> Tuple[str, RelativeMutationID]:
+def filename_and_mutation_id_from_pk(pk: int | str) -> Tuple[str, RelativeMutationID]:
+    if not isinstance(pk, (int, str)):  # pyright: ignore [reportUnnecessaryIsInstance]
+        raise ValueError("filename_and_mutation_id_from_pk:", type(pk))
     mutant = get_mutant(id=pk)
     if mutant is None:
         raise ValueError("Obtained null mutant for pk: {}".format(pk))
