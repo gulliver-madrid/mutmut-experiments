@@ -14,6 +14,7 @@ from types import NoneType
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
 from typing_extensions import ParamSpec
 
+from typing_extensions import Self
 from junit_xml import TestSuite, TestCase, to_xml_report_string  # pyright: ignore [reportUnknownVariableType,reportMissingTypeStubs]
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
@@ -48,7 +49,10 @@ db = Database()
 
 # type checking
 if TYPE_CHECKING:
-    DbEntity = Any
+    class DbEntity:
+        @classmethod
+        def get(cls, **kwargs: Any) -> Self | None:
+            ...
 else:
     DbEntity = db.Entity
 
@@ -65,14 +69,10 @@ class MiscData(DbEntity):
 
 
 if TYPE_CHECKING:
-    class SourceFile:
+    class SourceFile(DbEntity):
         filename: str
         hash: str | None
         lines: Set['Line']
-
-        @staticmethod
-        def get(**kwargs: Any) -> 'SourceFile':
-            ...
 else:
     class SourceFile(DbEntity):  # type: ignore [valid-type]
         filename = Required(str, autostrip=False)
@@ -81,17 +81,13 @@ else:
 
 
 if TYPE_CHECKING:
-    class Line:
+    class Line(DbEntity):
         sourcefile: SourceFile
         line: str | None
         line_number: int
         mutants: Set['Mutant']
 
         def __init__(self, *, sourcefile: Any, line: str, line_number: int) -> None:
-            ...
-
-        @staticmethod
-        def get(*, sourcefile: Any, line: str, line_number: int) -> 'Line':
             ...
 
         def delete(self) -> None:
@@ -108,7 +104,7 @@ if TYPE_CHECKING:
     from dataclasses import dataclass
 
     @dataclass
-    class Mutant:
+    class Mutant(DbEntity):
         line: Line
         index: int
         status: str
@@ -413,7 +409,10 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
         index_file.write('</table></body></html>')
 
 
-def get_or_create(model: Type[T], defaults: Mapping[str, Any] | None = None, **params: Any) -> T:
+U = TypeVar('U', bound=DbEntity)
+
+
+def get_or_create(model: Type[U], defaults: Mapping[str, Any] | None = None, **params: Any) -> U:
     if defaults is None:
         defaults = {}
     obj = model.get(**params)
