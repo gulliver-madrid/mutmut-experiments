@@ -65,7 +65,7 @@ class Context:
             return False
 
         assert self.filename is not None
-        covered_lines: list[int | None]
+        covered_lines: list[int]
 
         if self.filename in config.covered_lines_by_filename:
             covered_lines = list(config.covered_lines_by_filename[self.filename] or set())
