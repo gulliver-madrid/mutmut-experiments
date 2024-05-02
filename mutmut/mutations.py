@@ -268,7 +268,7 @@ def argument_mutation(children: list[NodeOrLeaf], context: Context, **_: Any) ->
     elif len(context.stack) >= 4 and context.stack[-4].type in ('power', 'atom_expr'):
         stack_pos_of_power_node = -4
     else:
-        return
+        return None
 
     power_node = context.stack[stack_pos_of_power_node]
     assert isinstance(power_node, BaseNode)
@@ -281,6 +281,7 @@ def argument_mutation(children: list[NodeOrLeaf], context: Context, **_: Any) ->
             children = children[:]
             children[0] = Name(c.value + 'XX', start_pos=c.start_pos, prefix=c.prefix)
             return children
+    return None
 
 
 def keyword_mutation(value: str, context: Context, **_: Any) -> str | None:
@@ -450,6 +451,8 @@ def name_mutation(node: Leaf | None, value: str, **_: Any) -> str | None:
 
     if function_call_pattern.matches(node=node):
         return 'None'
+
+    return None
 
 
 mutations_by_type: Final[Mapping[str, Mapping[str, Callable[..., Any]]]] = {

@@ -81,11 +81,12 @@ def queue_mutants(
     try:
         index = 0
         for filename, mutations in mutations_by_file.items():
-            cached_mutation_statuses = get_cached_mutation_statuses(filename, mutations, config.hash_of_tests)
+            cached_mutation_statuses: dict[RelativeMutationID, str] = get_cached_mutation_statuses(filename, mutations, config.hash_of_tests)
             with open(filename) as f:
                 source = f.read()
             for mutation_id in mutations:
                 cached_status = cached_mutation_statuses.get(mutation_id)
+                assert isinstance(cached_status, str)
                 if cached_status != UNTESTED:
                     progress.register(cached_status)
                     continue
@@ -334,7 +335,7 @@ def check_coverage_data_filepaths(coverage_data: Mapping[FilePathStr, ContextsBy
             raise ValueError('Filepaths in .coverage not recognized, try recreating the .coverage file manually.')
 
 
-def get_mutations_by_file_from_cache(mutation_pk: Any):
+def get_mutations_by_file_from_cache(mutation_pk: Any) -> dict[str, list[RelativeMutationID]]:
     """No code uses this function"""
     from mutmut.cache import filename_and_mutation_id_from_pk
     filename, mutation_id = filename_and_mutation_id_from_pk(int(mutation_pk))
@@ -372,7 +373,7 @@ def popen_streaming_output(
         stdout = os.fdopen(master)
         os.close(slave)
 
-    def kill(process_) -> None:
+    def kill(process_: Any) -> None:
         """Kill the specified process on Timer completion"""
         try:
             process_.kill()
@@ -465,7 +466,7 @@ def hammett_tests_pass(config: Config, callback: StrConsumer) -> bool:
         if any(module_name.startswith(x) for x in modules_to_force_unload) or module_name.startswith('tests') or module_name.startswith('django'):
             del sys.modules[module_name]
 
-    return returncode == 0
+    return bool(returncode == 0)
 
 
 CYCLE_PROCESS_AFTER = 100

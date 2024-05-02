@@ -41,7 +41,7 @@ def test_context_exclude_line() -> None:
 
 
 def check_mutants_stub(**kwargs: Any) -> None:
-    def run_mutation_stub(*_: Any) -> Literal['ok_killed']:
+    def run_mutation_stub(*_: object) -> Literal['ok_killed']:
         sleep(0.15)
         return OK_KILLED
     check_mutants_original = check_mutants

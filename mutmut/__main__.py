@@ -611,7 +611,7 @@ def time_test_suite(
 
     output: list[str] = []
 
-    def feedback(line: str):
+    def feedback(line: str) -> None:
         if not swallow_output:
             print(line)
         if not no_progress:
