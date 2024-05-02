@@ -15,7 +15,7 @@ from io import open
 from os.path import exists
 from shutil import copy
 from time import time
-from typing import Dict, List, Mapping, NoReturn, Optional, Tuple, TypeGuard, cast
+from typing import Dict, List, NoReturn, Tuple, cast
 
 import click
 from glob2 import glob
@@ -82,23 +82,6 @@ def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
 null_out = open(os.devnull, 'w')
 
 DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
-
-CoveredLinesByFilename = Dict[str, set[int]]
-
-
-def is_covered_lines_by_filename(obj: object) -> TypeGuard[CoveredLinesByFilename]:
-    if not isinstance(obj, dict):
-        return False
-    d = cast(Mapping[object, object], obj)
-    if not all(isinstance(k, str) for k in d.keys()):
-        return False
-    for v in d.values():
-        if not isinstance(v, set):
-            return False
-        covered_lines = cast(frozenset[object], v)
-        if not all(isinstance(item, int) for item in covered_lines):
-            return False
-    return True
 
 
 @ click.group(context_settings=dict(help_option_names=['-h', '--help']))
@@ -493,7 +476,6 @@ Legend for output:
             assert use_patch_file
             raw_covered_lines_by_filename = read_patch_data(use_patch_file)
             assert raw_covered_lines_by_filename is not None
-            assert is_covered_lines_by_filename(raw_covered_lines_by_filename)
             covered_lines_by_filename = {k: list(v) for k, v in raw_covered_lines_by_filename.items()}
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
