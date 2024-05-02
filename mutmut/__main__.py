@@ -272,7 +272,7 @@ def show(id_or_file: str | None, dict_synonyms: str) -> NoReturn:
     if os.path.isfile(id_or_file):
         print_result_cache(show_diffs=True, only_this_file=id_or_file)
         sys.exit(0)
-
+    assert isinstance(id_or_file, str)
     print(get_unified_diff(id_or_file, dict_synonyms))
     sys.exit(0)
 
