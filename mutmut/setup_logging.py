@@ -13,7 +13,7 @@ def configure_logger(name: str, level: int = logging.DEBUG) -> logging.Logger:
     logger.setLevel(level)  # Set the logger level
 
     # Create a specific FileHandler to write to a file
-    path = _get_main_directory() / "logs"
+    path = get_main_directory() / "logs"
     if not path.exists():
         path.mkdir()
     file_handler = logging.FileHandler(path / log_file_name, encoding="utf-8")
@@ -33,7 +33,7 @@ def configure_logger(name: str, level: int = logging.DEBUG) -> logging.Logger:
     return logger
 
 
-def _get_main_directory() -> Path:
+def get_main_directory() -> Path:
     return Path(__file__).parents[1]
 
 
