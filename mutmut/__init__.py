@@ -25,7 +25,7 @@ from threading import (
     Thread,
 )
 from time import time
-from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias
+from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias, cast
 
 import toml
 
@@ -228,7 +228,9 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
     """
     def config_from_pyproject_toml() -> dict[str, object]:
         try:
-            return toml.load('pyproject.toml')['tool']['mutmut']
+            data = toml.load('pyproject.toml')['tool']['mutmut']
+            assert isinstance(data, dict)
+            return cast(dict[str, object], data)
         except (FileNotFoundError, KeyError):
             return {}
 
