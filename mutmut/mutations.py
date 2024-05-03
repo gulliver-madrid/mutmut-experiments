@@ -35,6 +35,13 @@ def is_name_node(node: NodeOrLeaf) -> TypeGuard[Name]:
     return node.type == 'name'
 
 
+def has_children(node: object) -> TypeGuard[BaseNode]:
+    if not hasattr(node, 'children'):
+        return False
+    assert isinstance(node, BaseNode)
+    return True
+
+
 class ASTPattern:
     def __init__(self, source: str, **definitions: Any):
         source = source.strip()
@@ -63,8 +70,7 @@ class ASTPattern:
                 for x in node._split_prefix():  # pyright: ignore [reportPrivateUsage]
                     parse_markers(x)
 
-            if hasattr(node, 'children'):
-                assert isinstance(node, BaseNode)
+            if has_children(node):
                 for x in node.children:
                     parse_markers(x)
 
@@ -125,8 +131,7 @@ class ASTPattern:
             return False
 
         # Match children
-        if check_children and hasattr(pattern, 'children'):
-            assert isinstance(pattern, BaseNode)
+        if check_children and has_children(pattern):
             assert isinstance(node, BaseNode)
             if len(pattern.children) != len(node.children):
                 return False
