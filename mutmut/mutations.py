@@ -183,6 +183,7 @@ def number_mutation(value: str, **_: Any) -> str:
     else:
         base = 10
 
+    parsed: float | int
     try:
         parsed = int(value, base=base)
         result = repr(parsed + 1)
