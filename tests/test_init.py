@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from time import sleep
-from typing import Any, Literal
+from typing import Any, Literal, cast
 from pytest import raises, fixture
 from unittest.mock import MagicMock, patch
 
@@ -10,6 +10,7 @@ from mutmut import (
     MutationTestsRunner,
     check_mutants,
 )
+from mutmut.config import Config
 from mutmut.context import Context
 from mutmut.mutate import mutate
 from mutmut.mutations import (
@@ -52,7 +53,7 @@ class ConfigStub:
     hash_of_tests = None
 
 
-config_stub = ConfigStub()
+config_stub = cast(Config, ConfigStub())
 
 
 def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:

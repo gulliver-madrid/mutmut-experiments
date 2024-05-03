@@ -453,11 +453,8 @@ def update_line_numbers(filename: str) -> None:
         return
     cached_line_objects = list(sourcefile.lines.order_by(Line.line_number))
 
-    cached_lines = [x.line for x in cached_line_objects]
-
-    # type checking
-    assert (isinstance(line, str) for line in cached_lines)
-    cached_lines = cast(list[str], cached_lines)
+    cached_lines = [x.line for x in cached_line_objects if x.line is not None]
+    assert len(cached_line_objects) == len(cached_lines)
 
     with open(filename) as f:
         existing_lines = [x.strip('\n') for x in f.readlines()]
