@@ -329,7 +329,9 @@ def create_junitxml_report(dict_synonyms: list[str], suspicious_policy: str, unt
             test_cases.append(tc)
 
     ts = TestSuite("mutmut", test_cases)
-    return to_xml_report_string([ts])
+    report: Any = to_xml_report_string([ts])
+    assert isinstance(report, str)
+    return report
 
 
 @init_db
