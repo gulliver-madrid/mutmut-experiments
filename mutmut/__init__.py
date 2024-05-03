@@ -375,9 +375,11 @@ def popen_streaming_output(
     timer.daemon = True
     timer.start()
 
+    line: bytes | str
     while process.returncode is None:
         try:
             if os.name == 'nt':  # pragma: no cover
+                assert stdout is not None
                 line = stdout.readline()
                 # windows gives readline() raw stdout as a b''
                 # need to decode it
@@ -386,6 +388,7 @@ def popen_streaming_output(
                     callback(line)
             else:
                 while True:
+                    assert stdout is not None
                     line = stdout.readline()
                     if not line:
                         break
