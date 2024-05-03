@@ -20,7 +20,7 @@ from time import time
 from typing import Dict, List, NoReturn, Tuple, cast
 
 import click
-from glob2 import glob
+from glob2 import glob  # type: ignore [import-untyped]
 
 from mutmut import (
     MutationTestsRunner,

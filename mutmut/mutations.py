@@ -56,7 +56,7 @@ class ASTPattern:
             assert isinstance(of_type, (str, NoneType))
             first = self.module.children[0]
             assert isinstance(first, BaseNode)
-            node: Any = first.get_leaf_for_position((line, column))  # pyright: ignore [reportUnknownMemberType]
+            node = first.get_leaf_for_position((line, column))  # type: ignore [no-untyped-call]
             assert isinstance(node, NodeOrLeaf)
             while of_type is not None and node.type != of_type:
                 node = node.parent
@@ -69,7 +69,7 @@ class ASTPattern:
             if hasattr(node, '_split_prefix'):
                 # logger.info("slpit prefix:" + str(type(node)))
                 assert isinstance(node, PythonLeaf), type(node)
-                for x in node._split_prefix():  # pyright: ignore [reportPrivateUsage]
+                for x in node._split_prefix():  # type: ignore [no-untyped-call]
                     parse_markers(x)
 
             if has_children(node):
