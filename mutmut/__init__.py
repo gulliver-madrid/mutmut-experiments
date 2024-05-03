@@ -43,9 +43,6 @@ __version__ = '2.4.5'
 logger = configure_logger(__name__)
 
 
-FilePathStr: TypeAlias = str
-ContextsByLineNo: TypeAlias = Dict[int, List[str]]
-
 StrConsumer = Callable[[str], None]
 
 
@@ -329,12 +326,6 @@ class Progress:
         self.print()
 
 
-def check_coverage_data_filepaths(coverage_data: Mapping[FilePathStr, ContextsByLineNo]) -> None:
-    for filepath in coverage_data:
-        if not os.path.exists(filepath):
-            raise ValueError('Filepaths in .coverage not recognized, try recreating the .coverage file manually.')
-
-
 def get_mutations_by_file_from_cache(mutation_pk: Any) -> dict[str, list[RelativeMutationID]]:
     """No code uses this function"""
     from mutmut.cache import filename_and_mutation_id_from_pk
@@ -549,24 +540,6 @@ class MutationTestsRunner:
     def close_active_queues(self) -> None:
         for queue in self._active_queues:
             queue.close()
-
-
-def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
-    """
-    Reads the coverage database and returns a dictionary which maps the filenames to the covered lines and their contexts.
-    """
-    try:
-        # noinspection PyPackageRequirements,PyUnresolvedReferences
-        from coverage import Coverage
-    except ImportError as e:
-        raise ImportError('The --use-coverage feature requires the coverage library. Run "pip install --force-reinstall mutmut[coverage]"') from e
-    cov = Coverage('.coverage')
-    cov.load()
-    data = cov.get_data()
-    return {
-        filepath: data.contexts_by_lineno(filepath)
-        for filepath in data.measured_files()
-    }
 
 
 CoveredLinesByFilename = Dict[str, set[int]]

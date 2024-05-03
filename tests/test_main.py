@@ -25,10 +25,10 @@ from mutmut import (
     popen_streaming_output,
     Progress,
     python_source_files,
-    read_coverage_data,
     __version__,
 )
 from mutmut.__main__ import climain
+from mutmut.coverage import read_coverage_data
 from mutmut.mutations import mutations_by_type
 from mutmut.status import MUTANT_STATUSES
 
