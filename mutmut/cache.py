@@ -11,7 +11,7 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
 from typing_extensions import ParamSpec
 
 from typing_extensions import Self
@@ -41,8 +41,11 @@ T = TypeVar('T')
 if TYPE_CHECKING:
     def db_session(f: Callable[P, T]) -> Callable[P, T]:
         ...
+
+    db_session_ctx_manager: ContextManager[Any]
 else:
     from pony.orm import db_session
+    db_session_ctx_manager = db_session
 
 
 db = Database()
@@ -151,7 +154,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
 
             if os.path.exists(cache_filename):
                 # If the existing cache file is out of date, delete it and start over
-                with db_session:
+                with db_session_ctx_manager:  # pyright: ignore
                     try:
                         v = MiscData.get(key='version')
                         if v is None:
@@ -167,7 +170,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
                     db.schema = None  # Pony otherwise thinks we've already created the tables
                     db.generate_mapping(create_tables=True)
 
-            with db_session:
+            with db_session_ctx_manager:  # pyright: ignore
                 v = get_or_create(MiscData, key='version')
                 v.value = str(current_db_version)
 
