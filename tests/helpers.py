@@ -2,10 +2,17 @@ import builtins
 from pathlib import Path
 from typing import Any
 
-FileSystemPath = Path  # it's actually a pytest LocalPath, API is similar but not exactly the same
-# more info: https://stackoverflow.com/questions/40784950/pathlib-path-and-py-test-localpath
+
+class FileSystemPath(Path):
+    '''Only for type checking'''
+    # it's actually a pytest LocalPath, API is similar but not exactly the same
+    # more info: https://stackoverflow.com/questions/40784950/pathlib-path-and-py-test-localpath
+
+    def write(self, text: str) -> None:
+        ...
 
 # fix open to use unicode
+
 
 original_open = builtins.open
 
