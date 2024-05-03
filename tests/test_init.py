@@ -9,13 +9,13 @@ from unittest.mock import MagicMock, patch
 from mutmut import (
     MutationTestsRunner,
     check_mutants,
-    read_patch_data
 )
 from mutmut.context import Context
 from mutmut.mutate import mutate
 from mutmut.mutations import (
     partition_node_list,
     name_mutation)
+from mutmut.patch import read_patch_data
 from mutmut.setup_logging import configure_logger
 from mutmut.status import OK_KILLED
 
