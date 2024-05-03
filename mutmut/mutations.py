@@ -344,8 +344,7 @@ def operator_mutation(value: str, node: Leaf, **_: Any) -> str | list[str] | Non
         and node.parent.type in ('argument', 'arglist')
     ):
         return None
-
-    return {
+    data: Mapping[str, str | list[str]] = {
         '+': '-',
         '-': '+',
         '*': '/',
@@ -381,7 +380,8 @@ def operator_mutation(value: str, node: Leaf, **_: Any) -> str | list[str] | Non
         '==': '!=',
         '!=': '==',
         '<>': '==',
-    }.get(value)
+    }
+    return data.get(value)
 
 
 def and_or_test_mutation(children: list[Leaf], node: Node, **_: Any) -> list[Leaf]:
