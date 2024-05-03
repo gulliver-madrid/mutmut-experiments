@@ -472,71 +472,83 @@ def hammett_tests_pass(config: Config, callback: StrConsumer) -> bool:
 CYCLE_PROCESS_AFTER = 100
 
 
-def run_mutation_tests(
-    config: Config,
-    progress: Progress,
-    mutations_by_file: Dict[str, List[RelativeMutationID]] | None,
-) -> None:
-    from mutmut.cache import update_mutant_status
+class MutationTestsRunner:
+    def __init__(self) -> None:
+        # List of active multiprocessing queues
+        self._active_queues: list['multiprocessing.Queue[Any]'] = []
 
-    # Need to explicitly use the spawn method for python < 3.8 on macOS
-    mp_ctx = multiprocessing.get_context('spawn')
+    def run_mutation_tests(self,
+                           config: Config,
+                           progress: Progress,
+                           mutations_by_file: Dict[str, List[RelativeMutationID]] | None,
+                           ) -> None:
+        from mutmut.cache import update_mutant_status
 
-    mutants_queue = mp_ctx.Queue(maxsize=100)
-    add_to_active_queues(mutants_queue)
-    queue_mutants_thread = Thread(
-        target=queue_mutants,
-        name='queue_mutants',
-        daemon=True,
-        kwargs=dict(
-            progress=progress,
-            config=config,
-            mutants_queue=mutants_queue,
-            mutations_by_file=mutations_by_file,
-        )
-    )
-    queue_mutants_thread.start()
+        # Need to explicitly use the spawn method for python < 3.8 on macOS
+        mp_ctx = multiprocessing.get_context('spawn')
 
-    results_queue = mp_ctx.Queue(maxsize=100)
-    add_to_active_queues(results_queue)
-
-    def create_worker() -> SpawnProcess:
-        t = mp_ctx.Process(
-            target=check_mutants,
-            name='check_mutants',
+        mutants_queue = mp_ctx.Queue(maxsize=100)
+        self.add_to_active_queues(mutants_queue)
+        queue_mutants_thread = Thread(
+            target=queue_mutants,
+            name='queue_mutants',
             daemon=True,
             kwargs=dict(
+                progress=progress,
+                config=config,
                 mutants_queue=mutants_queue,
-                results_queue=results_queue,
-                cycle_process_after=CYCLE_PROCESS_AFTER,
+                mutations_by_file=mutations_by_file,
             )
         )
-        t.start()
-        return t
+        queue_mutants_thread.start()
 
-    t = create_worker()
+        results_queue = mp_ctx.Queue(maxsize=100)
+        self.add_to_active_queues(results_queue)
 
-    while True:
-        command, status, filename, mutation_id = results_queue.get()
-        if command == 'end':
-            t.join()
-            break
+        def create_worker() -> SpawnProcess:
+            t = mp_ctx.Process(
+                target=check_mutants,
+                name='check_mutants',
+                daemon=True,
+                kwargs=dict(
+                    mutants_queue=mutants_queue,
+                    results_queue=results_queue,
+                    cycle_process_after=CYCLE_PROCESS_AFTER,
+                )
+            )
+            t.start()
+            return t
 
-        elif command == 'cycle':
-            t = create_worker()
+        t = create_worker()
 
-        elif command == 'progress':
-            if not config.swallow_output:
-                print(status, end='', flush=True)
-            elif not config.no_progress:
-                progress.print()
+        while True:
+            command, status, filename, mutation_id = results_queue.get()
+            if command == 'end':
+                t.join()
+                break
 
-        else:
-            assert command == 'status'
+            elif command == 'cycle':
+                t = create_worker()
 
-            progress.register(status)
+            elif command == 'progress':
+                if not config.swallow_output:
+                    print(status, end='', flush=True)
+                elif not config.no_progress:
+                    progress.print()
 
-            update_mutant_status(file_to_mutate=filename, mutation_id=mutation_id, status=status, tests_hash=config.hash_of_tests)
+            else:
+                assert command == 'status'
+
+                progress.register(status)
+
+                update_mutant_status(file_to_mutate=filename, mutation_id=mutation_id, status=status, tests_hash=config.hash_of_tests)
+
+    def add_to_active_queues(self, queue: 'multiprocessing.Queue[Any]') -> None:
+        self._active_queues.append(queue)
+
+    def close_active_queues(self) -> None:
+        for queue in self._active_queues:
+            queue.close()
 
 
 def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
@@ -690,15 +702,3 @@ def compute_exit_code(
 hammett_prefix = 'python -m hammett '
 
 print_status = status_printer()
-
-# List of active multiprocessing queues
-_active_queues: list['multiprocessing.Queue[Any]'] = []
-
-
-def add_to_active_queues(queue: 'multiprocessing.Queue[Any]') -> None:
-    _active_queues.append(queue)
-
-
-def close_active_queues() -> None:
-    for queue in _active_queues:
-        queue.close()

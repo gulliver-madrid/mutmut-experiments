@@ -21,6 +21,7 @@ import click
 from glob2 import glob
 
 from mutmut import (
+    MutationTestsRunner,
     mutate_file,
     __version__,
     config_from_file,
@@ -28,14 +29,12 @@ from mutmut import (
     Progress,
     check_coverage_data_filepaths,
     popen_streaming_output,
-    run_mutation_tests,
     read_coverage_data,
     read_patch_data,
     add_mutations_by_file,
     python_source_files,
     compute_exit_code,
     print_status,
-    close_active_queues,
 )
 from mutmut.cache import (
     create_html_report,
@@ -532,8 +531,10 @@ Legend for output:
     print('2. Checking mutants')
     progress = Progress(total=config.total, output_legend=output_legend, no_progress=no_progress)
 
+    mutation_tests_runner = MutationTestsRunner()
     try:
-        run_mutation_tests(config=config, progress=progress, mutations_by_file=mutations_by_file)
+        mutation_tests_runner.run_mutation_tests(
+            config=config, progress=progress, mutations_by_file=mutations_by_file)
     except Exception as e:
         traceback.print_exc()
         return compute_exit_code(progress, e)
@@ -542,7 +543,7 @@ Legend for output:
     finally:
         print()  # make sure we end the output with a newline
         # Close all active multiprocessing queues to avoid hanging up the main process
-        close_active_queues()
+        mutation_tests_runner.close_active_queues()
 
 
 def parse_run_argument(

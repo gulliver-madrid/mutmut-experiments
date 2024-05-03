@@ -7,9 +7,8 @@ from pytest import raises, fixture
 from unittest.mock import MagicMock, patch
 
 from mutmut import (
-    run_mutation_tests,
+    MutationTestsRunner,
     check_mutants,
-    close_active_queues,
     read_patch_data
 )
 from mutmut.context import Context
@@ -83,12 +82,13 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
     progress_mock.register = progress_mock_register
 
     # act
-    run_mutation_tests(config_stub, progress_mock, None)
+    mutation_tests_runner = MutationTestsRunner()
+    mutation_tests_runner.run_mutation_tests(config_stub, progress_mock, None)
 
     # assert
     assert progress_mock.registered_mutants == total_mutants
 
-    close_active_queues()
+    mutation_tests_runner.close_active_queues()
 
 
 @fixture
