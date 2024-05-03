@@ -31,7 +31,7 @@ import toml
 
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import list_mutations, mutate, mutmut_config
+from mutmut.mutate import list_mutations, mutate_from_context, mutmut_config
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED
@@ -52,7 +52,7 @@ def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     if backup:
         with open(context.filename + '.bak', 'w') as f:
             f.write(original)
-    mutated, _ = mutate(context)
+    mutated, _ = mutate_from_context(context)
     with open(context.filename, 'w') as f:
         f.write(mutated)
     return original, mutated

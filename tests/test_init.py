@@ -12,7 +12,7 @@ from mutmut import (
 )
 from mutmut.config import Config
 from mutmut.context import Context
-from mutmut.mutate import mutate
+from mutmut.mutate import mutate_from_context
 from mutmut.mutations import (
     partition_node_list,
     name_mutation)
@@ -34,10 +34,10 @@ def test_name_mutation_simple_mutants() -> None:
 
 def test_context_exclude_line() -> None:
     source = "__import__('pkg_resources').declare_namespace(__name__)\n"
-    assert mutate(Context(source=source)) == (source, 0)
+    assert mutate_from_context(Context(source=source)) == (source, 0)
 
     source = "__all__ = ['hi']\n"
-    assert mutate(Context(source=source)) == (source, 0)
+    assert mutate_from_context(Context(source=source)) == (source, 0)
 
 
 def check_mutants_stub(**kwargs: Any) -> None:
