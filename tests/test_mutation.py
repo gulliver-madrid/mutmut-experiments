@@ -4,7 +4,7 @@ import pytest
 
 
 from mutmut.context import ALL, Context, RelativeMutationID
-from mutmut.mutate import mutate, list_mutations
+from mutmut.mutate import mutate_from_context, list_mutations
 from mutmut.mutations import (
     array_subscript_pattern,
     function_call_pattern,
@@ -129,7 +129,7 @@ for x in y:
     ]
 )
 def test_basic_mutations(original: str, expected: str) -> None:
-    actual, number_of_performed_mutations = mutate(Context(source=original, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))
+    actual, number_of_performed_mutations = mutate_from_context(Context(source=original, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))
     assert actual == expected, 'Performed {} mutations for original "{}"'.format(number_of_performed_mutations, original)
 
 
@@ -139,7 +139,7 @@ def test_fstring_mutation_fstring_is_mutated_separately_from_other_mutations() -
     expected_mutations = ["f'fo{x != 1}o'", "f'fo{x == 2}o'", "f'XXfo{x == 1}oXX'"]
 
     # act
-    actual_mutations = [mutate(Context(source=original, mutation_id=mutation))[0]
+    actual_mutations = [mutate_from_context(Context(source=original, mutation_id=mutation))[0]
                         for mutation in list_mutations(Context(source=original))]
 
     # assert
@@ -165,8 +165,8 @@ def test_fstring_mutation_fstring_is_mutated_separately_from_other_mutations() -
 def test_multiple_mutations(original: str, expected: list[str]) -> None:
     mutations = list_mutations(Context(source=original))
     assert len(mutations) == 3
-    assert mutate(Context(source=original, mutation_id=mutations[0])) == (expected[0], 1)
-    assert mutate(Context(source=original, mutation_id=mutations[1])) == (expected[1], 1)
+    assert mutate_from_context(Context(source=original, mutation_id=mutations[0])) == (expected[0], 1)
+    assert mutate_from_context(Context(source=original, mutation_id=mutations[1])) == (expected[1], 1)
 
 
 @pytest.mark.parametrize(
@@ -180,7 +180,7 @@ def test_multiple_mutations(original: str, expected: list[str]) -> None:
     ]
 )
 def test_basic_mutations_python3(original: str, expected: str) -> None:
-    actual = mutate(Context(source=original, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
+    actual = mutate_from_context(Context(source=original, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
     assert actual == expected
 
 
@@ -191,7 +191,7 @@ def test_basic_mutations_python3(original: str, expected: str) -> None:
     ]
 )
 def test_basic_mutations_python36(original: str, expected: str) -> None:
-    actual = mutate(Context(source=original, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
+    actual = mutate_from_context(Context(source=original, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
     assert actual == expected
 
 
@@ -213,7 +213,7 @@ def test_basic_mutations_python36(original: str, expected: str) -> None:
     ]
 )
 def test_do_not_mutate(source: str) -> None:
-    actual = mutate(Context(source=source, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
+    actual = mutate_from_context(Context(source=source, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
     assert actual == source
 
 
@@ -226,7 +226,7 @@ def test_do_not_mutate(source: str) -> None:
     ]
 )
 def test_do_not_mutate_python3(source: str) -> None:
-    actual = mutate(Context(source=source, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
+    actual = mutate_from_context(Context(source=source, mutation_id=ALL, dict_synonyms=['Struct', 'FooBarDict']))[0]
     assert actual == source
 
 
@@ -236,25 +236,25 @@ def foo() -> int:
     return 0
     """
 
-    assert mutate(Context(source=source, mutation_id=ALL))[0] == source.replace('0', '1')
+    assert mutate_from_context(Context(source=source, mutation_id=ALL))[0] == source.replace('0', '1')
 
 
 def test_mutate_all() -> None:
-    assert mutate(Context(source='def foo():\n    return 1+1', mutation_id=ALL)) == ('def foo():\n    return 2-2', 3)
+    assert mutate_from_context(Context(source='def foo():\n    return 1+1', mutation_id=ALL)) == ('def foo():\n    return 2-2', 3)
 
 
 def test_mutate_both() -> None:
     source = 'a = b + c'
     mutations = list_mutations(Context(source=source))
     assert len(mutations) == 2
-    assert mutate(Context(source=source, mutation_id=mutations[0])) == ('a = b - c', 1)
-    assert mutate(Context(source=source, mutation_id=mutations[1])) == ('a = None', 1)
+    assert mutate_from_context(Context(source=source, mutation_id=mutations[0])) == ('a = b - c', 1)
+    assert mutate_from_context(Context(source=source, mutation_id=mutations[1])) == ('a = None', 1)
 
 
 def test_perform_one_indexed_mutation() -> None:
-    assert mutate(Context(source='1+1', mutation_id=RelativeMutationID(line='1+1', index=0, line_number=0))) == ('2+1', 1)
-    assert mutate(Context(source='1+1', mutation_id=RelativeMutationID('1+1', 1, line_number=0))) == ('1-1', 1)
-    assert mutate(Context(source='1+1', mutation_id=RelativeMutationID('1+1', 2, line_number=0))) == ('1+2', 1)
+    assert mutate_from_context(Context(source='1+1', mutation_id=RelativeMutationID(line='1+1', index=0, line_number=0))) == ('2+1', 1)
+    assert mutate_from_context(Context(source='1+1', mutation_id=RelativeMutationID('1+1', 1, line_number=0))) == ('1-1', 1)
+    assert mutate_from_context(Context(source='1+1', mutation_id=RelativeMutationID('1+1', 2, line_number=0))) == ('1+2', 1)
 
     # TODO: should this case raise an exception?
     # assert mutate(Context(source='def foo():\n    return 1', mutation_id=2)) == ('def foo():\n    return 1\n', 0)
@@ -262,29 +262,29 @@ def test_perform_one_indexed_mutation() -> None:
 
 def test_function() -> None:
     source = "def capitalize(s):\n    return s[0].upper() + s[1:] if s else s\n"
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 0, line_number=1))) == ("def capitalize(s):\n    return s[1].upper() + s[1:] if s else s\n", 1)
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 1, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() - s[1:] if s else s\n", 1)
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 2, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() + s[2:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 0, line_number=1))) == ("def capitalize(s):\n    return s[1].upper() + s[1:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 1, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() - s[1:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 2, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() + s[2:] if s else s\n", 1)
 
 
 def test_function_with_annotation() -> None:
     source = "def capitalize(s : str):\n    return s[0].upper() + s[1:] if s else s\n"
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 0, line_number=1))) == ("def capitalize(s : str):\n    return s[1].upper() + s[1:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 0, line_number=1))) == ("def capitalize(s : str):\n    return s[1].upper() + s[1:] if s else s\n", 1)
 
 
 def test_pragma_no_mutate() -> None:
     source = """def foo():\n    return 1+1  # pragma: no mutate\n"""
-    assert mutate(Context(source=source, mutation_id=ALL)) == (source, 0)
+    assert mutate_from_context(Context(source=source, mutation_id=ALL)) == (source, 0)
 
 
 def test_pragma_no_mutate_and_no_cover() -> None:
     source = """def foo():\n    return 1+1  # pragma: no cover, no mutate\n"""
-    assert mutate(Context(source=source, mutation_id=ALL)) == (source, 0)
+    assert mutate_from_context(Context(source=source, mutation_id=ALL)) == (source, 0)
 
 
 def test_mutate_decorator() -> None:
     source = """@foo\ndef foo():\n    pass\n"""
-    assert mutate(Context(source=source, mutation_id=ALL)) == (source.replace('@foo', ''), 1)
+    assert mutate_from_context(Context(source=source, mutation_id=ALL)) == (source.replace('@foo', ''), 1)
 
 
 # TODO: getting this test and the above to both pass is tricky
@@ -295,25 +295,25 @@ def test_mutate_decorator() -> None:
 
 def test_mutate_dict() -> None:
     source = "dict(a=b, c=d)"
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID(source, 1, line_number=0))) == ("dict(a=b, cXX=d)", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source, 1, line_number=0))) == ("dict(a=b, cXX=d)", 1)
 
 
 def test_mutate_dict2() -> None:
     source = "dict(a=b, c=d, e=f, g=h)"
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID(source, 3, line_number=0))) == ("dict(a=b, c=d, e=f, gXX=h)", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source, 3, line_number=0))) == ("dict(a=b, c=d, e=f, gXX=h)", 1)
 
 
 def test_performed_mutation_ids() -> None:
     source = "dict(a=b, c=d)"
     context = Context(source=source)
-    mutate(context)
+    mutate_from_context(context)
     # we found two mutation points: mutate "a" and "c"
     assert context.performed_mutation_ids == [RelativeMutationID(source, 0, 0), RelativeMutationID(source, 1, 0)]
 
 
 def test_syntax_error() -> None:
     with pytest.raises(Exception):
-        mutate(Context(source=':!'))
+        mutate_from_context(Context(source=':!'))
 
 # TODO: this test becomes incorrect with the new mutation_id system, should try to salvage the idea though...
 # def test_mutation_index():
@@ -342,13 +342,13 @@ def icon(name):
         return ''
     tpl = '<span class="glyphicon glyphicon-{}"></span>'
     return format_html(tpl, name)"""
-    mutate(Context(source=source))
+    mutate_from_context(Context(source=source))
 
 
 def test_bug_github_issue_19() -> None:
     source = """key = lambda a: "foo"
 filters = dict((key(field), False) for field in fields)"""
-    mutate(Context(source=source))
+    mutate_from_context(Context(source=source))
 
 
 def test_bug_github_issue_26() -> None:
@@ -356,7 +356,7 @@ def test_bug_github_issue_26() -> None:
 class ConfigurationOptions(Protocol):
     min_name_length: int
     """
-    mutate(Context(source=source))
+    mutate_from_context(Context(source=source))
 
 
 def test_bug_github_issue_30() -> None:
@@ -364,7 +364,7 @@ def test_bug_github_issue_30() -> None:
 def from_checker(cls: Type['BaseVisitor'], checker) -> 'BaseVisitor':
     pass
 """
-    assert mutate(Context(source=source)) == (source, 0)
+    assert mutate_from_context(Context(source=source)) == (source, 0)
 
 
 def test_bug_github_issue_77() -> None:
@@ -381,7 +381,7 @@ __all__ = [
     'bar',
 ]
 """
-    assert mutate(Context(source=source)) == (source, 0)
+    assert mutate_from_context(Context(source=source)) == (source, 0)
 
 
 def test_bug_github_issue_162() -> None:
@@ -389,11 +389,11 @@ def test_bug_github_issue_162() -> None:
 primes: List[int] = []
 foo = 'bar'
 """
-    assert mutate(Context(source=source, mutation_id=RelativeMutationID("foo = 'bar'", 0, 2))) == (source.replace("'bar'", "'XXbarXX'"), 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID("foo = 'bar'", 0, 2))) == (source.replace("'bar'", "'XXbarXX'"), 1)
 
 
 def test_bad_mutation_str_type_definition() -> None:
     source = """
 foo: 'SomeType'
     """
-    assert mutate(Context(source=source)) == (source, 0)
+    assert mutate_from_context(Context(source=source)) == (source, 0)

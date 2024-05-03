@@ -43,7 +43,7 @@ dunder_whitelist: Final[list[str]] = [
 ]
 
 
-def mutate(context: Context) -> Tuple[str, int]:
+def mutate_from_context(context: Context) -> Tuple[str, int]:
     """
     :return: tuple of mutated source code and number of mutations performed
     """
@@ -53,7 +53,7 @@ def mutate(context: Context) -> Tuple[str, int]:
         print('Failed to parse {}. Internal error from parso follows.'.format(context.filename))
         print('----------------------------------')
         raise
-    mutate_list_of_nodes(result, context=context)
+    _mutate_list_of_nodes(result, context=context)
     mutated_source: str = result.get_code().replace(' not not ', ' ')
     if context.remove_newline_at_end:
         assert mutated_source[-1] == '\n'
@@ -69,7 +69,7 @@ def mutate(context: Context) -> Tuple[str, int]:
     return mutated_source, len(context.performed_mutation_ids)
 
 
-def mutate_node(node: NodeOrLeaf, context: Context) -> None:
+def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
     assert isinstance(node, NodeOrLeaf)
     context.stack.append(node)
     try:
@@ -103,7 +103,7 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
                 return
 
         if has_children(node):
-            mutate_list_of_nodes(node, context=context)
+            _mutate_list_of_nodes(node, context=context)
 
             # this is just an optimization to stop early
             if context.performed_mutation_ids and context.mutation_id != ALL:
@@ -154,7 +154,7 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
         context.stack.pop()
 
 
-def mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
+def _mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
     assert isinstance(node, BaseNode)
     return_annotation_started = False
 
@@ -168,7 +168,7 @@ def mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
         if return_annotation_started:
             continue
 
-        mutate_node(child_node, context=context)
+        _mutate_node(child_node, context=context)
 
         # this is just an optimization to stop early
         if context.performed_mutation_ids and context.mutation_id != ALL:
@@ -177,5 +177,5 @@ def mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
 
 def list_mutations(context: Context) -> list[RelativeMutationID]:
     assert context.mutation_id == ALL
-    mutate(context)
+    mutate_from_context(context)
     return context.performed_mutation_ids

@@ -20,7 +20,7 @@ from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import mutate
+from mutmut.mutate import mutate_from_context
 from mutmut.utils import ranges
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
@@ -292,7 +292,7 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
         mutation_id=mutation_id,
         dict_synonyms=dict_synonyms,
     )
-    mutated_source, number_of_mutations_performed = mutate(context)
+    mutated_source, number_of_mutations_performed = mutate_from_context(context)
     if not number_of_mutations_performed:
         return ""
 
