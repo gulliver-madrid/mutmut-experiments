@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
+from mutmut.patch import read_patch_data
 from mutmut.setup_logging import configure_logger
 from mutmut.utils import split_paths
 from mutmut.status import MUTANT_STATUSES, StatusStr
@@ -29,7 +30,6 @@ from mutmut import (
     guess_paths_to_mutate,
     Progress,
     popen_streaming_output,
-    read_patch_data,
     add_mutations_by_file,
     python_source_files,
     compute_exit_code,
