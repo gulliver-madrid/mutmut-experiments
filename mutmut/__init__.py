@@ -355,13 +355,13 @@ def popen_streaming_output(
         )
         stdout = process.stdout
     else:
-        master, slave = os.openpty()
+        master, slave = os.openpty()  # type: ignore [attr-defined]
         process = subprocess.Popen(
             shlex.split(cmd, posix=True),
             stdout=slave,
             stderr=slave
         )
-        stdout = os.fdopen(master)
+        stdout = os.fdopen(master)  # type: ignore [assignment]
         os.close(slave)
 
     def kill(process_: Any) -> None:
@@ -372,7 +372,7 @@ def popen_streaming_output(
             pass
 
     # python 2-3 agnostic process timer
-    timer = Timer(timeout, kill, [process])
+    timer = Timer(timeout, kill, [process])  # type: ignore [arg-type]
     timer.daemon = True
     timer.start()
 
@@ -393,7 +393,7 @@ def popen_streaming_output(
                     line = stdout.readline()
                     if not line:
                         break
-                    callback(line)
+                    callback(line)  # type: ignore [arg-type]
         except OSError:
             # This seems to happen on some platforms, including TravisCI.
             # It seems like it's ok to just let this pass here, you just
@@ -411,7 +411,7 @@ def popen_streaming_output(
 
 def hammett_tests_pass(config: Config, callback: StrConsumer) -> bool:
     # noinspection PyUnresolvedReferences
-    from hammett import main_cli
+    from hammett import main_cli  # type: ignore [import-untyped]
     modules_before = set(sys.modules.keys())
 
     # set up timeout
@@ -442,8 +442,8 @@ def hammett_tests_pass(config: Config, callback: StrConsumer) -> bool:
                 return len(s)
 
         redirect = StdOutRedirect()
-        sys.stdout = redirect
-        sys.stderr = redirect
+        sys.stdout = redirect  # type: ignore [assignment]
+        sys.stderr = redirect  # type: ignore [assignment]
         returncode = main_cli(shlex.split(config.test_command[len(hammett_prefix):]))
         sys.stdout = sys.__stdout__
         sys.stderr = sys.__stderr__

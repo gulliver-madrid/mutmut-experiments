@@ -35,7 +35,7 @@ from mutmut.status import MUTANT_STATUSES
 from helpers import FileSystemPath, open_utf8
 
 
-builtins.open = open_utf8
+builtins.open = open_utf8  # type: ignore [assignment]
 
 
 file_to_mutate_lines = [
@@ -250,7 +250,8 @@ def test_popen_streaming_output_timeout() -> None:
     with pytest.raises(TimeoutError):
         popen_streaming_output(
             PYTHON + ' -c "import time; time.sleep(4)"',
-            lambda line: line, timeout=0.1,
+            lambda line: line,  # type: ignore [arg-type] # (however it seems the return value it's not used)
+            timeout=0.1,
         )
 
     assert (time() - start) < 3

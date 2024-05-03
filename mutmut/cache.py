@@ -15,7 +15,7 @@ from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterable,
 from typing_extensions import ParamSpec
 
 from typing_extensions import Self
-from junit_xml import TestSuite, TestCase, to_xml_report_string  # pyright: ignore [reportUnknownVariableType,reportMissingTypeStubs]
+from junit_xml import TestSuite, TestCase, to_xml_report_string  # type: ignore [import-untyped]
 from pony.orm import Database, Required, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 
@@ -115,7 +115,7 @@ if TYPE_CHECKING:
         id: int = field(default=0)
 
 else:
-    class Mutant(DbEntity):  # type: ignore [valid-type]
+    class Mutant(DbEntity):
         line = Required(Line)
         index = Required(int)
         tested_against_hash = Optional(str, autostrip=False)

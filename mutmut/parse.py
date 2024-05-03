@@ -9,4 +9,4 @@ def parse(code: str, **kwargs: Any) -> Any:
 
     :param str version: The version used by :py:func:`parso.load_grammar`.
     """
-    return parso.parse(code, **kwargs)  # pyright: ignore [reportUnknownVariableType,reportUnknownMemberType]
+    return parso.parse(code, **kwargs)  # type: ignore [no-untyped-call]

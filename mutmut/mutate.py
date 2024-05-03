@@ -20,7 +20,7 @@ mutmut_config: Any
 if os.getcwd() not in sys.path:
     sys.path.insert(0, os.getcwd())
 try:
-    import mutmut_config  # type: ignore [no-redef]
+    import mutmut_config  # type: ignore  [import-not-found, no-redef]
 except ImportError:
     mutmut_config = None
 
