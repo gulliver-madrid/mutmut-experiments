@@ -518,6 +518,7 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]) -> 
 def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: str, tests_hash: str) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
+    assert line is not None
     mutant = get_mutant(line=line, index=mutation_id.index)
     assert mutant, dict(line=line, index=mutation_id.index)
     mutant.status = status
@@ -536,7 +537,9 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
 
     for mutation_id in mutations:
         if mutation_id.line not in line_obj_by_line:
-            line_obj_by_line[mutation_id.line] = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
+            line_from_db = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
+            assert line_from_db is not None
+            line_obj_by_line[mutation_id.line] = line_from_db
         line = line_obj_by_line[mutation_id.line]
         assert line
         mutant = get_mutant(line=line, index=mutation_id.index)
@@ -565,7 +568,7 @@ def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_
     assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
-    line: Line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
+    line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     assert line
     mutant = get_mutant(line=line, index=mutation_id.index)
     if mutant is None:
