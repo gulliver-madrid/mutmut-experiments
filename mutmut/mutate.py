@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 import sys
+from types import NoneType
 from typing import Any, Final, Tuple, TYPE_CHECKING
 
 from parso.tree import NodeOrLeaf, Node, BaseNode
@@ -118,12 +119,14 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
             if context.exclude_line():
                 continue
 
-            new = value(
+            new: object = value(
                 context=context,
                 node=node,
                 value=getattr(node, 'value', None),
                 children=getattr(node, 'children', None),
             )
+
+            assert isinstance(new, (str, list, NoneType))
 
             if isinstance(new, list) and not isinstance(old, list):
                 # multiple mutations
