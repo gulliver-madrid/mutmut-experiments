@@ -96,8 +96,10 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
                         return
 
         # Avoid mutating pure annotations
-        if node.type == 'annassign' and len(node.children) == 2:
-            return
+        if node.type == 'annassign':
+            assert has_children(node)
+            if len(node.children) == 2:
+                return
 
         if has_children(node):
             mutate_list_of_nodes(node, context=context)
