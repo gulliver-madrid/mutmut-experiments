@@ -41,7 +41,7 @@ class Context:
     ):
         self.index = index
         self.remove_newline_at_end = False
-        self._source = None
+        self._source: str | None = None
         self._set_source(source)
         self.mutation_id = mutation_id
         self.performed_mutation_ids: list[RelativeMutationID] = []
@@ -51,7 +51,7 @@ class Context:
         self.stack: list[NodeOrLeaf] = []
         self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
         self._source_by_line_number: list[str] | None = None
-        self._pragma_no_mutate_lines = None
+        self._pragma_no_mutate_lines: set[int] | None = None
         self._path_by_line = None
         self.config = config
         self.skip = False
