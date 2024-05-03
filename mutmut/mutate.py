@@ -10,7 +10,7 @@ from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
 from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context, RelativeMutationID
-from mutmut.mutations import is_name_node, is_operator, mutations_by_type
+from mutmut.mutations import has_children, is_name_node, is_operator, mutations_by_type
 from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 
@@ -99,8 +99,7 @@ def mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if node.type == 'annassign' and len(node.children) == 2:
             return
 
-        if hasattr(node, 'children'):
-            assert isinstance(node, BaseNode)
+        if has_children(node):
             mutate_list_of_nodes(node, context=context)
 
             # this is just an optimization to stop early
