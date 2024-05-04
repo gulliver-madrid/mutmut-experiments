@@ -10,12 +10,11 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Tuple, TypeVar
-from typing_extensions import ParamSpec
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Sequence, Tuple, TypeVar
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string  # type: ignore [import-untyped]
-from pony.orm import select, \
-    RowNotFound, ERDiagramError, OperationalError
+from pony.orm import select, RowNotFound, ERDiagramError, OperationalError
+from typing_extensions import ParamSpec
 
 from mutmut.context import Context, RelativeMutationID
 from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
@@ -122,10 +121,6 @@ def get_apply_line(mutant: Mutant) -> str:
 @init_db
 @db_session
 def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], only_this_file: str | None = None) -> None:
-    # CHECK TYPES START
-    assert isinstance(dict_synonyms, list)
-    assert isinstance(show_diffs, bool)
-    # CHECK TYPES END
     print('To apply a mutant on disk:')
     print('    mutmut apply <id>')
     print('')
@@ -135,31 +130,39 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], 
 
     def print_stuff(title: str, mutant_query: 'Query[Mutant, Mutant]') -> None:
         mutant_list = sorted(mutant_query, key=lambda x: x.line.sourcefile.filename)
-        if mutant_list:
+
+        if not mutant_list:
+            return
+
+        print('')
+        print("{} ({})".format(title, len(mutant_list)))
+        for filename, mutants_iterator in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
+            if only_this_file and filename != only_this_file:
+                continue
+
+            mutants = list(mutants_iterator)
             print('')
-            print("{} ({})".format(title, len(mutant_list)))
-            for filename, mutants_iterator in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
-                if only_this_file and filename != only_this_file:
-                    continue
+            print("---- {} ({}) ----".format(filename, len(mutants)))
+            print('')
+            if show_diffs:
+                with open(filename) as f:
+                    source = f.read()
 
-                mutants = list(mutants_iterator)
-                print('')
-                print("---- {} ({}) ----".format(filename, len(mutants)))
-                print('')
-                if show_diffs:
-                    with open(filename) as f:
-                        source = f.read()
+                for x in mutants:
+                    print('# mutant {}'.format(x.id))
+                    print(get_unified_diff(x.id, dict_synonyms, update_cache=False, source=source))
+            else:
+                print(ranges([x.id for x in mutants]))
+    print_stuff('Timed out ⏰', select_mutants_by_status(BAD_TIMEOUT))
+    print_stuff('Suspicious 🤔', select_mutants_by_status(OK_SUSPICIOUS))
+    print_stuff('Survived 🙁', select_mutants_by_status(BAD_SURVIVED))
+    print_stuff('Untested/skipped', select_mutants_by_status((UNTESTED, SKIPPED)))
 
-                    for x in mutants:
-                        print('# mutant {}'.format(x.id))
-                        print(get_unified_diff(x.id, dict_synonyms, update_cache=False, source=source))
-                else:
-                    print(ranges([x.id for x in mutants]))
 
-    print_stuff('Timed out ⏰', select(x for x in get_mutants() if x.status == BAD_TIMEOUT))
-    print_stuff('Suspicious 🤔', select(x for x in get_mutants() if x.status == OK_SUSPICIOUS))
-    print_stuff('Survived 🙁', select(x for x in get_mutants() if x.status == BAD_SURVIVED))
-    print_stuff('Untested/skipped', select(x for x in get_mutants() if x.status == UNTESTED or x.status == SKIPPED))
+def select_mutants_by_status(status: StatusResultStr | Sequence[StatusResultStr]) -> 'Query[Mutant, Mutant]':
+    if isinstance(status, str):
+        status = (status,)
+    return select(x for x in get_mutants() if x.status in status)
 
 
 @init_db
