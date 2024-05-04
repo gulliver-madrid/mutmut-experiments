@@ -473,16 +473,14 @@ Legend for output:
     # if we're running in a mode with externally whitelisted lines
     covered_lines_by_filename: Dict[str, list[int]] | None = None
     coverage_data = None
-    if use_coverage or use_patch_file:
+    if use_coverage:
         covered_lines_by_filename = {}
-        if use_coverage:
-            coverage_data = read_coverage_data()
-            check_coverage_data_filepaths(coverage_data)
-        else:
-            assert use_patch_file
-            raw_covered_lines_by_filename = read_patch_data(use_patch_file)
-            assert raw_covered_lines_by_filename is not None
-            covered_lines_by_filename = {k: list(v) for k, v in raw_covered_lines_by_filename.items()}
+        coverage_data = read_coverage_data()
+        check_coverage_data_filepaths(coverage_data)
+    elif use_patch_file:
+        raw_covered_lines_by_filename = read_patch_data(use_patch_file)
+        assert raw_covered_lines_by_filename is not None
+        covered_lines_by_filename = {k: list(v) for k, v in raw_covered_lines_by_filename.items()}
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
