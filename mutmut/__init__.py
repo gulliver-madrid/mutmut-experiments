@@ -34,7 +34,7 @@ from mutmut.context import Context, RelativeMutationID
 from mutmut.mutate import list_mutations, mutate_from_context, mutmut_config
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED
+from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr, StatusStr
 from mutmut.utils import status_printer
 
 __version__ = '2.4.5'
@@ -77,7 +77,7 @@ def queue_mutants(
     try:
         index = 0
         for filename, mutations in mutations_by_file.items():
-            cached_mutation_statuses: dict[RelativeMutationID, str] = get_cached_mutation_statuses(filename, mutations, config.hash_of_tests)
+            cached_mutation_statuses = get_cached_mutation_statuses(filename, mutations, config.hash_of_tests)
             with open(filename) as f:
                 source = f.read()
             for mutation_id in mutations:
@@ -136,7 +136,7 @@ def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_
             results_queue.put(('end', None, None, None))
 
 
-def run_mutation(context: Context, callback: StrConsumer) -> str:
+def run_mutation(context: Context, callback: StrConsumer) -> StatusResultStr:
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
     """
@@ -311,7 +311,7 @@ class Progress:
             self.skipped)
         )
 
-    def register(self, status: str) -> None:
+    def register(self, status: StatusResultStr) -> None:
         if status == BAD_SURVIVED:
             self.surviving_mutants += 1
         elif status == BAD_TIMEOUT:

@@ -23,7 +23,7 @@ from mutmut.context import Context, RelativeMutationID
 from mutmut.mutate import mutate_from_context
 from mutmut.utils import ranges
 from mutmut.setup_logging import configure_logger
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
+from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr, StatusStr
 
 
 if TYPE_CHECKING:
@@ -110,7 +110,7 @@ if TYPE_CHECKING:
     class Mutant(DbEntity):
         line: Line
         index: int
-        status: str
+        status: StatusResultStr
         tested_against_hash: str | None = field(default=None)
         id: int = field(default=0)
 
@@ -383,7 +383,7 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
                     len(mutants_by_status[BAD_SURVIVED]),
                 ))
 
-                def print_diffs(status: str) -> None:
+                def print_diffs(status: StatusResultStr) -> None:
                     mutants = mutants_by_status[status]
                     for mutant in sorted(mutants, key=lambda m: m.id):
                         assert isinstance(mutant.line.line, str)  # guess
@@ -515,7 +515,7 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]) -> 
 
 @init_db
 @db_session
-def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: str, tests_hash: str) -> None:
+def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: StatusResultStr, tests_hash: str) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     assert line is not None
@@ -527,13 +527,13 @@ def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, s
 
 @init_db
 @db_session
-def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashOfTestsStr) -> dict[RelativeMutationID, str]:
+def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashOfTestsStr) -> dict[RelativeMutationID, StatusResultStr]:
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
 
     line_obj_by_line: dict[str, Line] = {}
 
-    result: dict[RelativeMutationID, str] = {}
+    result: dict[RelativeMutationID, StatusResultStr] = {}
 
     for mutation_id in mutations:
         if mutation_id.line not in line_obj_by_line:
@@ -564,7 +564,7 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
 
 @init_db
 @db_session
-def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr) -> str:
+def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr) -> StatusResultStr:
     assert isinstance(filename, str)  # guess
     assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)

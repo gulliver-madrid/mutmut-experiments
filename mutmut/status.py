@@ -10,6 +10,15 @@ StatusStr: TypeAlias = Literal[
     "untested",
 ]
 
+StatusResultStr: TypeAlias = Literal[
+    'untested',
+    'ok_killed',
+    'ok_suspicious',
+    'bad_timeout',
+    'bad_survived',
+    'skipped',
+]
+
 UNTESTED: Final = 'untested'
 OK_KILLED: Final = 'ok_killed'
 OK_SUSPICIOUS: Final = 'ok_suspicious'
@@ -18,7 +27,7 @@ BAD_SURVIVED: Final = 'bad_survived'
 SKIPPED: Final = 'skipped'
 
 
-MUTANT_STATUSES: Final[Mapping[StatusStr, str]] = {
+MUTANT_STATUSES: Final[Mapping[StatusStr, StatusResultStr]] = {
     "killed": OK_KILLED,
     "timeout": BAD_TIMEOUT,
     "suspicious": OK_SUSPICIOUS,
