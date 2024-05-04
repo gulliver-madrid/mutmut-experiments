@@ -19,7 +19,7 @@ from typing_extensions import ParamSpec
 from mutmut.context import Context, RelativeMutationID
 from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
 from mutmut.mutate import mutate_from_context
-from mutmut.utils import ranges
+from mutmut.utils import ranges, split_lines
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr, StatusStr
 
@@ -206,7 +206,9 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
         return ""
 
     output = ""
-    for line in unified_diff(source.split('\n'), mutated_source.split('\n'), fromfile=filename, tofile=filename, lineterm=''):
+    for line in unified_diff(
+        split_lines(source), split_lines(mutated_source), fromfile=filename, tofile=filename, lineterm=''
+    ):
         output += line + "\n"
     return output
 

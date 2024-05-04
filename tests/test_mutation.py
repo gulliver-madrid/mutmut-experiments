@@ -11,6 +11,7 @@ from mutmut.mutations import (
     ASTPattern
 )
 from mutmut.parse import parse_source
+from mutmut.utils import split_lines
 
 
 def test_matches_py3() -> None:
@@ -262,14 +263,14 @@ def test_perform_one_indexed_mutation() -> None:
 
 def test_function() -> None:
     source = "def capitalize(s):\n    return s[0].upper() + s[1:] if s else s\n"
-    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 0, line_number=1))) == ("def capitalize(s):\n    return s[1].upper() + s[1:] if s else s\n", 1)
-    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 1, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() - s[1:] if s else s\n", 1)
-    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 2, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() + s[2:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(split_lines(source)[1], 0, line_number=1))) == ("def capitalize(s):\n    return s[1].upper() + s[1:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(split_lines(source)[1], 1, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() - s[1:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(split_lines(source)[1], 2, line_number=1))) == ("def capitalize(s):\n    return s[0].upper() + s[2:] if s else s\n", 1)
 
 
 def test_function_with_annotation() -> None:
     source = "def capitalize(s : str):\n    return s[0].upper() + s[1:] if s else s\n"
-    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(source.split('\n')[1], 0, line_number=1))) == ("def capitalize(s : str):\n    return s[1].upper() + s[1:] if s else s\n", 1)
+    assert mutate_from_context(Context(source=source, mutation_id=RelativeMutationID(split_lines(source)[1], 0, line_number=1))) == ("def capitalize(s : str):\n    return s[1].upper() + s[1:] if s else s\n", 1)
 
 
 def test_pragma_no_mutate() -> None:

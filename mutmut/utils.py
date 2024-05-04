@@ -65,3 +65,7 @@ def status_printer() -> Callable[[str], None]:
         sys.stdout.flush()
         last_len[0] = len_s
     return p
+
+
+def split_lines(s: str) -> list[str]:
+    return s.split('\n')
