@@ -65,18 +65,15 @@ class Context:
             return False
 
         assert self.filename is not None
-        covered_lines: list[int]
+        covered_lines: list[int] | None = config.covered_lines_by_filename.get(self.filename)
 
-        if self.filename in config.covered_lines_by_filename:
-            covered_lines = list(config.covered_lines_by_filename[self.filename])
-        elif config.coverage_data is None:
-            covered_lines = []
-        else:
+        if covered_lines is None and config.coverage_data is not None:
             covered_lines = self._get_covered_lines_from_coverage_data()
             config.covered_lines_by_filename[self.filename] = covered_lines
 
         if not covered_lines:
             return True
+
         current_line = self.current_line_index + 1
         return current_line not in covered_lines
 
