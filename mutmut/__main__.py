@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from mutmut.cache.html import create_html_report
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -36,7 +37,6 @@ from mutmut import (
     print_status,
 )
 from mutmut.cache.cache import (
-    create_html_report,
     cached_hash_of_tests,
     print_result_cache,
     print_result_ids_cache,
