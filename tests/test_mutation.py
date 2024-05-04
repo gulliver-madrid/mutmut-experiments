@@ -10,25 +10,25 @@ from mutmut.mutations import (
     function_call_pattern,
     ASTPattern
 )
-from mutmut.parse import parse
+from mutmut.parse import parse_source
 
 
 def test_matches_py3() -> None:
-    node = parse('a: Optional[int] = 7\n').children[0].children[0].children[1].children[1].children[1].children[1]
+    node = parse_source('a: Optional[int] = 7\n').children[0].children[0].children[1].children[1].children[1].children[1]
     assert not array_subscript_pattern.matches(node=node)
 
 
 def test_matches() -> None:
-    node = parse('from foo import bar').children[0]
+    node = parse_source('from foo import bar').children[0]
     assert not array_subscript_pattern.matches(node=node)
     assert not function_call_pattern.matches(node=node)
     assert not array_subscript_pattern.matches(node=node)
     assert not function_call_pattern.matches(node=node)
 
-    node = parse('foo[bar]\n').children[0].children[0].children[1].children[1]
+    node = parse_source('foo[bar]\n').children[0].children[0].children[1].children[1]
     assert array_subscript_pattern.matches(node=node)
 
-    node = parse('foo(bar)\n').children[0].children[0].children[1].children[1]
+    node = parse_source('foo(bar)\n').children[0].children[0].children[1].children[1]
     assert function_call_pattern.matches(node=node)
 
 
@@ -52,13 +52,13 @@ for x in y:
         )
     )
 
-    n = parse("""for a in [1, 2, 3]:
+    n = parse_source("""for a in [1, 2, 3]:
     if foo:
         continue
 """).children[0].children[3]
     assert p.matches(node=n)
 
-    n = parse("""for a, b in [1, 2, 3]:
+    n = parse_source("""for a, b in [1, 2, 3]:
     if foo:
         continue
 """).children[0].children[3]
