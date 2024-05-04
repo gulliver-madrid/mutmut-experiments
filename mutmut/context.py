@@ -40,7 +40,7 @@ class Context:
         index: int = 0,
     ):
         self.index = index
-        self.remove_newline_at_end = False
+        self.remove_newline_at_end: bool = False
         self._source: str | None = None
         self._set_source(source)
         self.mutation_id = mutation_id
@@ -52,9 +52,8 @@ class Context:
         self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
         self._source_by_line_number: list[str] | None = None
         self._pragma_no_mutate_lines: set[int] | None = None
-        self._path_by_line = None
         self.config = config
-        self.skip = False
+        self.skip: bool = False
 
     def exclude_line(self) -> bool:
         return self.current_line_index in self.pragma_no_mutate_lines or self.should_exclude()
