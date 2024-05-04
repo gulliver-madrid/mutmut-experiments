@@ -383,10 +383,11 @@ def operator_mutation(value: str, node: Leaf, **_: Any) -> str | list[str] | Non
     return data.get(value)
 
 
-def and_or_test_mutation(children: list[Leaf], node: Node, **_: Any) -> list[Leaf]:
+def and_or_test_mutation(children: list[NodeOrLeaf], node: Node, **_: Any) -> list[NodeOrLeaf]:
     assert isinstance(node, Node)
-    assert all(isinstance(child, Leaf) for child in children)
+    assert all(isinstance(child, NodeOrLeaf) for child in children), children
     children = children[:]
+    assert isinstance(children[1], Leaf)
     children[1] = Keyword(
         value={'and': ' or', 'or': ' and'}[children[1].value],
         start_pos=node.start_pos,
