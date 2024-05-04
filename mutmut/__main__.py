@@ -1,18 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from mutmut.cache.html import create_html_report
-from mutmut.cache.junitxml import print_result_cache_junitxml
-from mutmut.cache.print_results import print_result_cache, print_result_ids_cache
-from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.patch import CoveredLinesByFilename, read_patch_data
-from mutmut.setup_logging import configure_logger
-from mutmut.utils import split_lines, split_paths
-from mutmut.status import MUTANT_STATUSES, StatusStr
 from types import NoneType
-from mutmut.mutations import mutations_by_type
-from mutmut.mutate import mutmut_config
-from mutmut.context import Context
 import os
 import sys
 import traceback
@@ -46,8 +35,18 @@ from mutmut.cache.cache import (
     set_cached_test_time,
     update_line_numbers,
     get_unified_diff)
+from mutmut.cache.html import create_html_report
+from mutmut.cache.junitxml import print_result_cache_junitxml
+from mutmut.cache.print_results import print_result_cache, print_result_ids_cache
 from mutmut.config import Config
-from mutmut.context import RelativeMutationID
+from mutmut.context import Context, RelativeMutationID
+from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
+from mutmut.mutate import mutmut_config
+from mutmut.mutations import mutations_by_type
+from mutmut.patch import CoveredLinesByFilename, read_patch_data
+from mutmut.setup_logging import configure_logger
+from mutmut.utils import split_lines, split_paths
+from mutmut.status import MUTANT_STATUSES, StatusStr
 
 logger = configure_logger(__name__)
 
