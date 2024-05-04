@@ -10,7 +10,7 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Tuple, TypeAlias, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Tuple, TypeVar
 from typing_extensions import ParamSpec
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string  # type: ignore [import-untyped]
@@ -18,7 +18,7 @@ from pony.orm import select, \
     RowNotFound, ERDiagramError, OperationalError
 
 from mutmut.context import Context, RelativeMutationID
-from mutmut.cache.model import Line, MiscData, Mutant, SourceFile, db, get_mutant, get_mutants, get_or_create
+from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
 from mutmut.mutate import mutate_from_context
 from mutmut.utils import ranges
 from mutmut.setup_logging import configure_logger
@@ -31,7 +31,6 @@ if TYPE_CHECKING:
 
 logger = configure_logger(__name__)
 
-HashOfTestsStr: TypeAlias = str
 
 # Used for db_session and init_db
 P = ParamSpec('P')
@@ -48,9 +47,6 @@ else:
 
 
 current_db_version = 4
-
-
-NO_TESTS_FOUND = 'NO TESTS FOUND'
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
@@ -92,14 +88,14 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-def hash_of(filename: str) -> str:
+def hash_of(filename: str) -> HashStr:
     with open(filename, 'rb') as f:
         m = hashlib.sha256()
         m.update(f.read())
-        return m.hexdigest()
+        return HashStr(m.hexdigest())
 
 
-def hash_of_tests(tests_dirs: list[str]) -> str:
+def hash_of_tests(tests_dirs: list[str]) -> HashStr | NoTestFoundSentinel:
     assert isinstance(tests_dirs, list)
     m = hashlib.sha256()
     found_something = False
@@ -115,7 +111,7 @@ def hash_of_tests(tests_dirs: list[str]) -> str:
                     found_something = True
     if not found_something:
         return NO_TESTS_FOUND
-    return m.hexdigest()
+    return HashStr(m.hexdigest())
 
 
 def get_apply_line(mutant: Mutant) -> str:
@@ -405,7 +401,7 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]) -> 
 
 @init_db
 @db_session
-def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: StatusResultStr, tests_hash: str) -> None:
+def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: StatusResultStr, tests_hash: HashStr | NoTestFoundSentinel) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     assert line
@@ -417,7 +413,7 @@ def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, s
 
 @init_db
 @db_session
-def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashOfTestsStr) -> dict[RelativeMutationID, StatusResultStr]:
+def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutationID], hash_of_tests: HashStr | NoTestFoundSentinel) -> dict[RelativeMutationID, StatusResultStr]:
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
 
@@ -442,9 +438,11 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
             # suite will mean it's still killed
             result[mutation_id] = mutant.status
         else:
-            if mutant.tested_against_hash != hash_of_tests or \
-                    mutant.tested_against_hash == NO_TESTS_FOUND or \
-                    hash_of_tests == NO_TESTS_FOUND:
+            if (
+                mutant.tested_against_hash != hash_of_tests
+                or mutant.tested_against_hash == NO_TESTS_FOUND
+                or hash_of_tests == NO_TESTS_FOUND
+            ):
                 result[mutation_id] = UNTESTED
             else:
                 result[mutation_id] = mutant.status
@@ -454,7 +452,7 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
 
 @init_db
 @db_session
-def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr) -> StatusResultStr:
+def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashStr | NoTestFoundSentinel) -> StatusResultStr:
     assert isinstance(filename, str)  # guess
     assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)
