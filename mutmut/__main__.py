@@ -3,6 +3,7 @@
 
 from mutmut.cache.html import create_html_report
 from mutmut.cache.junitxml import print_result_cache_junitxml
+from mutmut.cache.print_results import print_result_cache, print_result_ids_cache
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -39,8 +40,6 @@ from mutmut import (
 )
 from mutmut.cache.cache import (
     cached_hash_of_tests,
-    print_result_cache,
-    print_result_ids_cache,
     hash_of_tests,
     filename_and_mutation_id_from_pk,
     cached_test_time,
