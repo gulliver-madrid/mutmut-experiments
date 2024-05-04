@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from mutmut.cache.html import create_html_report
+from mutmut.cache.junitxml import print_result_cache_junitxml
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -45,7 +46,6 @@ from mutmut.cache.cache import (
     cached_test_time,
     set_cached_test_time,
     update_line_numbers,
-    print_result_cache_junitxml,
     get_unified_diff)
 from mutmut.config import Config
 from mutmut.context import RelativeMutationID
