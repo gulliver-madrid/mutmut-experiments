@@ -57,7 +57,7 @@ class Context:
         self.skip = False
 
     def exclude_line(self) -> bool:
-        return self.current_line_index in self.pragma_no_mutate_lines or self. should_exclude()
+        return self.current_line_index in self.pragma_no_mutate_lines or self.should_exclude()
 
     def should_exclude(self) -> bool:
         config = self.config
@@ -68,7 +68,7 @@ class Context:
         covered_lines: list[int]
 
         if self.filename in config.covered_lines_by_filename:
-            covered_lines = list(config.covered_lines_by_filename[self.filename] or set())
+            covered_lines = list(config.covered_lines_by_filename[self.filename])
         elif config.coverage_data is None:
             covered_lines = []
         else:
@@ -80,9 +80,7 @@ class Context:
         if not covered_lines:
             return True
         current_line = self.current_line_index + 1
-        if current_line not in covered_lines:
-            return True
-        return False
+        return current_line not in covered_lines
 
     @property
     def source(self) -> str:
