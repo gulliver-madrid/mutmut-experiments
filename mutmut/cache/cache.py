@@ -11,7 +11,7 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, overload
 from typing_extensions import ParamSpec
 
 from typing_extensions import Self

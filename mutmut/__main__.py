@@ -35,7 +35,7 @@ from mutmut import (
     compute_exit_code,
     print_status,
 )
-from mutmut.cache import (
+from mutmut.cache.cache import (
     create_html_report,
     cached_hash_of_tests,
     print_result_cache,

@@ -71,7 +71,7 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
         sleep(0.1)
 
     monkeypatch.setattr('mutmut.check_mutants', check_mutants_stub)
-    monkeypatch.setattr('mutmut.cache.update_mutant_status', update_mutant_status_stub)
+    monkeypatch.setattr('mutmut.cache.cache.update_mutant_status', update_mutant_status_stub)
     monkeypatch.setattr('mutmut.CYCLE_PROCESS_AFTER', cycle_process_after)
 
     progress_mock = MagicMock()
