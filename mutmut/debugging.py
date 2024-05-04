@@ -1,14 +1,19 @@
 import inspect
+from typing import Callable
+
+from mutmut.setup_logging import configure_logger
 
 PROJECT_DIRECTORY_NAME = "mutmut-experiments"
 IGNORE = [".venv", "Users"]
 
+logger = configure_logger(__name__)
 
-def print_function_stack() -> None:
+
+def print_function_stack(max_deep: int = 3, log: Callable[[str], None] = logger.info) -> None:
     # Gets the current call stack
     stack = inspect.stack()
-    print("\nCall stack:")
-    for frame in stack:
+    log("\nCall stack:")
+    for frame in stack[1:max_deep + 1]:  # start with the caller
         # Relevant information in each stack frame
         info = frame.filename, frame.lineno, frame.function
         filepath = info[0]
@@ -24,4 +29,4 @@ def print_function_stack() -> None:
             file = filepath_splitted[0]
         else:
             file = "..." + filepath_splitted[1]
-        print(f"File: {file}, Line: {info[1]}, Function: {info[2]}")
+        log(f"File: {file}, Line: {info[1]}, Function: {info[2]}")
