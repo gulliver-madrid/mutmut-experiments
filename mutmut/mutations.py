@@ -10,7 +10,7 @@ from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
 from mutmut.context import Context
-from mutmut.parse import parse
+from mutmut.parse import parse_source
 from mutmut.setup_logging import configure_logger
 
 
@@ -48,7 +48,7 @@ class ASTPattern:
 
         self.definitions = definitions
 
-        self.module: Module = parse(source)
+        self.module: Module = parse_source(source)
 
         self.markers: list[Marker] = []
 

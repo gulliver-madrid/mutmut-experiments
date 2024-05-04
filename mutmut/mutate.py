@@ -11,7 +11,7 @@ from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context, RelativeMutationID
 from mutmut.mutations import has_children, is_name_node, is_operator, mutations_by_type
-from mutmut.parse import parse
+from mutmut.parse import parse_source
 from mutmut.setup_logging import configure_logger
 
 # mutmut_config es la configuracion en forma de archivo python que define el usuario
@@ -52,7 +52,7 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
     :return: tuple of mutated source code and number of mutations performed
     """
     try:
-        result = parse(context.source, error_recovery=False)
+        result = parse_source(context.source, error_recovery=False)
     except Exception:
         print('Failed to parse {}. Internal error from parso follows.'.format(context.filename))
         print('----------------------------------')

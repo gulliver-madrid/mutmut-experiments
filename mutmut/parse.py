@@ -2,7 +2,7 @@ from typing import Any
 import parso
 
 
-def parse(code: str, **kwargs: Any) -> Any:
+def parse_source(code: str, **kwargs: Any) -> Any:
     """
     A wrapper for parso.parse.
     Params are documented in :py:meth:`parso.Grammar.parse`.
