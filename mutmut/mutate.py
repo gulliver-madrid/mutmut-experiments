@@ -83,10 +83,9 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if node.type == 'atom_expr':
             assert isinstance(node, Node)
             if node.children:
-                first_child = node.children[0]
-                if is_name_node(first_child):
-                    if first_child.value == '__import__':
-                        return
+                first = node.children[0]
+                if is_name_node(first) and first.value == '__import__':
+                    return
 
         if node.start_pos[0] - 1 != context.current_line_index:
             context.current_line_index = node.start_pos[0] - 1
@@ -96,9 +95,8 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
             assert isinstance(node, ExprStmt)
             if node.children:
                 first = node.children[0]
-                if is_name_node(first):
-                    if is_dunder_name(first.value):
-                        return
+                if is_name_node(first) and is_dunder_name(first.value):
+                    return
 
         # Avoid mutating pure annotations
         if node.type == 'annassign':
