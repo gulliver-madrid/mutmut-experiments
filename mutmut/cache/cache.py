@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-from dataclasses import field
 import hashlib
 import os
 from collections import defaultdict
@@ -11,15 +10,15 @@ from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterable, Iterator, List, Mapping, Tuple, Type, TypeAlias, TypeVar, overload
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Tuple, TypeAlias, TypeVar
 from typing_extensions import ParamSpec
 
-from typing_extensions import Self
 from junit_xml import TestSuite, TestCase, to_xml_report_string  # type: ignore [import-untyped]
-from pony.orm import Database, Required, Set, Optional, select, \
-    PrimaryKey, RowNotFound, ERDiagramError, OperationalError
+from pony.orm import select, \
+    RowNotFound, ERDiagramError, OperationalError
 
 from mutmut.context import Context, RelativeMutationID
+from mutmut.cache.model import Line, MiscData, Mutant, SourceFile, db, get_mutant, get_mutants, get_or_create
 from mutmut.mutate import mutate_from_context
 from mutmut.utils import ranges
 from mutmut.setup_logging import configure_logger
@@ -48,96 +47,10 @@ else:
     db_session_ctx_manager = db_session
 
 
-db = Database()
-
-
-if TYPE_CHECKING:
-    class DbEntity:
-        @classmethod
-        def get(cls, **kwargs: Any) -> Self | None:
-            ...
-else:
-    DbEntity = db.Entity
-
-
 current_db_version = 4
 
 
 NO_TESTS_FOUND = 'NO TESTS FOUND'
-
-
-class MiscData(DbEntity):
-    key = PrimaryKey(str, auto=True)
-    value = Optional(str, autostrip=False)
-
-
-if TYPE_CHECKING:
-    class SourceFile(DbEntity):
-        filename: str
-        hash: str | None
-        lines: Set['Line']
-else:
-    class SourceFile(DbEntity):  # type: ignore [valid-type]
-        filename = Required(str, autostrip=False)
-        hash = Optional(str)
-        lines = Set('Line')
-
-
-if TYPE_CHECKING:
-    class Line(DbEntity):
-        sourcefile: SourceFile
-        line: str | None
-        line_number: int
-        mutants: Set['Mutant']
-
-        def __init__(self, *, sourcefile: Any, line: str, line_number: int) -> None:
-            ...
-
-        def delete(self) -> None:
-            ...
-else:
-    class Line(DbEntity):  # type: ignore [valid-type]
-        sourcefile = Required(SourceFile)
-        line = Optional(str, autostrip=False)
-        line_number = Required(int)
-        mutants = Set('Mutant')
-
-
-if TYPE_CHECKING:
-    from dataclasses import dataclass
-
-    @dataclass
-    class Mutant(DbEntity):
-        line: Line
-        index: int
-        status: StatusResultStr
-        tested_against_hash: str | None = field(default=None)
-        id: int = field(default=0)
-
-else:
-    class Mutant(DbEntity):
-        line = Required(Line)
-        index = Required(int)
-        tested_against_hash = Optional(str, autostrip=False)
-        status = Required(str, autostrip=False)  # really an enum of mutant_statuses
-
-
-def get_mutants() -> Iterable[Mutant]:
-    return Mutant  # type: ignore [return-value]
-
-
-@overload
-def get_mutant(*, id: int | str) -> Mutant | None:
-    ...
-
-
-@overload
-def get_mutant(*, line: Line, index: int) -> Mutant | None:
-    ...
-
-
-def get_mutant(**kwargs: Any) -> Mutant | None:
-    return Mutant.get(**kwargs)
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
@@ -409,23 +322,6 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
                 f.write('</body></html>')
 
         index_file.write('</table></body></html>')
-
-
-U = TypeVar('U', bound=DbEntity)
-
-
-def get_or_create(model: Type[U], defaults: Mapping[str, Any] | None = None, **params: Any) -> U:
-    if defaults is None:
-        defaults = {}
-    obj = model.get(**params)
-    if obj is None:
-        params = params.copy()
-        for k, v in defaults.items():
-            if k not in params:
-                params[k] = v
-        return model(**params)
-    else:
-        return obj
 
 
 def sequence_ops(a: list[str], b: list[str]) -> Iterator[tuple[str, str, int | None, str | None, int | None]]:
