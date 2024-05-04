@@ -288,6 +288,7 @@ def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -
     """
     Show a mutation diff with junitxml format.
     """
+    assert isinstance(dict_synonyms, str)
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
     print_result_cache_junitxml(dict_synonyms_as_list, suspicious_policy, untested_policy)
     sys.exit(0)
