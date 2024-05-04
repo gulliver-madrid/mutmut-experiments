@@ -4,7 +4,7 @@
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
-from mutmut.utils import split_paths
+from mutmut.utils import split_lines, split_paths
 from mutmut.status import MUTANT_STATUSES, StatusStr
 from types import NoneType
 from mutmut.mutations import mutations_by_type
@@ -490,7 +490,7 @@ Legend for output:
         # here paths_to_exclude_ becames a list[str]
         paths_to_exclude_as_list = [
             path.strip()
-            for path in paths_to_exclude.replace(',', '\n').split('\n')
+            for path in split_lines(paths_to_exclude.replace(',', '\n'))
         ]
         paths_to_exclude_as_list = [x for x in paths_to_exclude_as_list if x]
     else:

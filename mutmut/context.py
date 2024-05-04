@@ -12,6 +12,7 @@ from parso.tree import NodeOrLeaf
 
 from mutmut.config import Config
 from mutmut.setup_logging import configure_logger
+from mutmut.utils import split_lines
 
 logger = configure_logger(__name__)
 
@@ -103,7 +104,7 @@ class Context:
     def source_by_line_number(self) -> list[str]:
         if self._source_by_line_number is None:
             assert self.source is not None
-            self._source_by_line_number = self.source.split('\n')
+            self._source_by_line_number = split_lines(self.source)
         return self._source_by_line_number
 
     @property
