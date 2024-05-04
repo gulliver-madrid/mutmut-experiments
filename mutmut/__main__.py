@@ -17,7 +17,7 @@ from io import open
 from os.path import exists
 from shutil import copy
 from time import time
-from typing import Dict, List, NoReturn, Tuple, cast
+from typing import List, NoReturn, Tuple, cast
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
