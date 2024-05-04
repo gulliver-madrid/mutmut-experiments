@@ -43,6 +43,10 @@ dunder_whitelist: Final[list[str]] = [
 ]
 
 
+def is_dunder_name(name: str) -> bool:
+    return name.startswith('__') and name.endswith('__') and name[2:-2] in dunder_whitelist
+
+
 def mutate_from_context(context: Context) -> Tuple[str, int]:
     """
     :return: tuple of mutated source code and number of mutations performed
@@ -91,9 +95,9 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if node.type == 'expr_stmt':
             assert isinstance(node, ExprStmt)
             if node.children:
-                first_child = node.children[0]
-                if is_name_node(first_child):
-                    if first_child.value.startswith('__') and first_child.value.endswith('__') and first_child.value[2:-2] in dunder_whitelist:
+                first = node.children[0]
+                if is_name_node(first):
+                    if is_dunder_name(first.value):
                         return
 
         # Avoid mutating pure annotations
