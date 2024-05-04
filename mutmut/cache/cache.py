@@ -8,18 +8,23 @@ from functools import wraps
 from io import open
 from itertools import zip_longest
 from types import NoneType
-from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Tuple, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Sequence, Tuple, TypeVar
 
-from pony.orm import RowNotFound, ERDiagramError, OperationalError
+
+from pony.orm import select, RowNotFound, ERDiagramError, OperationalError
 from typing_extensions import ParamSpec
 
 from mutmut.context import Context, RelativeMutationID
-from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_or_create
+from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
 from mutmut.mutate import mutate_from_context
 from mutmut.utils import split_lines
 from mutmut.setup_logging import configure_logger
 from mutmut.status import OK_KILLED, UNTESTED, StatusResultStr
 
+current_db_version = 4
+
+if TYPE_CHECKING:
+    from pony.orm import Query
 
 logger = configure_logger(__name__)
 
@@ -36,9 +41,6 @@ if TYPE_CHECKING:
 else:
     from pony.orm import db_session
     db_session_ctx_manager = db_session
-
-
-current_db_version = 4
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
@@ -324,6 +326,14 @@ def filename_and_mutation_id_from_pk(pk: int | str) -> Tuple[str, RelativeMutati
     if mutant is None:
         raise ValueError("Obtained null mutant for pk: {}".format(pk))
     return mutant.line.sourcefile.filename, mutation_id_from_pk(pk)
+
+
+@init_db
+@db_session
+def select_mutants_by_status(status: StatusResultStr | Sequence[StatusResultStr]) -> 'Query[Mutant, Mutant]':
+    if isinstance(status, str):
+        status = (status,)
+    return select(x for x in get_mutants() if x.status in status)
 
 
 @init_db

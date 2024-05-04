@@ -3,14 +3,12 @@
 
 from io import open
 from itertools import groupby
-from typing import TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING
 
-from pony.orm import select
-
-from mutmut.cache.cache import db_session, get_unified_diff, init_db
-from mutmut.cache.model import Mutant, get_mutants
+from mutmut.cache.cache import db_session, get_unified_diff, init_db, select_mutants_by_status
+from mutmut.cache.model import Mutant
 from mutmut.utils import ranges
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr, StatusStr
+from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
 
 if TYPE_CHECKING:
     from pony.orm import Query
@@ -61,11 +59,5 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], 
 @db_session
 def print_result_ids_cache(desired_status: StatusStr) -> None:
     status = MUTANT_STATUSES[desired_status]
-    mutant_query = select(x for x in get_mutants() if x.status == status)
+    mutant_query = select_mutants_by_status(status)
     print(" ".join(str(mutant.id) for mutant in mutant_query))
-
-
-def select_mutants_by_status(status: StatusResultStr | Sequence[StatusResultStr]) -> 'Query[Mutant, Mutant]':
-    if isinstance(status, str):
-        status = (status,)
-    return select(x for x in get_mutants() if x.status in status)
