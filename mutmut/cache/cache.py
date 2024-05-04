@@ -110,11 +110,6 @@ def hash_of_tests(tests_dirs: list[str]) -> HashStr | NoTestFoundSentinel:
     return HashStr(m.hexdigest())
 
 
-def get_apply_line(mutant: Mutant) -> str:
-    apply_line = 'mutmut apply {}'.format(mutant.id)
-    return apply_line
-
-
 @init_db
 @db_session
 def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], only_this_file: str | None = None) -> None:
