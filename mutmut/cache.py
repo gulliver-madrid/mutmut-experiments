@@ -50,7 +50,7 @@ else:
 
 db = Database()
 
-# type checking
+
 if TYPE_CHECKING:
     class DbEntity:
         @classmethod
@@ -225,9 +225,6 @@ def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], 
     print('')
 
     def print_stuff(title: str, mutant_query: 'Query[Mutant, Mutant]') -> None:
-        # CHECK TYPES START
-        assert isinstance(title, str)
-        # CHECK TYPES END
         mutant_list = sorted(mutant_query, key=lambda x: x.line.sourcefile.filename)
         if mutant_list:
             print('')
@@ -303,10 +300,7 @@ def _get_unified_diff(source: str | None, filename: str, mutation_id: RelativeMu
 
 
 def print_result_cache_junitxml(dict_synonyms: list[str], suspicious_policy: str, untested_policy: str) -> None:
-    assert isinstance(dict_synonyms, list)
-    report = create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy)
-    assert isinstance(report, str)
-    print(report)
+    print(create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy))
 
 
 @init_db
@@ -386,7 +380,7 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
                 def print_diffs(status: StatusResultStr) -> None:
                     mutants = mutants_by_status[status]
                     for mutant in sorted(mutants, key=lambda m: m.id):
-                        assert isinstance(mutant.line.line, str)  # guess
+                        assert mutant.line.line is not None  # guess
                         mutation_id = RelativeMutationID(mutant.line.line, mutant.index, mutant.line.line_number)
                         diff = _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache=False)
                         f.write('<h3>Mutant %s</h3>' % mutant.id)
@@ -518,9 +512,9 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]) -> 
 def update_mutant_status(file_to_mutate: str, mutation_id: RelativeMutationID, status: StatusResultStr, tests_hash: str) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
-    assert line is not None
+    assert line
     mutant = get_mutant(line=line, index=mutation_id.index)
-    assert mutant, dict(line=line, index=mutation_id.index)
+    assert mutant
     mutant.status = status
     mutant.tested_against_hash = tests_hash
 
