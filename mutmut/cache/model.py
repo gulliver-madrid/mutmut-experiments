@@ -2,12 +2,18 @@
 
 
 from dataclasses import field
-from typing import TYPE_CHECKING, Any, Iterable, Mapping, Type, overload, TypeVar
+from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, Mapping, NewType, Type, overload, TypeVar
 
 from typing_extensions import Self
 from pony.orm import Database, Required, Set, Optional, PrimaryKey
 
 from mutmut.status import StatusResultStr
+
+HashStr = NewType('HashStr', str)
+
+NO_TESTS_FOUND: Final = 'NO TESTS FOUND'
+
+NoTestFoundSentinel = Literal['NO TESTS FOUND']
 
 db = Database()
 
@@ -29,7 +35,7 @@ class MiscData(DbEntity):
 if TYPE_CHECKING:
     class SourceFile(DbEntity):
         filename: str
-        hash: str | None
+        hash: HashStr | None
         lines: Set['Line']
 else:
     class SourceFile(DbEntity):  # type: ignore [valid-type]

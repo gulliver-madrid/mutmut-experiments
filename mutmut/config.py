@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
+from mutmut.cache.model import HashStr, NoTestFoundSentinel
+
 
 @dataclass
 class Config:
@@ -15,7 +17,7 @@ class Config:
     total: int
     using_testmon: bool
     tests_dirs: List[str]
-    hash_of_tests: str
+    hash_of_tests: HashStr | NoTestFoundSentinel
     post_mutation: str | None
     pre_mutation: str | None
     coverage_data: Dict[str, Dict[int, List[str]]] | None
