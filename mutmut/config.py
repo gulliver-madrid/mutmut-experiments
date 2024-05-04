@@ -27,3 +27,7 @@ class Config:
 
     def __post_init__(self) -> None:
         self._default_test_command = self.test_command
+
+    @property
+    def default_test_command(self) -> str:
+        return self._default_test_command
