@@ -143,7 +143,7 @@ def test_read_patch_data_added_line_is_in_the_list(testpatches_path: Path) -> No
 
     # assert
     assert file_name in file_changes
-    assert file_changes[file_name] == {3}  # line is added between second and third
+    assert file_changes[file_name] == [3]  # line is added between second and third
 
 
 def test_read_patch_data_edited_line_is_in_the_list(testpatches_path: Path) -> None:
@@ -156,7 +156,7 @@ def test_read_patch_data_edited_line_is_in_the_list(testpatches_path: Path) -> N
 
     # assert
     assert file_name in file_changes
-    assert file_changes[file_name] == {2}  # line is added between 2nd and 3rd
+    assert file_changes[file_name] == [2]  # line is added between 2nd and 3rd
 
 
 def test_read_patch_data_edited_line_in_subfolder_is_in_the_list(testpatches_path: Path) -> None:
@@ -169,7 +169,7 @@ def test_read_patch_data_edited_line_in_subfolder_is_in_the_list(testpatches_pat
 
     # assert
     assert file_name in file_changes
-    assert file_changes[file_name] == {2}  # line is added between 2nd and 3rd
+    assert file_changes[file_name] == [2]  # line is added between 2nd and 3rd
 
 
 def test_read_patch_data_renamed_file_edited_line_is_in_the_list(testpatches_path: Path) -> None:
@@ -184,15 +184,15 @@ def test_read_patch_data_renamed_file_edited_line_is_in_the_list(testpatches_pat
     # assert
     assert original_file_name not in file_changes
     assert new_file_name in file_changes
-    assert file_changes[new_file_name] == {3}  # 3rd line is edited
+    assert file_changes[new_file_name] == [3]  # 3rd line is edited
 
 
 def test_read_patch_data_mutliple_files(testpatches_path: Path) -> None:
     # arrange
     expected_changes = {
-        "existing_file.txt": {2, 3},
-        "existing_file_2.txt": {4, 5},
-        "new_file.txt": {1, 2, 3}
+        "existing_file.txt": [2, 3],
+        "existing_file_2.txt": [4, 5],
+        "new_file.txt": [1, 2, 3]
     }
     file_patch = testpatches_path / "multiple_files.patch"
 

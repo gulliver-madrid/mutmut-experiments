@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.patch import read_patch_data
+from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
 from mutmut.utils import split_paths
 from mutmut.status import MUTANT_STATUSES, StatusStr
@@ -471,16 +471,15 @@ Legend for output:
         copy('.testmondata', '.testmondata-initial')
 
     # if we're running in a mode with externally whitelisted lines
-    covered_lines_by_filename: Dict[str, list[int]] | None = None
+    covered_lines_by_filename: CoveredLinesByFilename | None = None
+
     coverage_data = None
     if use_coverage:
         covered_lines_by_filename = {}
         coverage_data = read_coverage_data()
         check_coverage_data_filepaths(coverage_data)
     elif use_patch_file:
-        raw_covered_lines_by_filename = read_patch_data(use_patch_file)
-        assert raw_covered_lines_by_filename is not None
-        covered_lines_by_filename = {k: list(v) for k, v in raw_covered_lines_by_filename.items()}
+        covered_lines_by_filename = read_patch_data(use_patch_file)
 
     mutations_by_file: dict[str, list[RelativeMutationID]] = {}
 
