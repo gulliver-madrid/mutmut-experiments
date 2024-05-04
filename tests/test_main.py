@@ -78,9 +78,9 @@ def filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
 
     # This is a hack to get pony to forget about the old db file
     # otherwise Pony thinks we've already created the tables
-    import mutmut.cache
-    mutmut.cache.db.provider = None
-    mutmut.cache.db.schema = None
+    import mutmut.cache.cache
+    mutmut.cache.cache.db.provider = None
+    mutmut.cache.cache.db.schema = None
 
 
 @pytest.fixture
@@ -91,9 +91,9 @@ def single_mutant_filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
 
     # This is a hack to get pony to forget about the old db file
     # otherwise Pony thinks we've already created the tables
-    import mutmut.cache
-    mutmut.cache.db.provider = None
-    mutmut.cache.db.schema = None
+    import mutmut.cache.cache
+    mutmut.cache.cache.db.provider = None
+    mutmut.cache.cache.db.schema = None
 
 
 @pytest.fixture
@@ -114,9 +114,9 @@ def test_nothing(): assert True
 
     # This is a hack to get pony to forget about the old db file
     # otherwise Pony thinks we've already created the tables
-    import mutmut.cache
-    mutmut.cache.db.provider = None
-    mutmut.cache.db.schema = None
+    import mutmut.cache.cache
+    mutmut.cache.cache.db.provider = None
+    mutmut.cache.cache.db.schema = None
 
 
 def create_filesystem(tmpdir: FileSystemPath, file_to_mutate_contents: str, test_file_contents: str) -> None:

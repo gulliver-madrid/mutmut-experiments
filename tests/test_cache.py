@@ -1,4 +1,4 @@
-from mutmut.cache import sequence_ops
+from mutmut.cache.cache import sequence_ops
 
 
 def test_sequence_ops() -> None:
