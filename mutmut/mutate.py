@@ -47,16 +47,21 @@ def is_dunder_name(name: str) -> bool:
     return name.startswith('__') and name.endswith('__') and name[2:-2] in dunder_whitelist
 
 
+def parse_checking_errors(source: str, filename: str | None) -> Any:
+    try:
+        result = parse_source(source, error_recovery=False)
+    except Exception:
+        print('Failed to parse {}. Internal error from parso follows.'.format(filename))
+        print('----------------------------------')
+        raise
+    return result
+
+
 def mutate_from_context(context: Context) -> Tuple[str, int]:
     """
     :return: tuple of mutated source code and number of mutations performed
     """
-    try:
-        result = parse_source(context.source, error_recovery=False)
-    except Exception:
-        print('Failed to parse {}. Internal error from parso follows.'.format(context.filename))
-        print('----------------------------------')
-        raise
+    result = parse_checking_errors(context.source, context.filename)
     _mutate_list_of_nodes(result, context=context)
     mutated_source: str = result.get_code().replace(' not not ', ' ')
     if context.remove_newline_at_end:
