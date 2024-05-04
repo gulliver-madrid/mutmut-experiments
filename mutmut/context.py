@@ -72,15 +72,21 @@ class Context:
         elif config.coverage_data is None:
             covered_lines = []
         else:
-            abspath = os.path.abspath(self.filename)
-            covered_lines_as_dict = config.coverage_data.get(abspath, {})
-            covered_lines = list(covered_lines_as_dict.keys())
+            covered_lines = self._get_covered_lines_from_coverage_data()
             config.covered_lines_by_filename[self.filename] = covered_lines
 
         if not covered_lines:
             return True
         current_line = self.current_line_index + 1
         return current_line not in covered_lines
+
+    def _get_covered_lines_from_coverage_data(self) -> list[int]:
+        assert self.config
+        assert self.config.coverage_data is not None
+        assert self.filename is not None
+        abspath = os.path.abspath(self.filename)
+        covered_lines_as_dict = self.config.coverage_data.get(abspath, {})
+        return list(covered_lines_as_dict.keys())
 
     @property
     def source(self) -> str:
