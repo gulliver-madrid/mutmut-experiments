@@ -48,6 +48,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if db.provider is None:
             cache_filename = os.path.join(os.getcwd(), '.mutmut-cache')
+            logger.info(f"El directorio donde se guarda la .mutmut-cache es {os.getcwd()}")
             db.bind(provider='sqlite', filename=cache_filename, create_db=True)
 
             try:
