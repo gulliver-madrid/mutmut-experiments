@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pathlib import Path
-from types import NoneType
 import os
 import sys
 import traceback
 from io import open
 from os.path import exists
+from pathlib import Path
 from shutil import copy
 from time import time
+from types import NoneType
 from typing import List, NoReturn, Tuple, cast
 
 import click
@@ -51,8 +51,8 @@ from mutmut.mutate import ProjectPath, get_mutmut_config, set_project_path
 from mutmut.mutations import mutations_by_type
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
-from mutmut.utils import split_lines, split_paths
 from mutmut.status import MUTANT_STATUSES, StatusStr
+from mutmut.utils import split_lines, split_paths
 
 logger = configure_logger(__name__)
 
