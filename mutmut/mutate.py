@@ -27,6 +27,8 @@ def get_mutmut_config() -> Any:
     if TYPE_CHECKING:
         mutmut_config: Any
 
+    prev_path = sys.path[:]
+
     if os.getcwd() not in sys.path:
         sys.path.insert(0, os.getcwd())
     try:
@@ -34,6 +36,7 @@ def get_mutmut_config() -> Any:
     except ImportError:
         mutmut_config = None
     _cached_mutmut_config = mutmut_config
+    sys.path = prev_path
     return mutmut_config
 
 
