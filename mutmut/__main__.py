@@ -41,7 +41,7 @@ from mutmut.cache.print_results import print_result_cache, print_result_ids_cach
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutate import mutmut_config
+from mutmut.mutate import get_mutmut_config
 from mutmut.mutations import mutations_by_type
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -359,6 +359,10 @@ def do_run(
     assert isinstance(ci, (bool, NoneType))
     assert isinstance(rerun_all, (bool, NoneType)), rerun_all
     # CHECK TYPES END
+
+    mutmut_config = get_mutmut_config()
+
+    print(f"Mutmut config defined: {mutmut_config is not None}")
 
     no_progress = no_progress or False
 

@@ -14,16 +14,28 @@ from mutmut.mutations import has_children, is_name_node, is_operator, mutations_
 from mutmut.parse import parse_source
 from mutmut.setup_logging import configure_logger
 
-# mutmut_config es la configuracion en forma de archivo python que define el usuario
-if TYPE_CHECKING:
-    mutmut_config: Any
+MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
 
-if os.getcwd() not in sys.path:
-    sys.path.insert(0, os.getcwd())
-try:
-    import mutmut_config  # type: ignore  [import-not-found, no-redef]
-except ImportError:
-    mutmut_config = None
+_cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
+
+
+def get_mutmut_config() -> Any:
+    global _cached_mutmut_config
+    # mutmut_config es la configuracion en forma de archivo python que define el usuario
+    if _cached_mutmut_config != MUTMUT_CONFIG_NOT_DEFINED:
+        return _cached_mutmut_config
+    if TYPE_CHECKING:
+        mutmut_config: Any
+
+    if os.getcwd() not in sys.path:
+        sys.path.insert(0, os.getcwd())
+    try:
+        import mutmut_config  # type: ignore  [import-not-found, no-redef]
+    except ImportError:
+        mutmut_config = None
+    _cached_mutmut_config = mutmut_config
+    return mutmut_config
+
 
 logger = configure_logger(__name__)
 
@@ -80,6 +92,7 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
 
 def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
     assert isinstance(node, NodeOrLeaf)
+    mutmut_config = get_mutmut_config()
     context.stack.append(node)
     try:
         if node.type in ('tfpdef', 'import_from', 'import_name'):
