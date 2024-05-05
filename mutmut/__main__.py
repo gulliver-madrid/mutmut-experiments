@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
 from types import NoneType
 import os
 import sys
@@ -13,6 +14,11 @@ from typing import List, NoReturn, Tuple, cast
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
+
+# ensure mutmut modules are detected
+base = Path(__file__).parent.parent
+if str(base) not in sys.path:
+    sys.path.insert(0, str(base))
 
 from mutmut import (
     MutationTestsRunner,
