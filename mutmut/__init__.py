@@ -31,7 +31,7 @@ import toml
 
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import ProjectPath, list_mutations, mutate_from_context, get_mutmut_config
+from mutmut.mutate import ProjectPath, clear_mutmut_config_cache, list_mutations, mutate_from_context, get_mutmut_config
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr
@@ -110,6 +110,13 @@ ResultQueue: TypeAlias = 'multiprocessing.Queue[ResultQueueItem]'
 
 def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_process_after: int, project_path: ProjectPath | None = None) -> None:
     assert isinstance(cycle_process_after, int)
+
+    # We want be sure than when mutation tests get called, mutmut_config.py is obtained again.
+    # If not, executing tests after mutmut_config is set would prevent to get a new mutmut_config
+    # if directory has changed.
+    # This is only really needed in Linux.
+    # More info: https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
+    clear_mutmut_config_cache()
 
     def feedback(line: str) -> None:
         results_queue.put(('progress', line, None, None))

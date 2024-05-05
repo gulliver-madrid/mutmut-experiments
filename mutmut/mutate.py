@@ -33,6 +33,11 @@ def set_project_path(project: ProjectPath | None = None) -> None:
     _cached_project_path = project
 
 
+def clear_mutmut_config_cache() -> None:
+    global _cached_mutmut_config
+    _cached_mutmut_config = MUTMUT_CONFIG_NOT_DEFINED
+
+
 def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     global _cached_mutmut_config
     # mutmut_config es la configuracion en forma de archivo python que define el usuario
