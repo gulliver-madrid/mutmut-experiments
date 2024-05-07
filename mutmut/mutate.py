@@ -50,19 +50,28 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
 
     project = get_project_path()
 
-    if TYPE_CHECKING:
-        mutmut_config: Any
 
     prev_path = sys.path[:]
 
     if not project or project not in sys.path:
         sys.path.insert(0, project or os.getcwd())
 
+    need_reload = "mutmut_config" in sys.modules
+
+    if TYPE_CHECKING:
+        mutmut_config: Any
+
     try:
         import mutmut_config  # type: ignore [import-not-found, no-redef]
-        importlib.reload(mutmut_config)
     except ImportError:
         mutmut_config = None
+
+    if mutmut_config and need_reload:
+        try:
+            importlib.reload(mutmut_config)
+        except ImportError:
+            mutmut_config = None
+
     _cached_mutmut_config = mutmut_config
     sys.path = prev_path
     return mutmut_config
