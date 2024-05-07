@@ -112,9 +112,9 @@ def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_
     assert isinstance(cycle_process_after, int)
 
     # We want be sure than when mutation tests get called, mutmut_config.py is obtained again.
-    # If not, executing tests after mutmut_config is set would prevent to get a new mutmut_config
+    # If not, executing tests after mutmut_config is set could prevent to get a new mutmut_config
     # if directory has changed.
-    # This is only really needed in Linux.
+    # This is probably not really needed in the regular program flow (that uses spawn).
     # More info: https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
     clear_mutmut_config_cache()
 
