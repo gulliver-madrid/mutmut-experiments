@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import importlib
 import os
 import sys
 from types import NoneType
@@ -58,7 +59,8 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
         sys.path.insert(0, project or os.getcwd())
 
     try:
-        import mutmut_config  # type: ignore  [import-not-found, no-redef]
+        import mutmut_config  # type: ignore [import-not-found, no-redef]
+        importlib.reload(mutmut_config)
     except ImportError:
         mutmut_config = None
     _cached_mutmut_config = mutmut_config

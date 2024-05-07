@@ -47,7 +47,7 @@ from mutmut.cache.print_results import print_result_cache, print_result_ids_cach
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutate import ProjectPath, clear_mutmut_config_cache, get_mutmut_config, set_project_path
+from mutmut.mutate import MUTMUT_CONFIG_NOT_DEFINED, ProjectPath, clear_mutmut_config_cache, get_mutmut_config, set_project_path
 from mutmut.mutations import mutations_by_type
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -387,7 +387,7 @@ def do_run(
     clear_mutmut_config_cache()
     mutmut_config = get_mutmut_config(project_path)
 
-    print(f"Mutmut config defined: {mutmut_config is not None}")
+    print(f"Mutmut config found: {mutmut_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}")
 
     no_progress = no_progress or False
 
