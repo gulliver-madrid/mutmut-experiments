@@ -35,6 +35,7 @@ from mutmut import (
 )
 from mutmut.cache.cache import (
     cached_hash_of_tests,
+    get_cache_path,
     hash_of_tests,
     filename_and_mutation_id_from_pk,
     cached_test_time,
@@ -219,6 +220,9 @@ def results() -> NoReturn:
     """
     Print the results.
     """
+    if not Path(get_cache_path()).exists():
+        print("There is no results yet. Please run `mutmut run` first.\n")
+        sys.exit(1)
     print_result_cache()
     sys.exit(0)
 
