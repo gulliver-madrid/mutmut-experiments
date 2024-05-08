@@ -37,8 +37,8 @@ from mutmut.cache.cache import (
 from mutmut.config import Config
 from mutmut.context import RelativeMutationID
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutate import MUTMUT_CONFIG_NOT_DEFINED, clear_mutmut_config_cache, get_mutmut_config
 from mutmut.mutations import mutations_by_type
+from mutmut.mut_config_storage import MUTMUT_CONFIG_NOT_DEFINED, clear_mutmut_config_cache, get_mutmut_config
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.project import get_current_project_path, get_project_path, set_project_path
 from mutmut.utils import split_lines, split_paths
