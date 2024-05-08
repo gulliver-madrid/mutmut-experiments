@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib
 import os
+from pathlib import Path
 import sys
 from types import NoneType
 from typing import Any, Final, NewType, Tuple, TYPE_CHECKING
@@ -21,7 +22,7 @@ MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
 _cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
 _cached_project_path: ProjectPath | None = None
 
-ProjectPath = NewType('ProjectPath', str)
+ProjectPath = NewType('ProjectPath', Path)
 
 
 def get_project_path() -> ProjectPath | None:
@@ -29,9 +30,11 @@ def get_project_path() -> ProjectPath | None:
     return _cached_project_path
 
 
-def set_project_path(project: ProjectPath | None = None) -> None:
+def set_project_path(project: str | Path | None = None) -> None:
     global _cached_project_path
-    _cached_project_path = project
+    if isinstance(project, str):
+        project = Path(project)
+    _cached_project_path = ProjectPath(project.resolve()) if project is not None else None
 
 
 def clear_mutmut_config_cache() -> None:
@@ -50,11 +53,12 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
 
     project = get_project_path()
 
-
     prev_path = sys.path[:]
 
-    if not project or project not in sys.path:
-        sys.path.insert(0, project or os.getcwd())
+    current_project_path_as_str = str(project) if project is not None else os.getcwd()
+
+    if current_project_path_as_str not in sys.path:
+        sys.path.insert(0, current_project_path_as_str)
 
     need_reload = "mutmut_config" in sys.modules
 

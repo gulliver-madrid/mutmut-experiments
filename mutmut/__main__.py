@@ -48,7 +48,7 @@ from mutmut.cache.print_results import print_result_cache, print_result_ids_cach
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutate import MUTMUT_CONFIG_NOT_DEFINED, ProjectPath, clear_mutmut_config_cache, get_mutmut_config, set_project_path
+from mutmut.mutate import MUTMUT_CONFIG_NOT_DEFINED, ProjectPath, clear_mutmut_config_cache, get_mutmut_config, get_project_path, set_project_path
 from mutmut.mutations import mutations_by_type
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -254,8 +254,6 @@ def apply(mutation_id: str, backup: bool, dict_synonyms: List[str], project: str
     """
     Apply a mutation on disk.
     """
-    if project is not None:
-        project = ProjectPath(project)
     set_project_path(project)
     do_apply(mutation_id, dict_synonyms, backup)
     sys.exit(0)
@@ -274,8 +272,6 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
     """
     assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
 
-    if project is not None:
-        project = ProjectPath(project)
     set_project_path(project)
 
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
@@ -387,9 +383,9 @@ def do_run(
     print(f"Runner: {runner}")
     print(f"Project: {project}")
 
-    project_path = ProjectPath(project) if project else None
+    set_project_path(project)
     clear_mutmut_config_cache()
-    mutmut_config = get_mutmut_config(project_path)
+    mutmut_config = get_mutmut_config()
 
     print(f"Mutmut config found: {mutmut_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}")
 
@@ -562,7 +558,7 @@ Legend for output:
     mutation_tests_runner = MutationTestsRunner()
     try:
         mutation_tests_runner.run_mutation_tests(
-            config=config, progress=progress, mutations_by_file=mutations_by_file, project_path=project_path)
+            config=config, progress=progress, mutations_by_file=mutations_by_file, project_path=get_project_path())
     except Exception as e:
         traceback.print_exc()
         return compute_exit_code(progress, e)
