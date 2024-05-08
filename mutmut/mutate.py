@@ -13,7 +13,7 @@ from parso.python.tree import ExprStmt
 from mutmut.context import ALL, Context, RelativeMutationID
 from mutmut.mutations import has_children, is_name_node, is_operator, mutations_by_type
 from mutmut.parse import parse_source
-from mutmut.project import ProjectPath, get_current_project_path, set_project_path
+from mutmut.project import get_current_project_path
 from mutmut.setup_logging import configure_logger
 
 
@@ -31,14 +31,11 @@ def clear_mutmut_config_cache() -> None:
     _cached_mutmut_config = MUTMUT_CONFIG_NOT_DEFINED
 
 
-def get_mutmut_config(project: ProjectPath | None = None) -> Any:
+def get_mutmut_config() -> Any:
     global _cached_mutmut_config
     # mutmut_config es la configuracion en forma de archivo python que define el usuario
     if _cached_mutmut_config != MUTMUT_CONFIG_NOT_DEFINED:
         return _cached_mutmut_config
-
-    if project is not None:
-        set_project_path(project)
 
     current_project_path = get_current_project_path()
 

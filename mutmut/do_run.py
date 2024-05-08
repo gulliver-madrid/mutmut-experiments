@@ -3,7 +3,6 @@
 import os
 import sys
 import traceback
-from os.path import exists
 from pathlib import Path
 from shutil import copy
 from time import time
@@ -105,7 +104,7 @@ def do_run(
     set_project_path(project)
     project_path = get_project_path()
     clear_mutmut_config_cache()
-    mutmut_config = get_mutmut_config(project_path)
+    mutmut_config = get_mutmut_config()
 
     print(f"Mutmut config found: {mutmut_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}")
 
