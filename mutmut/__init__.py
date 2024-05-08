@@ -31,7 +31,8 @@ import toml
 
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import clear_mutmut_config_cache,  list_mutations, mutate_from_context, get_mutmut_config
+from mutmut.mut_config_storage import clear_mutmut_config_cache, get_mutmut_config
+from mutmut.mutate import  list_mutations, mutate_from_context
 from mutmut.project import ProjectPath, get_current_project_path, set_project_path
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
