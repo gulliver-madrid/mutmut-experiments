@@ -384,8 +384,9 @@ def do_run(
     print(f"Project: {project}")
 
     set_project_path(project)
+    project_path = get_project_path()
     clear_mutmut_config_cache()
-    mutmut_config = get_mutmut_config()
+    mutmut_config = get_mutmut_config(project_path)
 
     print(f"Mutmut config found: {mutmut_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}")
 
@@ -558,7 +559,7 @@ Legend for output:
     mutation_tests_runner = MutationTestsRunner()
     try:
         mutation_tests_runner.run_mutation_tests(
-            config=config, progress=progress, mutations_by_file=mutations_by_file, project_path=get_project_path())
+            config=config, progress=progress, mutations_by_file=mutations_by_file, project_path=project_path)
     except Exception as e:
         traceback.print_exc()
         return compute_exit_code(progress, e)
