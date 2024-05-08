@@ -40,13 +40,13 @@ StrConsumer = Callable[[str], None]
 
 def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     assert isinstance(context.filename, str)
-    with open(context.filename) as f:
+    with open(get_current_project_path() / context.filename) as f:
         original = f.read()
     if backup:
         with open(context.filename + '.bak', 'w') as f:
             f.write(original)
     mutated, _ = mutate_from_context(context)
-    with open(context.filename, 'w') as f:
+    with open(get_current_project_path() / context.filename, 'w') as f:
         f.write(mutated)
     return original, mutated
 

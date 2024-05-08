@@ -88,7 +88,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
 
 
 def hash_of(filename: str) -> HashStr:
-    with open(filename, 'rb') as f:
+    with open(get_current_project_path() / filename, 'rb') as f:
         m = hashlib.sha256()
         m.update(f.read())
         return HashStr(m.hexdigest())

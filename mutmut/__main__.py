@@ -243,6 +243,9 @@ def apply(mutation_id: str, backup: bool, dict_synonyms: List[str], project: str
     Apply a mutation on disk.
     """
     set_project_path(project)
+    if not get_cache_path().exists():
+        print("There is no mutants to apply yet. Please run `mutmut run` first.\n")
+        sys.exit(1)
     do_apply(mutation_id, dict_synonyms, backup)
     sys.exit(0)
 
