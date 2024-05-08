@@ -7,6 +7,7 @@ from pathlib import Path
 from shutil import copy
 from time import time
 from types import NoneType
+from typing import Final
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
@@ -136,7 +137,7 @@ def do_run(
         paths_to_mutate = guess_paths_to_mutate()
     assert isinstance(paths_to_mutate, str)
 
-    paths_to_mutate = split_paths(paths_to_mutate)
+    paths_to_mutate = split_paths(paths_to_mutate, get_current_project_path())
 
     if not paths_to_mutate:
         raise click.BadOptionUsage(
@@ -148,20 +149,25 @@ def do_run(
 
     tests_dirs: list[str] = []
     assert tests_dir is not None
-    test_paths = split_paths(tests_dir)
+    test_paths = split_paths(tests_dir, get_current_project_path())
     if test_paths is None:
         raise FileNotFoundError(
             'No test folders found in current folder. Run this where there is a "tests" or "test" folder.'
         )
+
+    original_cwd = os.getcwd()
+    os.chdir(get_current_project_path()) # parece que es irrelevante # TODO: review
     for p in test_paths:
         tests_dirs.extend(glob(p, recursive=True))
 
     for p in paths_to_mutate:
-        paths_splitted = split_paths(tests_dir)
+        paths_splitted = split_paths(tests_dir, get_current_project_path())
         assert paths_splitted is not None
         for pt in paths_splitted:
             assert pt is not None
             tests_dirs.extend(glob(p + '/**/' + pt, recursive=True))
+    os.chdir(original_cwd)
+    del original_cwd
     del tests_dir
     current_hash_of_tests = hash_of_tests(tests_dirs)
 
@@ -206,6 +212,10 @@ Legend for output:
     if hasattr(mutmut_config, 'init'):
         mutmut_config.init()
 
+    project_path_customized: Final = bool(project_path)
+    if project_path_customized:
+        original_cwd = os.getcwd()
+        os.chdir(get_current_project_path())
     baseline_time_elapsed = time_test_suite(
         swallow_output=not swallow_output,
         test_command=runner,
@@ -213,6 +223,8 @@ Legend for output:
         current_hash_of_tests=current_hash_of_tests,
         no_progress=no_progress,
     )
+    if project_path_customized:
+        os.chdir(original_cwd) # pyright: ignore [reportPossiblyUnboundVariable]
 
     if using_testmon:
         copy('.testmondata', '.testmondata-initial')
@@ -305,11 +317,17 @@ def parse_run_argument(
     # argument is the mutation id or a path to a file to mutate
     if argument is None:
         for path in paths_to_mutate:
-            for filename in python_source_files(path, tests_dirs, paths_to_exclude):
+            # paths to mutate should be relative here
+            assert not Path(path).is_absolute()
+            print("Analizando path", str(Path(path)))
+            original = os.getcwd()
+            os.chdir(get_current_project_path())
+            for filename in python_source_files(Path(path), tests_dirs, paths_to_exclude):
                 if filename.startswith('test_') or filename.endswith('__tests.py'):
                     continue
                 update_line_numbers(filename)
                 add_mutations_by_file(mutations_by_file, filename, dict_synonyms, config)
+            os.chdir(original)
     else:
         try:
             int(argument)

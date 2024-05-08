@@ -4,6 +4,7 @@ from __future__ import annotations
 import fnmatch
 import multiprocessing
 import os
+from pathlib import Path
 import shlex
 import subprocess
 import sys
@@ -43,7 +44,7 @@ def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     with open(get_current_project_path() / context.filename) as f:
         original = f.read()
     if backup:
-        with open(context.filename + '.bak', 'w') as f:
+        with open(get_current_project_path() / (context.filename + '.bak'), 'w') as f:
             f.write(original)
     mutated, _ = mutate_from_context(context)
     with open(get_current_project_path() / context.filename, 'w') as f:
@@ -64,14 +65,16 @@ def queue_mutants(
     config: Config,
     mutants_queue: MutantQueue,
     mutations_by_file: Dict[str, List[RelativeMutationID]],
+    project: ProjectPath|None = None
 ) -> None:
     from mutmut.cache.cache import get_cached_mutation_statuses
+    set_project_path(project)
 
     try:
         index = 0
         for filename, mutations in mutations_by_file.items():
             cached_mutation_statuses = get_cached_mutation_statuses(filename, mutations, config.hash_of_tests)
-            with open(filename) as f:
+            with open(get_current_project_path() / filename) as f:
                 source = f.read()
             for mutation_id in mutations:
                 cached_status = cached_mutation_statuses.get(mutation_id)
@@ -145,6 +148,7 @@ def run_mutation(context: Context, callback: StrConsumer, project_path: ProjectP
     assert context.filename is not None
     if project_path is not None:
         set_project_path(project_path)
+    os.chdir(get_current_project_path())
     mutmut_config = get_mutmut_config()
     cached_status = cached_mutation_status(context.filename, context.mutation_id, context.config.hash_of_tests)
 
@@ -196,7 +200,10 @@ def run_mutation(context: Context, callback: StrConsumer, project_path: ProjectP
 
     finally:
         assert isinstance(context.filename, str)
+        original = os.getcwd()
+        os.chdir(get_current_project_path())
         move(context.filename + '.bak', context.filename)
+        os.chdir(original)
         config.test_command = config.default_test_command  # reset test command to its default in the case it was altered in a hook
         if config.post_mutation:
             result = subprocess.check_output(config.post_mutation, shell=True).decode().strip()
@@ -262,8 +269,10 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
 
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
-    project_dir_name = str(get_current_project_path()).split(os.sep)[-1]
-
+    project_dir = get_current_project_path()
+    project_dir_name = str(project_dir).split(os.sep)[-1]
+    original = os.getcwd()
+    os.chdir(project_dir_name)
     result: str | None = None
     if isdir('lib'):
         result = 'lib'
@@ -279,7 +288,7 @@ def guess_paths_to_mutate() -> str:
         result = project_dir_name.replace('-', '')
     elif isdir(project_dir_name.replace(' ', '')):
         result = project_dir_name.replace(' ', '')
-
+    os.chdir(original)
     if result is None:
         raise FileNotFoundError(
             'Could not figure out where the code to mutate is. '
@@ -287,6 +296,8 @@ def guess_paths_to_mutate() -> str:
             'or by adding "paths_to_mutate=code_dir" in pyproject.toml or setup.cfg to the [mutmut] '
             'section.')
     return result
+
+
 
 class Progress:
     def __init__(self, total: int, output_legend: Mapping[str, str], no_progress: bool = False):
@@ -493,6 +504,7 @@ class MutationTestsRunner:
 
         mutants_queue = mp_ctx.Queue(maxsize=100)
         self.add_to_active_queues(mutants_queue)
+
         queue_mutants_thread = Thread(
             target=queue_mutants,
             name='queue_mutants',
@@ -502,8 +514,11 @@ class MutationTestsRunner:
                 config=config,
                 mutants_queue=mutants_queue,
                 mutations_by_file=mutations_by_file,
+                project=get_current_project_path()
             )
         )
+
+
         queue_mutants_thread.start()
 
         results_queue = mp_ctx.Queue(maxsize=100)
@@ -586,7 +601,7 @@ def add_mutations_by_file(
 
 
 def python_source_files(
-    path: str, tests_dirs: List[str], paths_to_exclude: Optional[List[str]] = None
+    path: Path, tests_dirs: List[str], paths_to_exclude: Optional[List[str]] = None
 ) -> Iterator[str]:
     """Attempt to guess where the python source files to mutate are and yield
     their paths
@@ -596,11 +611,22 @@ def python_source_files(
         (we do not want to mutate these!)
     :param paths_to_exclude: list of UNIX filename patterns to exclude
 
-    :return: generator listing the paths to the python source files to mutate
+    :return: generator listing the paths to the python source files to mutate (absolute paths!)
     """
+    if path.is_absolute():
+        parent = get_current_project_path().resolve()
+        child = path.resolve()
+        assert child == parent or parent in child.parents, (child, parent)
+        absolute_path = path
+    else:
+        absolute_path =(get_current_project_path() / path).resolve()
+    assert absolute_path.exists(), absolute_path
+    relative_path = absolute_path.relative_to(get_current_project_path())
     paths_to_exclude = paths_to_exclude or []
-    if isdir(path):
-        for root, dirs, files in os.walk(path, topdown=True):
+    original = os.getcwd()
+    os.chdir(get_current_project_path())
+    if absolute_path.is_dir():
+        for root, dirs, files in os.walk(relative_path, topdown=True):
             for exclude_pattern in paths_to_exclude:
                 dirs[:] = [d for d in dirs if not fnmatch.fnmatch(d, exclude_pattern)]
                 files[:] = [f for f in files if not fnmatch.fnmatch(f, exclude_pattern)]
@@ -610,7 +636,8 @@ def python_source_files(
                 if filename.endswith('.py'):
                     yield os.path.join(root, filename)
     else:
-        yield path
+        yield str(relative_path)
+    os.chdir(original)
 
 
 def compute_exit_code(

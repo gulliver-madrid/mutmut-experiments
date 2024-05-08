@@ -30,6 +30,7 @@ from mutmut import (
 from mutmut.__main__ import climain
 from mutmut.coverage import read_coverage_data
 from mutmut.mutations import mutations_by_type
+from mutmut.project import set_project_path
 from mutmut.status import MUTANT_STATUSES
 
 from helpers import FileSystemPath, open_utf8
@@ -210,7 +211,7 @@ def test_read_coverage_data(filesystem: FileSystemPath) -> None:
     ]
 )
 def test_python_source_files(expected: list[str], source_path: str, tests_dirs: list[str], filesystem: FileSystemPath) -> None:
-    assert list(python_source_files(source_path, tests_dirs)) == expected
+    assert list(python_source_files(Path(source_path), tests_dirs)) == expected
 
 
 def test_python_source_files__with_paths_to_exclude(tmpdir: FileSystemPath) -> None:
@@ -237,11 +238,13 @@ def test_python_source_files__with_paths_to_exclude(tmpdir: FileSystemPath) -> N
     with open(join(entities_dir, 'user.py'), 'w'):
         pass
 
+    set_project_path(tmpdir_str)
     # act, assert
-    assert set(python_source_files(project_dir, [], paths_to_exclude)) == {
-        os.path.join(project_dir, 'services', 'main.py'),
-        os.path.join(project_dir, 'services', 'utils.py'),
+    assert set(python_source_files(Path(project_dir), [], paths_to_exclude)) == {
+        os.path.join('project', 'services', 'main.py'),
+        os.path.join('project', 'services', 'utils.py'),
     }
+
 
 
 @pytest.mark.skip(reason="timeout bug")

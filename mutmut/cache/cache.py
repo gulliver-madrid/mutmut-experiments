@@ -124,7 +124,7 @@ def get_unified_diff(pk: int | str, dict_synonyms: list[str], update_cache: bool
     assert isinstance(dict_synonyms, list)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
-        with open(filename) as f:
+        with open(get_current_project_path() / filename) as f:
             source = f.read()
 
     return get_unified_diff_from_filename_and_mutation_id(source, filename, mutation_id, dict_synonyms, update_cache)

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import itertools
+import os
 import sys
 from collections.abc import Sequence
 from pathlib import Path
@@ -35,14 +36,18 @@ def ranges(numbers: Sequence[int]) -> str:
     return ', '.join(result)
 
 
-def split_paths(paths: str) -> list[str] | None:
+def split_paths(paths: str, directory: Path) -> list[str] | None:
     # This method is used to split paths that are separated by commas or colons
     # filtering out those that do not exist
+    original = os.getcwd()
+    os.chdir(directory)
+    separated: list[str] | None = None
     for sep in [',', ':']:
         separated = list(filter(lambda p: Path(p).exists(), paths.split(sep)))
         if separated:
-            return separated
-    return None
+            break
+    os.chdir(original)
+    return separated
 
 
 spinner = itertools.cycle('⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏')
