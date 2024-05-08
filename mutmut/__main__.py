@@ -262,6 +262,10 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
     Show a mutation diff.
     """
     assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
+    set_project_path(project)
+    if not get_cache_path().exists():
+        print("There is no results to show yet. Please run `mutmut run` first.\n")
+        sys.exit(1)
 
     set_project_path(project)
 
