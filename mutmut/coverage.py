@@ -1,6 +1,8 @@
 import os
 from typing import Dict, List, Mapping, TypeAlias
 
+from mutmut.project import get_current_project_path
+
 
 FilePathStr: TypeAlias = str
 ContextsByLineNo: TypeAlias = Dict[int, List[str]]
@@ -15,7 +17,7 @@ def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
         from coverage import Coverage
     except ImportError as e:
         raise ImportError('The --use-coverage feature requires the coverage library. Run "pip install --force-reinstall mutmut[coverage]"') from e
-    cov = Coverage('.coverage')
+    cov = Coverage(str(get_current_project_path() / '.coverage'))
     cov.load()
     data = cov.get_data()
     return {
