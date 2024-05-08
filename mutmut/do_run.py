@@ -38,9 +38,10 @@ from mutmut.cache.cache import (
 from mutmut.config import Config
 from mutmut.context import RelativeMutationID
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutate import MUTMUT_CONFIG_NOT_DEFINED, clear_mutmut_config_cache, get_mutmut_config, get_project_path, set_project_path
+from mutmut.mutate import MUTMUT_CONFIG_NOT_DEFINED, clear_mutmut_config_cache, get_mutmut_config
 from mutmut.mutations import mutations_by_type
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
+from mutmut.project import get_current_project_path, get_project_path, set_project_path
 from mutmut.utils import split_lines, split_paths
 
 DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
@@ -129,7 +130,7 @@ def do_run(
 
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
 
-    if use_coverage and not exists('.coverage'):
+    if use_coverage and not (get_current_project_path()/'.coverage').exists():
         raise FileNotFoundError('No .coverage file found. You must generate a coverage file to use this feature.')
 
     if paths_to_mutate is None:

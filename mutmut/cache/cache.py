@@ -7,16 +7,17 @@ from difflib import SequenceMatcher, unified_diff
 from functools import wraps
 from io import open
 from itertools import zip_longest
+from pathlib import Path
 from types import NoneType
 from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator, List, Sequence, Tuple, TypeVar
-
 
 from pony.orm import select, RowNotFound, ERDiagramError, OperationalError
 from typing_extensions import ParamSpec
 
 from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import get_project_path, mutate_from_context
+from mutmut.mutate import mutate_from_context
+from mutmut.project import get_current_project_path
 from mutmut.setup_logging import configure_logger
 from mutmut.status import OK_KILLED, UNTESTED, StatusResultStr
 from mutmut.utils import split_lines
@@ -42,23 +43,24 @@ else:
     from pony.orm import db_session
     db_session_ctx_manager = db_session
 
-def get_cache_path() -> str:
-    return os.path.join(get_project_path() or os.getcwd(), '.mutmut-cache')
+def get_cache_path() -> Path:
+    return get_current_project_path()/'.mutmut-cache'
+
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if db.provider is None:
-            cache_filename = get_cache_path()
-            logger.info(f"El directorio donde se guarda la .mutmut-cache es {get_project_path() or os.getcwd()}")
-            db.bind(provider='sqlite', filename=cache_filename, create_db=True)
+            cache_path = get_cache_path()
+            logger.info(f"El directorio donde se guarda la .mutmut-cache es {get_current_project_path()}")
+            db.bind(provider='sqlite', filename=str(cache_path), create_db=True)
 
             try:
                 db.generate_mapping(create_tables=True)
             except OperationalError:
                 pass
 
-            if os.path.exists(cache_filename):
+            if cache_path.exists():
                 # If the existing cache file is out of date, delete it and start over
                 with db_session_ctx_manager:  # pyright: ignore
                     try:
