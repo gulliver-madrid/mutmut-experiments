@@ -57,33 +57,34 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     current_project_path = get_project_path() or Path(os.getcwd())
     assert current_project_path.exists()
 
-    current_project_path_as_str = str(current_project_path)
-
     prev_path = sys.path[:]
 
-    if current_project_path_as_str not in sys.path:
-        sys.path.insert(0, current_project_path_as_str)
-
-    need_reload = "mutmut_config" in sys.modules
-
-    if TYPE_CHECKING:
-        mutmut_config: Any
-
-    try:
-        import mutmut_config  # type: ignore [import-not-found, no-redef]
-    except ImportError:
-        mutmut_config = None
-
-    if mutmut_config and need_reload:
-        try:
-            importlib.reload(mutmut_config)
-        except ImportError:
-            mutmut_config = None
+    mutmut_config = import_mutmut_config(current_project_path)
 
     _cached_mutmut_config = mutmut_config
     sys.path = prev_path
     return mutmut_config
 
+def import_mutmut_config(current_project_path: Path) -> Any:
+    current_project_path_as_str = str(current_project_path)
+    if current_project_path_as_str not in sys.path:
+        sys.path.insert(0, current_project_path_as_str)
+
+    needs_reload = "mutmut_config" in sys.modules
+
+    mutmut_config: Any = None
+
+    try:
+        import mutmut_config  # type: ignore [import-not-found, no-redef]
+    except ImportError:
+        pass
+
+    if mutmut_config and needs_reload:
+        try:
+            importlib.reload(mutmut_config)
+        except ImportError:
+            mutmut_config = None
+    return mutmut_config
 
 logger = configure_logger(__name__)
 
