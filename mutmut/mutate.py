@@ -54,12 +54,12 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     if project is not None:
         set_project_path(project)
 
-    project = get_project_path()
+    current_project_path = get_project_path() or Path(os.getcwd())
+    assert current_project_path.exists()
+
+    current_project_path_as_str = str(current_project_path)
 
     prev_path = sys.path[:]
-
-    current_project_path_as_str = str(project) if project is not None else os.getcwd()
-    assert Path(current_project_path_as_str).exists()
 
     if current_project_path_as_str not in sys.path:
         sys.path.insert(0, current_project_path_as_str)
