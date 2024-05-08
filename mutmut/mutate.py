@@ -34,7 +34,10 @@ def set_project_path(project: str | Path | None = None) -> None:
     global _cached_project_path
     if isinstance(project, str):
         project = Path(project)
-    _cached_project_path = ProjectPath(project.resolve()) if project is not None else None
+    project_path = ProjectPath(project.resolve()) if project is not None else None
+    if project_path is not None:
+        assert project_path.exists()
+    _cached_project_path = project_path
 
 
 def clear_mutmut_config_cache() -> None:
@@ -56,6 +59,7 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     prev_path = sys.path[:]
 
     current_project_path_as_str = str(project) if project is not None else os.getcwd()
+    assert Path(current_project_path_as_str).exists()
 
     if current_project_path_as_str not in sys.path:
         sys.path.insert(0, current_project_path_as_str)
