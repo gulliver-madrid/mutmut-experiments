@@ -42,12 +42,14 @@ else:
     from pony.orm import db_session
     db_session_ctx_manager = db_session
 
+def get_cache_path() -> str:
+    return os.path.join(get_project_path() or os.getcwd(), '.mutmut-cache')
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if db.provider is None:
-            cache_filename = os.path.join(get_project_path() or os.getcwd(), '.mutmut-cache')
+            cache_filename = get_cache_path()
             logger.info(f"El directorio donde se guarda la .mutmut-cache es {get_project_path() or os.getcwd()}")
             db.bind(provider='sqlite', filename=cache_filename, create_db=True)
 
