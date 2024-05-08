@@ -6,7 +6,6 @@ from pathlib import Path
 from typing import NewType
 
 
-
 ProjectPath = NewType('ProjectPath', Path)
 
 # global variable

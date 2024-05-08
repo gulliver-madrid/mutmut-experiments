@@ -32,7 +32,7 @@ import toml
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
 from mutmut.mutate import clear_mutmut_config_cache,  list_mutations, mutate_from_context, get_mutmut_config
-from mutmut.project import ProjectPath, get_current_project_path
+from mutmut.project import ProjectPath, get_current_project_path, set_project_path
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr
@@ -151,7 +151,9 @@ def run_mutation(context: Context, callback: StrConsumer, project_path: ProjectP
     from mutmut.cache.cache import cached_mutation_status
     assert context.config is not None
     assert context.filename is not None
-    mutmut_config = get_mutmut_config(project_path)
+    if project_path is not None:
+        set_project_path(project_path)
+    mutmut_config = get_mutmut_config()
     cached_status = cached_mutation_status(context.filename, context.mutation_id, context.config.hash_of_tests)
 
     if cached_status != UNTESTED and context.config.total != 1:
