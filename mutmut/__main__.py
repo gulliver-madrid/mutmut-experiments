@@ -212,7 +212,8 @@ def results(project:str | None) -> NoReturn:
 
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
 @ click.argument('status', nargs=1, required=True)
-def result_ids(status: str) -> NoReturn:
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
+def result_ids(status: str, project:str | None) -> NoReturn:
     """
     Print the IDs of the specified mutant classes (separated by spaces).\n
     result-ids survived (or any other of: killed,timeout,suspicious,skipped,untested)\n
@@ -220,6 +221,10 @@ def result_ids(status: str) -> NoReturn:
     if not status or status not in MUTANT_STATUSES:
         raise click.BadArgumentUsage(f'The result-ids command needs a status class of mutants '
                                      f'(one of : {set(MUTANT_STATUSES.keys())}) but was {status}')
+    set_project_path(project)
+    if not get_cache_path().exists():
+        print("There is no results yet. Please run `mutmut run` first.\n")
+        sys.exit(1)
     status = cast(StatusStr, status)
     print_result_ids_cache(status)
     sys.exit(0)
