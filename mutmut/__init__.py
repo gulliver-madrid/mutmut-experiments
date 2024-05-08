@@ -31,7 +31,8 @@ import toml
 
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import ProjectPath, clear_mutmut_config_cache, list_mutations, mutate_from_context, get_mutmut_config
+from mutmut.mutate import clear_mutmut_config_cache,  list_mutations, mutate_from_context, get_mutmut_config
+from mutmut.project import ProjectPath, get_current_project_path
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr
@@ -267,21 +268,21 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
 
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
-    this_dir = os.getcwd().split(os.sep)[-1]
+    project_dir = str(get_current_project_path()).split(os.sep)[-1]
     if isdir('lib'):
         return 'lib'
     elif isdir('src'):
         return 'src'
-    elif isdir(this_dir):
-        return this_dir
-    elif isdir(this_dir.replace('-', '_')):
-        return this_dir.replace('-', '_')
-    elif isdir(this_dir.replace(' ', '_')):
-        return this_dir.replace(' ', '_')
-    elif isdir(this_dir.replace('-', '')):
-        return this_dir.replace('-', '')
-    elif isdir(this_dir.replace(' ', '')):
-        return this_dir.replace(' ', '')
+    elif isdir(project_dir):
+        return project_dir
+    elif isdir(project_dir.replace('-', '_')):
+        return project_dir.replace('-', '_')
+    elif isdir(project_dir.replace(' ', '_')):
+        return project_dir.replace(' ', '_')
+    elif isdir(project_dir.replace('-', '')):
+        return project_dir.replace('-', '')
+    elif isdir(project_dir.replace(' ', '')):
+        return project_dir.replace(' ', '')
     raise FileNotFoundError(
         'Could not figure out where the code to mutate is. '
         'Please specify it on the command line using --paths-to-mutate, '

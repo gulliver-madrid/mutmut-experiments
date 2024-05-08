@@ -2,11 +2,10 @@
 from __future__ import annotations
 
 import importlib
-import os
 from pathlib import Path
 import sys
 from types import NoneType
-from typing import Any, Final, NewType, Tuple
+from typing import Any, Final, Tuple
 
 from parso.tree import NodeOrLeaf, Node, BaseNode
 from parso.python.tree import ExprStmt
@@ -14,35 +13,17 @@ from parso.python.tree import ExprStmt
 from mutmut.context import ALL, Context, RelativeMutationID
 from mutmut.mutations import has_children, is_name_node, is_operator, mutations_by_type
 from mutmut.parse import parse_source
+from mutmut.project import ProjectPath, get_current_project_path, set_project_path
 from mutmut.setup_logging import configure_logger
 
 
 MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
 
 
-ProjectPath = NewType('ProjectPath', Path)
-
 logger = configure_logger(__name__)
 
-# global variables
+# global variable
 _cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
-_cached_project_path: ProjectPath | None = None
-
-def get_project_path() -> ProjectPath | None:
-    '''It could to be None. In that case, calling code probably should use os.getcwd().'''
-    return _cached_project_path
-
-
-def set_project_path(project: str | Path | None = None) -> None:
-    global _cached_project_path
-    if isinstance(project, str):
-        project = Path(project)
-    if project is None:
-        _cached_project_path = None
-    else:
-        project_path = ProjectPath(project.resolve())
-        assert project_path.exists()
-        _cached_project_path = project_path
 
 
 def clear_mutmut_config_cache() -> None:
@@ -59,8 +40,7 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     if project is not None:
         set_project_path(project)
 
-    current_project_path = get_project_path() or Path(os.getcwd())
-    assert current_project_path.exists()
+    current_project_path = get_current_project_path()
 
     original = sys.path[:]
     _cached_mutmut_config = _import_mutmut_config(current_project_path)

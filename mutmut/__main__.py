@@ -31,7 +31,7 @@ from mutmut.cache.junitxml import print_result_cache_junitxml
 from mutmut.cache.print_results import print_result_cache, print_result_ids_cache
 from mutmut.context import Context, RelativeMutationID
 from mutmut.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
-from mutmut.mutate import set_project_path
+from mutmut.project import set_project_path
 from mutmut.setup_logging import configure_logger
 from mutmut.status import MUTANT_STATUSES, StatusStr
 
@@ -203,7 +203,7 @@ def results(project:str | None) -> NoReturn:
     """
     assert isinstance(project, (str, NoneType))
     set_project_path(project)
-    if not Path(get_cache_path()).exists():
+    if not get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
     print_result_cache()
