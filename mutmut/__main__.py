@@ -290,14 +290,19 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
 @ click.option('--dict-synonyms')
 @ click.option('--suspicious-policy', type=click.Choice(['ignore', 'skipped', 'error', 'failure']), default='ignore')
 @ click.option('--untested-policy', type=click.Choice(['ignore', 'skipped', 'error', 'failure']), default='ignore')
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
 @ config_from_file(
     dict_synonyms='',
 )
-def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str) -> NoReturn:
+def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str, project: str | None) -> NoReturn:
     """
     Show a mutation diff with junitxml format.
     """
     assert isinstance(dict_synonyms, str)
+    set_project_path(project)
+    if not get_cache_path().exists():
+        print("There is no results yet. Please run `mutmut run` first.\n")
+        sys.exit(1)
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
     print_result_cache_junitxml(dict_synonyms_as_list, suspicious_policy, untested_policy)
     sys.exit(0)
