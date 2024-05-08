@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import sys
 from types import NoneType
-from typing import Any, Final, NewType, Tuple, TYPE_CHECKING
+from typing import Any, Final, NewType, Tuple
 
 from parso.tree import NodeOrLeaf, Node, BaseNode
 from parso.python.tree import ExprStmt
@@ -19,11 +19,14 @@ from mutmut.setup_logging import configure_logger
 
 MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
 
-_cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
-_cached_project_path: ProjectPath | None = None
 
 ProjectPath = NewType('ProjectPath', Path)
 
+logger = configure_logger(__name__)
+
+# global variables
+_cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
+_cached_project_path: ProjectPath | None = None
 
 def get_project_path() -> ProjectPath | None:
     '''It could to be None. In that case, calling code probably should use os.getcwd().'''
@@ -59,15 +62,13 @@ def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     current_project_path = get_project_path() or Path(os.getcwd())
     assert current_project_path.exists()
 
-    prev_path = sys.path[:]
+    original = sys.path[:]
+    _cached_mutmut_config = _import_mutmut_config(current_project_path)
+    sys.path = original
 
-    mutmut_config = import_mutmut_config(current_project_path)
+    return _cached_mutmut_config
 
-    _cached_mutmut_config = mutmut_config
-    sys.path = prev_path
-    return mutmut_config
-
-def import_mutmut_config(current_project_path: Path) -> Any:
+def _import_mutmut_config(current_project_path: Path) -> Any:
     current_project_path_as_str = str(current_project_path)
     if current_project_path_as_str not in sys.path:
         sys.path.insert(0, current_project_path_as_str)
@@ -88,7 +89,7 @@ def import_mutmut_config(current_project_path: Path) -> Any:
             mutmut_config = None
     return mutmut_config
 
-logger = configure_logger(__name__)
+
 
 # We have a global whitelist for constants of the pattern __all__, __version__, etc
 
