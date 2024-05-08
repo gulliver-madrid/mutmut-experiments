@@ -9,6 +9,7 @@ from typing import Optional
 from parso.tree import NodeOrLeaf
 
 from mutmut.config import Config
+from mutmut.project import get_current_project_path
 from mutmut.setup_logging import configure_logger
 from mutmut.utils import split_lines
 
@@ -87,7 +88,7 @@ class Context:
     def source(self) -> str:
         if self._source is None:
             assert self.filename
-            with open(self.filename) as f:
+            with open(get_current_project_path() / self.filename) as f:
                 self._set_source(f.read())
         assert self._source is not None
         return self._source
