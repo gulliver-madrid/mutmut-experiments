@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import os
-from io import (
-    open,
-)
+from dataclasses import dataclass, field
+from io import open
 from typing import Optional
 
 from parso.tree import NodeOrLeaf
