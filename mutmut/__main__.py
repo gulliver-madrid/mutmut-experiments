@@ -216,10 +216,13 @@ def run(
 
 
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
-def results() -> NoReturn:
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
+def results(project:str | None) -> NoReturn:
     """
     Print the results.
     """
+    assert isinstance(project, (str, NoneType))
+    set_project_path(project)
     if not Path(get_cache_path()).exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
