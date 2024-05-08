@@ -4,8 +4,8 @@
 from dataclasses import field
 from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, Mapping, NewType, Type, overload, TypeVar
 
-from typing_extensions import Self
 from pony.orm import Database, Required, Set, Optional, PrimaryKey
+from typing_extensions import Self
 
 from mutmut.status import StatusResultStr
 

@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import importlib
-from pathlib import Path
 import sys
+from pathlib import Path
 from typing import Any
 
 from mutmut.project import get_current_project_path
