@@ -15,7 +15,7 @@ from io import open, TextIOBase
 from multiprocessing.context import SpawnProcess
 from os.path import isdir
 from shutil import move, copy
-from threading import Timer, Thread
+from threading import Thread
 from time import time
 from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Optional, ParamSpec, Tuple, TypeAlias, cast
 
@@ -25,6 +25,7 @@ from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
 from mutmut.mut_config_storage import clear_mutmut_config_cache, get_mutmut_config
 from mutmut.mutate import  list_mutations, mutate_from_context
+from mutmut.process import popen_streaming_output
 from mutmut.project import ProjectPath, get_current_project_path, set_project_path
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
@@ -352,81 +353,6 @@ def get_mutations_by_file_from_cache(mutation_pk: Any) -> dict[str, list[Relativ
     filename, mutation_id = filename_and_mutation_id_from_pk(int(mutation_pk))
     return {filename: [mutation_id]}
 
-
-def popen_streaming_output(
-    cmd: str, callback: Callable[[str], None], timeout: Optional[float] = None
-) -> int:
-    """Open a subprocess and stream its output without hard-blocking.
-
-    :param cmd: the command to execute within the subprocess
-    :param callback: function that intakes the subprocess' stdout line by line.
-        It is called for each line received from the subprocess' stdout stream.
-    :param timeout: the timeout time of the subprocess
-    :raises TimeoutError: if the subprocess' execution time exceeds
-        the timeout time
-    :return: the return code of the executed subprocess
-    """
-    if os.name == 'nt':  # pragma: no cover
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            shell=True,
-        )
-        stdout = process.stdout
-    else:
-        master, slave = os.openpty()  # type: ignore [attr-defined]
-        process = subprocess.Popen(
-            shlex.split(cmd, posix=True),
-            stdout=slave,
-            stderr=slave
-        )
-        stdout = os.fdopen(master)  # type: ignore [assignment]
-        os.close(slave)
-
-    def kill(process_: Any) -> None:
-        """Kill the specified process on Timer completion"""
-        try:
-            process_.kill()
-        except OSError:
-            pass
-
-    # python 2-3 agnostic process timer
-    timer = Timer(timeout, kill, [process])  # type: ignore [arg-type]
-    timer.daemon = True
-    timer.start()
-
-    line: bytes | str
-    while process.returncode is None:
-        try:
-            if os.name == 'nt':  # pragma: no cover
-                assert stdout is not None
-                line = stdout.readline()
-                # windows gives readline() raw stdout as a b''
-                # need to decode it
-                line = line.decode("utf-8")
-                if line:  # ignore empty strings and None
-                    callback(line)
-            else:
-                while True:
-                    assert stdout is not None
-                    line = stdout.readline()
-                    if not line:
-                        break
-                    callback(line)  # type: ignore [arg-type]
-        except OSError:
-            # This seems to happen on some platforms, including TravisCI.
-            # It seems like it's ok to just let this pass here, you just
-            # won't get as nice feedback.
-            pass
-        if not timer.is_alive():
-            raise TimeoutError("subprocess running command '{}' timed out after {} seconds".format(cmd, timeout))
-        process.poll()
-
-    # we have returned from the subprocess cancel the timer if it is running
-    timer.cancel()
-
-    return process.returncode
 
 
 def hammett_tests_pass(config: Config, callback: StrConsumer) -> bool:

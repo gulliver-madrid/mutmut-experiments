@@ -10,7 +10,9 @@ from types import NoneType
 from typing import Final
 
 import click
-from glob2 import glob  # type: ignore [import-untyped]
+from glob2 import glob # type: ignore [import-untyped]
+
+from mutmut.process import popen_streaming_output
 
 # ensure mutmut modules are detected
 base = Path(__file__).parent.parent
@@ -22,7 +24,6 @@ from mutmut import (
     __version__,
     guess_paths_to_mutate,
     Progress,
-    popen_streaming_output,
     add_mutations_by_file,
     python_source_files,
     compute_exit_code,
