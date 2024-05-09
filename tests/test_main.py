@@ -22,7 +22,6 @@ from click.testing import CliRunner
 
 from mutmut import (
     compute_exit_code,
-    popen_streaming_output,
     Progress,
     python_source_files,
     __version__,
@@ -31,6 +30,7 @@ from mutmut.__main__ import climain
 from mutmut.coverage import read_coverage_data
 from mutmut.mutations import mutations_by_type
 from mutmut.project import set_project_path
+from mutmut.process import popen_streaming_output
 from mutmut.status import MUTANT_STATUSES
 
 from helpers import FileSystemPath, open_utf8
