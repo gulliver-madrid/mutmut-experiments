@@ -1,6 +1,6 @@
 import os
 import sys
-from typing import Iterator
+from typing import Any, Iterator
 
 from click.testing import CliRunner
 import pytest
@@ -37,9 +37,17 @@ def pre_mutation_ast(context):
 """)
     yield tmpdir
 
-
 @pytest.fixture
-def set_working_dir_and_path(basic_filesystem: FileSystemPath) -> Iterator[FileSystemPath]:
+def set_working_dir_and_path(request: Any) -> Iterator[FileSystemPath]:
+
+    def get_default() -> FileSystemPath:
+        return request.getfixturevalue('basic_filesystem') # type: ignore [no-any-return]
+
+    if hasattr(request, 'param'):
+        basic_filesystem = request.param
+    else:
+        basic_filesystem = get_default()
+
     original_dir = os.path.abspath(os.getcwd())
     original_path = sys.path[:]
 
