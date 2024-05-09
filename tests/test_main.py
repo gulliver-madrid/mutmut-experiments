@@ -39,7 +39,7 @@ from helpers import FileSystemPath, open_utf8
 builtins.open = open_utf8  # type: ignore [assignment]
 
 
-file_to_mutate_lines = [
+FILE_TO_MUTATE_LINES = [
     "def foo(a, b):",
     "    return a < b",
     "c = 1",
@@ -54,9 +54,9 @@ EXPECTED_MUTANTS = 14
 
 PYTHON = '"{}"'.format(sys.executable)
 
-file_to_mutate_contents = '\n'.join(file_to_mutate_lines) + '\n'
+FILE_TO_MUTATE_CONTENTS = '\n'.join(FILE_TO_MUTATE_LINES) + '\n'
 
-test_file_contents = '''
+TEST_FILE_CONTENTS = '''
 from foo import *
 
 def test_foo():
@@ -73,7 +73,7 @@ def test_foo():
 
 @pytest.fixture
 def filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
-    create_filesystem(tmpdir, file_to_mutate_contents, test_file_contents)
+    create_filesystem(tmpdir, FILE_TO_MUTATE_CONTENTS, TEST_FILE_CONTENTS)
 
     yield tmpdir
 
@@ -297,7 +297,7 @@ def test_simple_apply(filesystem: FileSystemPath) -> None:
     print(repr(result.output))
     assert result.exit_code == 0
     with open(os.path.join(str(filesystem), 'foo.py')) as f:
-        assert f.read() != file_to_mutate_contents
+        assert f.read() != FILE_TO_MUTATE_CONTENTS
 
 
 def test_simply_apply_with_backup(filesystem: FileSystemPath) -> None:
@@ -309,9 +309,9 @@ def test_simply_apply_with_backup(filesystem: FileSystemPath) -> None:
     print(repr(result.output))
     assert result.exit_code == 0
     with open(os.path.join(str(filesystem), 'foo.py')) as f:
-        assert f.read() != file_to_mutate_contents
+        assert f.read() != FILE_TO_MUTATE_CONTENTS
     with open(os.path.join(str(filesystem), 'foo.py.bak')) as f:
-        assert f.read() == file_to_mutate_contents
+        assert f.read() == FILE_TO_MUTATE_CONTENTS
 
 
 def test_full_run_no_surviving_mutants(filesystem: FileSystemPath) -> None:
@@ -392,7 +392,7 @@ Survived 🙁 (14)
 
 def test_full_run_one_surviving_mutant(filesystem: FileSystemPath) -> None:
     with open(os.path.join(str(filesystem), "tests", "test_foo.py"), 'w') as f:
-        f.write(test_file_contents.replace('assert foo(2, 2) is False', ''))
+        f.write(TEST_FILE_CONTENTS.replace('assert foo(2, 2) is False', ''))
 
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-base=15.0"], catch_exceptions=False)
     print(repr(result.output))
@@ -419,7 +419,7 @@ Survived 🙁 (1)
 
 def test_full_run_one_surviving_mutant_junit(filesystem: FileSystemPath) -> None:
     with open(os.path.join(str(filesystem), "tests", "test_foo.py"), 'w') as f:
-        f.write(test_file_contents.replace('assert foo(2, 2) is False\n', ''))
+        f.write(TEST_FILE_CONTENTS.replace('assert foo(2, 2) is False\n', ''))
 
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-base=15.0"], catch_exceptions=False)
     print(repr(result.output))
@@ -480,7 +480,7 @@ def test_full_run_all_suspicious_mutant_junit(filesystem: FileSystemPath) -> Non
 
 def test_use_coverage(filesystem: FileSystemPath) -> None:
     with open(os.path.join(str(filesystem), "tests", "test_foo.py"), 'w') as f:
-        f.write(test_file_contents.replace('assert foo(2, 2) is False\n', ''))
+        f.write(TEST_FILE_CONTENTS.replace('assert foo(2, 2) is False\n', ''))
 
     # first validate that mutmut without coverage detects a surviving mutant
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-base=15.0"], catch_exceptions=False)
