@@ -21,6 +21,11 @@ def clear_mutmut_config_cache() -> None:
 
 
 def get_mutmut_config() -> Any:
+    mutmut_config = _get_mutmut_config()
+    # print(f"{mutmut_config=}")
+    return mutmut_config
+
+def _get_mutmut_config() -> Any:
     global _cached_mutmut_config
     # mutmut_config es la configuracion en forma de archivo python que define el usuario
     if _cached_mutmut_config != MUTMUT_CONFIG_NOT_DEFINED:

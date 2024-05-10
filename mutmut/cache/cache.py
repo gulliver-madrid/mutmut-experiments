@@ -44,6 +44,11 @@ else:
     db_session_ctx_manager = db_session
 
 def get_cache_path() -> Path:
+    cache_path = _get_cache_path()
+    # print(f"{cache_path=}")
+    return cache_path
+
+def _get_cache_path() -> Path:
     return get_current_project_path()/'.mutmut-cache'
 
 
