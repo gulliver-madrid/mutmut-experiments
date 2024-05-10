@@ -237,15 +237,37 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
     Creates a decorator that loads configurations from pyproject.toml and setup.cfg and applies
     these configurations to other functions that are declared with it.
     """
+    project = os.getcwd()
+    found = False
+    for arg in sys.argv:
+        if found:
+            break
+        for preffix in ('-p', '--project'):
+            if arg[:len(preffix)] == preffix:
+                if '=' in arg:
+                    _, project = arg.split('=')
+                else:
+                    project = arg[len(preffix):]
+                project = project.strip()
+                assert Path(project).exists()
+                found = True
+                break
+
     def config_from_pyproject_toml() -> dict[str, object]:
+        original = os.getcwd()
+        os.chdir(project)
         try:
             data = toml.load('pyproject.toml')['tool']['mutmut']
             assert isinstance(data, dict)
             return cast(dict[str, object], data)
         except (FileNotFoundError, KeyError):
             return {}
+        finally:
+            os.chdir(original)
 
     def config_from_setup_cfg() -> dict[str, object]:
+        original = os.getcwd()
+        os.chdir(project)
         config_parser = ConfigParser()
         config_parser.read('setup.cfg')
 
@@ -253,6 +275,8 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
             return dict(config_parser['mutmut'])
         except KeyError:
             return {}
+        finally:
+            os.chdir(original)
 
     config = config_from_pyproject_toml() or config_from_setup_cfg()
 
@@ -265,6 +289,7 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
             f(*args, **kwargs)
 
         return wrapper
+
     return decorator
 
 
