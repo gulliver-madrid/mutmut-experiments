@@ -311,14 +311,19 @@ def junitxml(dict_synonyms: str, suspicious_policy: str, untested_policy: str, p
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
 @ click.option('--dict-synonyms')
 @ click.option('-d', '--directory', help='Write the output files to DIR.')
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
 @ config_from_file(
     dict_synonyms='',
     directory='html',
 )
-def html(dict_synonyms: str, directory: str) -> NoReturn:
+def html(dict_synonyms: str, directory: str, project: str | None) -> NoReturn:
     """
     Generate a HTML report of surviving mutants.
     """
+    set_project_path(project)
+    if not get_cache_path().exists():
+        print("There is no results yet. Please run `mutmut run` first.\n")
+        sys.exit(1)
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
     create_html_report(dict_synonyms_as_list, directory)
     sys.exit(0)
