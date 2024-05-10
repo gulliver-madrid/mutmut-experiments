@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 import sys
 from types import NoneType
-from typing import Any, Final, Tuple, TYPE_CHECKING
+from typing import Any, Final, NewType, Tuple, TYPE_CHECKING
 
 from parso.tree import NodeOrLeaf, Node, BaseNode
 from parso.python.tree import ExprStmt
@@ -14,23 +14,44 @@ from mutmut.mutations import has_children, is_name_node, is_operator, mutations_
 from mutmut.parse import parse_source
 from mutmut.setup_logging import configure_logger
 
+
 MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
 
 _cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
+_cached_project_path: ProjectPath | None = None
+
+ProjectPath = NewType('ProjectPath', str)
 
 
-def get_mutmut_config() -> Any:
+def get_project_path() -> ProjectPath | None:
+    '''It could to be None. In that case, calling code probably should use os.getcwd().'''
+    return _cached_project_path
+
+
+def set_project_path(project: ProjectPath | None = None) -> None:
+    global _cached_project_path
+    _cached_project_path = project
+
+
+def get_mutmut_config(project: ProjectPath | None = None) -> Any:
     global _cached_mutmut_config
     # mutmut_config es la configuracion en forma de archivo python que define el usuario
     if _cached_mutmut_config != MUTMUT_CONFIG_NOT_DEFINED:
         return _cached_mutmut_config
+
+    if project is not None:
+        set_project_path(project)
+
+    project = get_project_path()
+
     if TYPE_CHECKING:
         mutmut_config: Any
 
     prev_path = sys.path[:]
 
-    if os.getcwd() not in sys.path:
-        sys.path.insert(0, os.getcwd())
+    if not project or project not in sys.path:
+        sys.path.insert(0, project or os.getcwd())
+
     try:
         import mutmut_config  # type: ignore  [import-not-found, no-redef]
     except ImportError:

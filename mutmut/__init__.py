@@ -31,7 +31,7 @@ import toml
 
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import list_mutations, mutate_from_context, get_mutmut_config
+from mutmut.mutate import ProjectPath, list_mutations, mutate_from_context, get_mutmut_config
 from mutmut.mutations import SkipException
 from mutmut.setup_logging import configure_logger
 from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr
@@ -108,7 +108,7 @@ ResultQueueItem: TypeAlias = (
 ResultQueue: TypeAlias = 'multiprocessing.Queue[ResultQueueItem]'
 
 
-def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_process_after: int) -> None:
+def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_process_after: int, project_path: ProjectPath | None = None) -> None:
     assert isinstance(cycle_process_after, int)
 
     def feedback(line: str) -> None:
@@ -124,7 +124,7 @@ def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_
                 break
 
             assert context
-            status = run_mutation(context, feedback)
+            status = run_mutation(context, feedback, project_path)
             results_queue.put(('status', status, context.filename, context.mutation_id))
             count += 1
             if count == cycle_process_after:
@@ -136,14 +136,14 @@ def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_
             results_queue.put(('end', None, None, None))
 
 
-def run_mutation(context: Context, callback: StrConsumer) -> StatusResultStr:
+def run_mutation(context: Context, callback: StrConsumer, project_path: ProjectPath | None = None) -> StatusResultStr:
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
     """
     from mutmut.cache.cache import cached_mutation_status
     assert context.config is not None
     assert context.filename is not None
-    mutmut_config = get_mutmut_config()
+    mutmut_config = get_mutmut_config(project_path)
     cached_status = cached_mutation_status(context.filename, context.mutation_id, context.config.hash_of_tests)
 
     if cached_status != UNTESTED and context.config.total != 1:
@@ -478,6 +478,7 @@ class MutationTestsRunner:
                            config: Config,
                            progress: Progress,
                            mutations_by_file: Dict[str, List[RelativeMutationID]] | None,
+                           *, project_path: ProjectPath | None = None
                            ) -> None:
         from mutmut.cache.cache import update_mutant_status
 
@@ -511,6 +512,7 @@ class MutationTestsRunner:
                     mutants_queue=mutants_queue,
                     results_queue=results_queue,
                     cycle_process_after=CYCLE_PROCESS_AFTER,
+                    project_path=project_path
                 )
             )
             t.start()
