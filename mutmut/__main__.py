@@ -41,7 +41,7 @@ from mutmut.cache.print_results import print_result_cache, print_result_ids_cach
 from mutmut.config import Config
 from mutmut.context import Context, RelativeMutationID
 from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutate import get_mutmut_config
+from mutmut.mutate import ProjectPath, get_mutmut_config, set_project_path
 from mutmut.mutations import mutations_by_type
 from mutmut.patch import CoveredLinesByFilename, read_patch_data
 from mutmut.setup_logging import configure_logger
@@ -124,6 +124,7 @@ def version() -> NoReturn:
 @ click.option('--tests-dir')
 @ click.option('-m', '--test-time-multiplier', default=2.0, type=float)
 @ click.option('-b', '--test-time-base', default=0.0, type=float)
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
 @ click.option('-s', '--swallow-output', help='turn off output capture', is_flag=True)
 @ click.option('--dict-synonyms')
 @ click.option('--pre-mutation')
@@ -139,8 +140,6 @@ def version() -> NoReturn:
     pre_mutation=None,
     post_mutation=None,
     use_patch_file=None,
-
-
 )
 def run(
     argument: str | None,
@@ -161,7 +160,8 @@ def run(
     simple_output: bool | None,
     no_progress: bool | None,
     ci: bool | None,
-    rerun_all: bool | None
+    rerun_all: bool | None,
+    project: str | None
 ) -> NoReturn:
     """
     Runs mutmut. You probably want to start with just trying this. If you supply a mutation ID mutmut will check just this mutant.
@@ -205,7 +205,7 @@ def run(
     sys.exit(do_run(argument, paths_to_mutate, disable_mutation_types, enable_mutation_types, runner,
                     tests_dir, test_time_multiplier, test_time_base, swallow_output, use_coverage,
                     dict_synonyms, pre_mutation, post_mutation, use_patch_file, paths_to_exclude,
-                    simple_output, no_progress, ci, rerun_all))
+                    simple_output, no_progress, ci, rerun_all, project))
 
 
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
@@ -332,6 +332,7 @@ def do_run(
     no_progress: bool | None,
     ci: bool | None,
     rerun_all: bool | None,
+    project: str | None
 ) -> int:
     """return exit code, after performing an mutation test run.
 
@@ -358,9 +359,16 @@ def do_run(
     assert isinstance(no_progress, (bool, NoneType)), no_progress
     assert isinstance(ci, (bool, NoneType))
     assert isinstance(rerun_all, (bool, NoneType)), rerun_all
+    assert isinstance(project, (str, NoneType))
     # CHECK TYPES END
 
-    mutmut_config = get_mutmut_config()
+    print(f"Paths to mutate: {paths_to_mutate}")
+    print(f"Tests directory: {tests_dir}")
+    print(f"Runner: {runner}")
+    print(f"Project: {project}")
+
+    project_path = ProjectPath(project) if project else None
+    mutmut_config = get_mutmut_config(project_path)
 
     print(f"Mutmut config defined: {mutmut_config is not None}")
 
@@ -533,7 +541,7 @@ Legend for output:
     mutation_tests_runner = MutationTestsRunner()
     try:
         mutation_tests_runner.run_mutation_tests(
-            config=config, progress=progress, mutations_by_file=mutations_by_file)
+            config=config, progress=progress, mutations_by_file=mutations_by_file, project_path=project_path)
     except Exception as e:
         traceback.print_exc()
         return compute_exit_code(progress, e)

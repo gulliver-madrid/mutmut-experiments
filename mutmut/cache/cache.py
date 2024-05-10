@@ -16,7 +16,7 @@ from typing_extensions import ParamSpec
 
 from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
 from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import mutate_from_context
+from mutmut.mutate import get_project_path, mutate_from_context
 from mutmut.setup_logging import configure_logger
 from mutmut.status import OK_KILLED, UNTESTED, StatusResultStr
 from mutmut.utils import split_lines
@@ -47,8 +47,8 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if db.provider is None:
-            cache_filename = os.path.join(os.getcwd(), '.mutmut-cache')
-            logger.info(f"El directorio donde se guarda la .mutmut-cache es {os.getcwd()}")
+            cache_filename = os.path.join(get_project_path() or os.getcwd(), '.mutmut-cache')
+            logger.info(f"El directorio donde se guarda la .mutmut-cache es {get_project_path() or os.getcwd()}")
             db.bind(provider='sqlite', filename=cache_filename, create_db=True)
 
             try:
