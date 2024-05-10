@@ -236,13 +236,17 @@ def result_ids(status: str) -> NoReturn:
 @ click.argument('mutation-id', nargs=1, required=True)
 @ click.option('--backup/--no-backup', default=False)
 @ click.option('--dict-synonyms')
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
 @ config_from_file(
     dict_synonyms='',
 )
-def apply(mutation_id: str, backup: bool, dict_synonyms: List[str]) -> NoReturn:
+def apply(mutation_id: str, backup: bool, dict_synonyms: List[str], project: str | None) -> NoReturn:
     """
     Apply a mutation on disk.
     """
+    if project is not None:
+        project = ProjectPath(project)
+    set_project_path(project)
     do_apply(mutation_id, dict_synonyms, backup)
     sys.exit(0)
 
