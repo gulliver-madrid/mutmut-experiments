@@ -262,27 +262,31 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
 
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
-    project_dir = str(get_current_project_path()).split(os.sep)[-1]
-    if isdir('lib'):
-        return 'lib'
-    elif isdir('src'):
-        return 'src'
-    elif isdir(project_dir):
-        return project_dir
-    elif isdir(project_dir.replace('-', '_')):
-        return project_dir.replace('-', '_')
-    elif isdir(project_dir.replace(' ', '_')):
-        return project_dir.replace(' ', '_')
-    elif isdir(project_dir.replace('-', '')):
-        return project_dir.replace('-', '')
-    elif isdir(project_dir.replace(' ', '')):
-        return project_dir.replace(' ', '')
-    raise FileNotFoundError(
-        'Could not figure out where the code to mutate is. '
-        'Please specify it on the command line using --paths-to-mutate, '
-        'or by adding "paths_to_mutate=code_dir" in pyproject.toml or setup.cfg to the [mutmut] '
-        'section.')
+    project_dir_name = str(get_current_project_path()).split(os.sep)[-1]
 
+    result: str | None = None
+    if isdir('lib'):
+        result = 'lib'
+    elif isdir('src'):
+        result = 'src'
+    elif isdir(project_dir_name):
+        result = project_dir_name
+    elif isdir(project_dir_name.replace('-', '_')):
+        result = project_dir_name.replace('-', '_')
+    elif isdir(project_dir_name.replace(' ', '_')):
+        result = project_dir_name.replace(' ', '_')
+    elif isdir(project_dir_name.replace('-', '')):
+        result = project_dir_name.replace('-', '')
+    elif isdir(project_dir_name.replace(' ', '')):
+        result = project_dir_name.replace(' ', '')
+
+    if result is None:
+        raise FileNotFoundError(
+            'Could not figure out where the code to mutate is. '
+            'Please specify it on the command line using --paths-to-mutate, '
+            'or by adding "paths_to_mutate=code_dir" in pyproject.toml or setup.cfg to the [mutmut] '
+            'section.')
+    return result
 
 class Progress:
     def __init__(self, total: int, output_legend: Mapping[str, str], no_progress: bool = False):
