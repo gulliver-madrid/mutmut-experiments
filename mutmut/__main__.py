@@ -254,14 +254,20 @@ def apply(mutation_id: str, backup: bool, dict_synonyms: List[str], project: str
 @ climain.command(context_settings=dict(help_option_names=['-h', '--help']))
 @ click.argument('id-or-file', nargs=1, required=False)
 @ click.option('--dict-synonyms')
+@ click.option('-p', '--project', help='base directory of the project', type=click.STRING)
 @ config_from_file(
     dict_synonyms='',
 )
-def show(id_or_file: str | None, dict_synonyms: str) -> NoReturn:
+def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoReturn:
     """
     Show a mutation diff.
     """
     assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
+
+    if project is not None:
+        project = ProjectPath(project)
+    set_project_path(project)
+
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
     if not id_or_file:
         print_result_cache()
