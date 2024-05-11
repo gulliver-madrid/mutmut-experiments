@@ -30,7 +30,7 @@ def test_add():
     yield tmpdir
     os.chdir(original)
 
-def test_project_path(filesystem_with_two_dirs: FileSystemPath) -> None:
+def test_project_path_run(filesystem_with_two_dirs: FileSystemPath) -> None:
     result_run = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', '--project=../b'], catch_exceptions=False)
     result_show = CliRunner().invoke(climain, ['show', '1', '--project=../b'], catch_exceptions=False)
     assert '1/1  🎉 1  ⏰ 0  🤔 0  🙁 0  🔇 0' in result_run.output
@@ -42,3 +42,16 @@ def test_project_path(filesystem_with_two_dirs: FileSystemPath) -> None:
 -def add(a, b): return a + b
 +def add(a, b): return a - b
 '''.strip() in result_show.output
+
+def test_project_path_show_or_apply_without_run(filesystem_with_two_dirs: FileSystemPath) -> None:
+    for command in ("show", "apply"):
+        result_show = CliRunner().invoke(climain, [command, '1', '--project=../b'], catch_exceptions=False)
+        assert result_show.exit_code == 1
+        assert 'There is no' in result_show.output
+
+def test_project_path_run_and_apply(filesystem_with_two_dirs: FileSystemPath) -> None:
+    CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', '--project=../b'], catch_exceptions=False)
+    result_apply = CliRunner().invoke(climain, ['apply', '1', '--project=../b'], catch_exceptions=False)
+    assert result_apply.exit_code == 0
+    with open("../b/foo.py", "r") as file:
+        assert file.read().strip() == "def add(a, b): return a - b"
