@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set
 
-from mutmut.cache.model import HashStr, NoTestFoundSentinel
+from src.cache.model import HashStr, NoTestFoundSentinel
 
 
 @dataclass

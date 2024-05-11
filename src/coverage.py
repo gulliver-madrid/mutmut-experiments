@@ -1,7 +1,7 @@
 import os
 from typing import Dict, List, Mapping, TypeAlias
 
-from mutmut.project import get_current_project_path
+from src.project import get_current_project_path
 
 
 FilePathStr: TypeAlias = str

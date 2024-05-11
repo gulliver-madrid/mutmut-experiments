@@ -3,13 +3,13 @@ from typing import Iterator
 
 import pytest
 
-from mutmut.mut_config_storage import reset_global_vars
+from src.mut_config_storage import reset_global_vars
 
 
 def clear_db() -> None:
     # This is a hack to get pony to forget about the old db file
     # otherwise Pony thinks we've already created the tables
-    import mutmut.cache.model as cache
+    import src.cache.model as cache
     cache.db.provider = None
     cache.db.schema = None
 

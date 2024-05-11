@@ -21,16 +21,16 @@ from typing import Any, Callable, Dict, Iterator, List, Literal, Mapping, Option
 
 import toml
 
-from mutmut.config import Config
-from mutmut.context import Context, RelativeMutationID
-from mutmut.mut_config_storage import clear_mutmut_config_cache, get_mutmut_config
-from mutmut.mutate import  list_mutations, mutate_from_context
-from mutmut.process import popen_streaming_output
-from mutmut.project import ProjectPath, get_current_project_path, set_project_path
-from mutmut.mutations import SkipException
-from mutmut.setup_logging import configure_logger
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr
-from mutmut.utils import status_printer
+from src.config import Config
+from src.context import Context, RelativeMutationID
+from src.mut_config_storage import clear_mutmut_config_cache, get_mutmut_config
+from src.mutate import  list_mutations, mutate_from_context
+from src.process import popen_streaming_output
+from src.project import ProjectPath, get_current_project_path, set_project_path
+from src.mutations import SkipException
+from src.setup_logging import configure_logger
+from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusResultStr
+from src.utils import status_printer
 
 __version__ = '2.4.5'
 
@@ -68,7 +68,7 @@ def queue_mutants(
     mutations_by_file: Dict[str, List[RelativeMutationID]],
     project: ProjectPath|None = None
 ) -> None:
-    from mutmut.cache.cache import get_cached_mutation_statuses
+    from src.cache.cache import get_cached_mutation_statuses
     set_project_path(project)
 
     try:
@@ -144,7 +144,7 @@ def run_mutation(context: Context, callback: StrConsumer, project_path: ProjectP
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
     """
-    from mutmut.cache.cache import cached_mutation_status
+    from src.cache.cache import cached_mutation_status
     assert context.config is not None
     assert context.filename is not None
     if project_path is not None:
@@ -374,7 +374,7 @@ class Progress:
 
 def get_mutations_by_file_from_cache(mutation_pk: Any) -> dict[str, list[RelativeMutationID]]:
     """No code uses this function"""
-    from mutmut.cache.cache import filename_and_mutation_id_from_pk
+    from src.cache.cache import filename_and_mutation_id_from_pk
     filename, mutation_id = filename_and_mutation_id_from_pk(int(mutation_pk))
     return {filename: [mutation_id]}
 
@@ -448,7 +448,7 @@ class MutationTestsRunner:
                            mutations_by_file: Dict[str, List[RelativeMutationID]] | None,
                            *, project_path: ProjectPath | None = None
                            ) -> None:
-        from mutmut.cache.cache import update_mutant_status
+        from src.cache.cache import update_mutant_status
 
         # Need to explicitly use the spawn method for python < 3.8 on macOS
         mp_ctx = multiprocessing.get_context('spawn')
@@ -540,7 +540,7 @@ def add_mutations_by_file(
 
     try:
         mutations_by_file[filename] = list_mutations(context)
-        from mutmut.cache.cache import register_mutants
+        from src.cache.cache import register_mutants
 
         register_mutants(mutations_by_file)
     except Exception as e:

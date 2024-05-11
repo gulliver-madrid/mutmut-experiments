@@ -1,7 +1,7 @@
 import inspect
 from typing import Callable
 
-from mutmut.setup_logging import configure_logger
+from src.setup_logging import configure_logger
 
 PROJECT_DIRECTORY_NAME = "mutmut-experiments"
 IGNORE = [".venv", "Users"]

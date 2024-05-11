@@ -20,18 +20,18 @@ from unittest.mock import (
 import pytest
 from click.testing import CliRunner
 
-from mutmut import (
+from src import (
     compute_exit_code,
     Progress,
     python_source_files,
     __version__,
 )
-from mutmut.__main__ import climain
-from mutmut.coverage import read_coverage_data
-from mutmut.mutations import mutations_by_type
-from mutmut.project import set_project_path
-from mutmut.process import popen_streaming_output
-from mutmut.status import MUTANT_STATUSES
+from src.__main__ import climain
+from src.coverage import read_coverage_data
+from src.mutations import mutations_by_type
+from src.project import set_project_path
+from src.process import popen_streaming_output
+from src.status import MUTANT_STATUSES
 
 from helpers import FileSystemPath, open_utf8
 

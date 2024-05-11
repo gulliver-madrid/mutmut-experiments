@@ -16,24 +16,24 @@ base = Path(__file__).parent.parent
 if str(base) not in sys.path:
     sys.path.insert(0, str(base))
 
-from mutmut import (
+from src import (
     mutate_file,
     __version__,
     config_from_file,
 )
-from mutmut.cache.cache import (
+from src.cache.cache import (
     get_cache_path,
     filename_and_mutation_id_from_pk,
     update_line_numbers,
     get_unified_diff)
-from mutmut.cache.html import create_html_report
-from mutmut.cache.junitxml import print_result_cache_junitxml
-from mutmut.cache.print_results import print_result_cache, print_result_ids_cache
-from mutmut.context import Context, RelativeMutationID
-from mutmut.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
-from mutmut.project import set_project_path
-from mutmut.setup_logging import configure_logger
-from mutmut.status import MUTANT_STATUSES, StatusStr
+from src.cache.html import create_html_report
+from src.cache.junitxml import print_result_cache_junitxml
+from src.cache.print_results import print_result_cache, print_result_ids_cache
+from src.context import Context, RelativeMutationID
+from src.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
+from src.project import set_project_path
+from src.setup_logging import configure_logger
+from src.status import MUTANT_STATUSES, StatusStr
 
 logger = configure_logger(__name__)
 

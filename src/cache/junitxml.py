@@ -7,9 +7,9 @@ from typing import Any
 from junit_xml import TestSuite, TestCase, to_xml_report_string  # type: ignore [import-untyped]
 from pony.orm import select
 
-from mutmut.cache.cache import db_session, get_unified_diff, init_db
-from mutmut.cache.model import get_mutants
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_SUSPICIOUS, UNTESTED
+from src.cache.cache import db_session, get_unified_diff, init_db
+from src.cache.model import get_mutants
+from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_SUSPICIOUS, UNTESTED
 
 
 def print_result_cache_junitxml(dict_synonyms: list[str], suspicious_policy: str, untested_policy: str) -> None:

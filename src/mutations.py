@@ -9,9 +9,9 @@ from parso.python.tree import Name, Number, Keyword, FStringStart, FStringEnd, M
 from parso.python.prefix import PrefixPart
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
-from mutmut.context import Context
-from mutmut.parse import parse_source
-from mutmut.setup_logging import configure_logger
+from src.context import Context
+from src.parse import parse_source
+from src.setup_logging import configure_logger
 
 
 logger = configure_logger(__name__)
