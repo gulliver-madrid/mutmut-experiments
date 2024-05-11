@@ -333,4 +333,4 @@ def html(dict_synonyms: str, directory: str, project: str | None) -> NoReturn:
 
 
 if __name__ == '__main__':
-    climain()
+    climain(prog_name='mut')
