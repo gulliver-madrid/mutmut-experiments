@@ -11,6 +11,7 @@ from pony.orm import select
 from src.cache.cache import get_unified_diff_from_filename_and_mutation_id, db_session, init_db
 from src.cache.model import Mutant, get_mutants
 from src.context import RelativeMutationID
+from src.project import get_current_project_path
 from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, StatusResultStr
 
 
@@ -18,6 +19,10 @@ from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIP
 @db_session
 def create_html_report(dict_synonyms: list[str], directory: str) -> None:
     mutants = sorted(list(select(x for x in get_mutants())), key=lambda x: x.line.sourcefile.filename)
+
+    project_path = get_current_project_path()
+    original = os.getcwd()
+    os.chdir(project_path)
 
     os.makedirs(directory, exist_ok=True)
 
@@ -91,3 +96,5 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
                 f.write('</body></html>')
 
         index_file.write('</table></body></html>')
+
+        os.chdir(original)
