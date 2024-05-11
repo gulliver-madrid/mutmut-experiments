@@ -239,7 +239,7 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
     """
     project = os.getcwd()
     found = False
-    for arg in sys.argv:
+    for i, arg in enumerate(sys.argv):
         if found:
             break
         for preffix in ('-p', '--project'):
@@ -247,7 +247,7 @@ def config_from_file(**defaults: Any) -> Callable[[Callable[P, None]], Callable[
                 if '=' in arg:
                     _, project = arg.split('=')
                 else:
-                    project = arg[len(preffix):]
+                    project = sys.argv[i + 1]
                 project = project.strip()
                 assert Path(project).exists()
                 found = True
