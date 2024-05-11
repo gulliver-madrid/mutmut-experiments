@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, Mapping, NewTyp
 from pony.orm import Database, Required, Set, Optional, PrimaryKey
 from typing_extensions import Self
 
-from mutmut.status import StatusResultStr
+from src.status import StatusResultStr
 
 HashStr = NewType('HashStr', str)
 

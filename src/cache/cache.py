@@ -14,13 +14,13 @@ from typing import TYPE_CHECKING, Any, Callable, ContextManager, Dict, Iterator,
 from pony.orm import select, RowNotFound, ERDiagramError, OperationalError
 from typing_extensions import ParamSpec
 
-from mutmut.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
-from mutmut.context import Context, RelativeMutationID
-from mutmut.mutate import mutate_from_context
-from mutmut.project import get_current_project_path
-from mutmut.setup_logging import configure_logger
-from mutmut.status import OK_KILLED, UNTESTED, StatusResultStr
-from mutmut.utils import split_lines
+from src.cache.model import NO_TESTS_FOUND, HashStr, Line, MiscData, Mutant, NoTestFoundSentinel, SourceFile, db, get_mutant, get_mutants, get_or_create
+from src.context import Context, RelativeMutationID
+from src.mutate import mutate_from_context
+from src.project import get_current_project_path
+from src.setup_logging import configure_logger
+from src.status import OK_KILLED, UNTESTED, StatusResultStr
+from src.utils import split_lines
 
 current_db_version = 4
 

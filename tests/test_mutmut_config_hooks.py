@@ -6,7 +6,7 @@ from click.testing import CliRunner
 import pytest
 
 from helpers import FileSystemPath
-from mutmut.__main__ import climain
+from src.__main__ import climain
 
 
 @pytest.fixture

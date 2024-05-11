@@ -6,19 +6,19 @@ from typing import Any, Literal, cast
 from pytest import raises, fixture
 from unittest.mock import MagicMock, patch
 
-from mutmut import (
+from src import (
     MutationTestsRunner,
     check_mutants,
 )
-from mutmut.config import Config
-from mutmut.context import Context
-from mutmut.mutate import mutate_from_context
-from mutmut.mutations import (
+from src.config import Config
+from src.context import Context
+from src.mutate import mutate_from_context
+from src.mutations import (
     partition_node_list,
     name_mutation)
-from mutmut.patch import read_patch_data
-from mutmut.setup_logging import configure_logger
-from mutmut.status import OK_KILLED
+from src.patch import read_patch_data
+from src.setup_logging import configure_logger
+from src.status import OK_KILLED
 
 logger = configure_logger(__name__)
 
@@ -45,7 +45,7 @@ def check_mutants_stub(**kwargs: Any) -> None:
         sleep(0.15)
         return OK_KILLED
     check_mutants_original = check_mutants
-    with patch('mutmut.run_mutation', run_mutation_stub):
+    with patch('src.run_mutation', run_mutation_stub):
         check_mutants_original(**kwargs)
 
 
@@ -65,14 +65,14 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
         for _ in range(total_mutants):
             kwargs['mutants_queue'].put(('mutant', Context(config=config_stub)))
         kwargs['mutants_queue'].put(('end', None))
-    monkeypatch.setattr('mutmut.queue_mutants', queue_mutants_stub)
+    monkeypatch.setattr('src.queue_mutants', queue_mutants_stub)
 
     def update_mutant_status_stub(**_: Any) -> None:
         sleep(0.1)
 
-    monkeypatch.setattr('mutmut.check_mutants', check_mutants_stub)
-    monkeypatch.setattr('mutmut.cache.cache.update_mutant_status', update_mutant_status_stub)
-    monkeypatch.setattr('mutmut.CYCLE_PROCESS_AFTER', cycle_process_after)
+    monkeypatch.setattr('src.check_mutants', check_mutants_stub)
+    monkeypatch.setattr('src.cache.cache.update_mutant_status', update_mutant_status_stub)
+    monkeypatch.setattr('src.CYCLE_PROCESS_AFTER', cycle_process_after)
 
     progress_mock = MagicMock()
     progress_mock.registered_mutants = 0

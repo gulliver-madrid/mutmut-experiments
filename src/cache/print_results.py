@@ -5,10 +5,10 @@ from io import open
 from itertools import groupby
 from typing import TYPE_CHECKING
 
-from mutmut.cache.cache import db_session, get_unified_diff, init_db, select_mutants_by_status
-from mutmut.cache.model import Mutant
-from mutmut.utils import ranges
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
+from src.cache.cache import db_session, get_unified_diff, init_db, select_mutants_by_status
+from src.cache.model import Mutant
+from src.utils import ranges
+from src.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
 
 if TYPE_CHECKING:
     from pony.orm import Query

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from mutmut.project import get_current_project_path, set_project_path
+from src.project import get_current_project_path, set_project_path
 
 
 MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'

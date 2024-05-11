@@ -3,7 +3,7 @@ from typing import Iterator
 from click.testing import CliRunner
 import pytest
 
-from mutmut.__main__ import climain
+from src.__main__ import climain
 
 from helpers import FileSystemPath
 

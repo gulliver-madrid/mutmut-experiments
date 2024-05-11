@@ -8,10 +8,10 @@ from typing import Optional
 
 from parso.tree import NodeOrLeaf
 
-from mutmut.config import Config
-from mutmut.project import get_current_project_path
-from mutmut.setup_logging import configure_logger
-from mutmut.utils import split_lines
+from src.config import Config
+from src.project import get_current_project_path
+from src.setup_logging import configure_logger
+from src.utils import split_lines
 
 logger = configure_logger(__name__)
 

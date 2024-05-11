@@ -12,14 +12,14 @@ from typing import Final
 import click
 from glob2 import glob # type: ignore [import-untyped]
 
-from mutmut.process import popen_streaming_output
+from src.process import popen_streaming_output
 
 # ensure mutmut modules are detected
 base = Path(__file__).parent.parent
 if str(base) not in sys.path:
     sys.path.insert(0, str(base))
 
-from mutmut import (
+from src import (
     MutationTestsRunner,
     __version__,
     guess_paths_to_mutate,
@@ -29,21 +29,21 @@ from mutmut import (
     compute_exit_code,
     print_status,
 )
-from mutmut.cache.cache import (
+from src.cache.cache import (
     cached_hash_of_tests,
     hash_of_tests,
     filename_and_mutation_id_from_pk,
     cached_test_time,
     set_cached_test_time,
     update_line_numbers)
-from mutmut.config import Config
-from mutmut.context import RelativeMutationID
-from mutmut.coverage import check_coverage_data_filepaths, read_coverage_data
-from mutmut.mutations import mutations_by_type
-from mutmut.mut_config_storage import MUTMUT_CONFIG_NOT_DEFINED, clear_mutmut_config_cache, get_mutmut_config
-from mutmut.patch import CoveredLinesByFilename, read_patch_data
-from mutmut.project import get_current_project_path, get_project_path, set_project_path
-from mutmut.utils import split_lines, split_paths
+from src.config import Config
+from src.context import RelativeMutationID
+from src.coverage import check_coverage_data_filepaths, read_coverage_data
+from src.mutations import mutations_by_type
+from src.mut_config_storage import MUTMUT_CONFIG_NOT_DEFINED, clear_mutmut_config_cache, get_mutmut_config
+from src.patch import CoveredLinesByFilename, read_patch_data
+from src.project import get_current_project_path, get_project_path, set_project_path
+from src.utils import split_lines, split_paths
 
 DEFAULT_RUNNER = 'python -m pytest -x --assert=plain'
 

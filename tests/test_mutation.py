@@ -3,15 +3,15 @@
 import pytest
 
 
-from mutmut.context import ALL, Context, RelativeMutationID
-from mutmut.mutate import mutate_from_context, list_mutations
-from mutmut.mutations import (
+from src.context import ALL, Context, RelativeMutationID
+from src.mutate import mutate_from_context, list_mutations
+from src.mutations import (
     array_subscript_pattern,
     function_call_pattern,
     ASTPattern
 )
-from mutmut.parse import parse_source
-from mutmut.utils import split_lines
+from src.parse import parse_source
+from src.utils import split_lines
 
 
 def test_matches_py3() -> None:

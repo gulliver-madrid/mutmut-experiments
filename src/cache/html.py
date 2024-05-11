@@ -8,10 +8,10 @@ from os.path import join, dirname
 
 from pony.orm import select
 
-from mutmut.cache.cache import get_unified_diff_from_filename_and_mutation_id, db_session, init_db
-from mutmut.cache.model import Mutant, get_mutants
-from mutmut.context import RelativeMutationID
-from mutmut.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, StatusResultStr
+from src.cache.cache import get_unified_diff_from_filename_and_mutation_id, db_session, init_db
+from src.cache.model import Mutant, get_mutants
+from src.context import RelativeMutationID
+from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_KILLED, OK_SUSPICIOUS, SKIPPED, StatusResultStr
 
 
 @init_db
