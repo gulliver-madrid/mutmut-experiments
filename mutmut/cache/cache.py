@@ -49,7 +49,7 @@ def get_cache_path() -> Path:
     return cache_path
 
 def _get_cache_path() -> Path:
-    return get_current_project_path()/'.mutmut-cache'
+    return get_current_project_path() / '.mutmut-cache'
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
