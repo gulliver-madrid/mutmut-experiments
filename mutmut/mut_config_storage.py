@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from mutmut.project import get_current_project_path
+from mutmut.project import get_current_project_path, set_project_path
 
 
 MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
@@ -14,6 +14,10 @@ MUTMUT_CONFIG_NOT_DEFINED = 'Mutmut Config Not Defined'
 # global variable
 _cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
 
+
+def reset_global_vars() -> None:
+    clear_mutmut_config_cache()
+    set_project_path()
 
 def clear_mutmut_config_cache() -> None:
     global _cached_mutmut_config
