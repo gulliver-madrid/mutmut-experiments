@@ -1,3 +1,44 @@
+mutmut-experiments - fork of mutmut
+===================================
+
+This is a fork of `Mutmut <https://github.com/boxed/mutmut>`_. For most use cases the original project is probably what you are looking for.
+This fork is focused on improving code modularity and cohesion, with the intent of enhancing  the usability as well.
+It also adds the ``--project`` option to commands,allowing them to be executed from a different directory.
+
+**Warning**: force push risks.
+
+How to use
+----------
+
+After cloning the project locally, you can create a custom alias ``mut`` (using features of your Operative System) to execute this project. For example, in Windows, you could create a ``mut.bat`` batch script with the following content and place it in a directory in your path:
+
+.. code-block:: bat
+
+    @echo off
+    set mut_path=<your path to mutmut-experiments>
+
+    poetry -C %mut_path% run python %mut_path%\src %*
+
+This way, you can call ``mut.bat`` from the directory of your project, for example with:
+
+.. code-block:: console
+
+    mut run --paths-to-mutate=src --tests-dir=tests
+
+or you can call the same script from another directory using the ``--project`` option:
+
+.. code-block:: console
+
+    mut run --project=<path to your project> --paths-to-mutate=src --tests-dir=tests
+
+.. note::
+
+   The idea behind using a specific alias ``mut`` to execute this project is to preserve the name ``mutmut`` for the original project. The configuration (in a ``pyproject.toml`` file, ``setup.cfg``, and/or ``mutmut_config.py``) continues to use ``mutmut`` to avoid duplications, as the settings remain the same as those of the original project for now.
+
+What follows is the content of the original Mutmut README, which is likely all you need to effectively use this fork, in addition to this introduction.
+
+Happy mutation testing!!
+
 mutmut - python mutation tester
 ===============================
 
