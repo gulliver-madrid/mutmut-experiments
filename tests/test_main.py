@@ -77,24 +77,12 @@ def filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
 
     yield tmpdir
 
-    # This is a hack to get pony to forget about the old db file
-    # otherwise Pony thinks we've already created the tables
-    import mutmut.cache.model as cache
-    cache.db.provider = None
-    cache.db.schema = None
-
 
 @pytest.fixture
 def single_mutant_filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
     create_filesystem(tmpdir, "def foo():\n    return 1\n", "from foo import *\ndef test_foo():\n    assert foo() == 1")
 
     yield tmpdir
-
-    # This is a hack to get pony to forget about the old db file
-    # otherwise Pony thinks we've already created the tables
-    import mutmut.cache.model as cache
-    cache.db.provider = None
-    cache.db.schema = None
 
 
 @pytest.fixture
@@ -113,11 +101,6 @@ def test_nothing(): assert True
 
     yield tmpdir
 
-    # This is a hack to get pony to forget about the old db file
-    # otherwise Pony thinks we've already created the tables
-    import mutmut.cache.model as cache
-    cache.db.provider = None
-    cache.db.schema = None
 
 
 def create_filesystem(tmpdir: FileSystemPath, file_to_mutate_contents: str, test_file_contents: str) -> None:
