@@ -562,7 +562,9 @@ def test_output_result_ids(filesystem: FileSystemPath) -> None:
     # Generate the results
     CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--simple-output"], catch_exceptions=False)
     # Check the output for the parts that are zero
-    for attribute in set(MUTANT_STATUSES.keys()) - {"killed"}:
+    for attribute in set(MUTANT_STATUSES.keys()):
+        if attribute == "killed":
+            continue
         assert CliRunner().invoke(climain, ['result-ids', attribute], catch_exceptions=False).output.strip() == ""
     # Check that "killed" contains all IDs
     killed_list = " ".join(str(num) for num in range(1, 15))
