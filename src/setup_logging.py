@@ -45,6 +45,7 @@ logger = configure_logger(__name__)
 
 def inspect_stack() -> None:
     import inspect
+
     logger.info("\n\n---start---")
 
     stack = inspect.stack()

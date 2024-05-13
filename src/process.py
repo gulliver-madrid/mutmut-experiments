@@ -8,7 +8,6 @@ from threading import Timer
 from typing import Any, Callable, Optional
 
 
-
 def popen_streaming_output(
     cmd: str, callback: Callable[[str], None], timeout: Optional[float] = None
 ) -> int:
@@ -22,7 +21,7 @@ def popen_streaming_output(
         the timeout time
     :return: the return code of the executed subprocess
     """
-    if os.name == 'nt':  # pragma: no cover
+    if os.name == "nt":  # pragma: no cover
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -33,9 +32,7 @@ def popen_streaming_output(
     else:
         master, slave = os.openpty()  # type: ignore [attr-defined]
         process = subprocess.Popen(
-            shlex.split(cmd, posix=True),
-            stdout=slave,
-            stderr=slave
+            shlex.split(cmd, posix=True), stdout=slave, stderr=slave
         )
         stdout = os.fdopen(master)  # type: ignore [assignment]
         os.close(slave)
@@ -55,7 +52,7 @@ def popen_streaming_output(
     line: bytes | str
     while process.returncode is None:
         try:
-            if os.name == 'nt':  # pragma: no cover
+            if os.name == "nt":  # pragma: no cover
                 assert stdout is not None
                 line = stdout.readline()
                 # windows gives readline() raw stdout as a b''
@@ -76,7 +73,11 @@ def popen_streaming_output(
             # won't get as nice feedback.
             pass
         if not timer.is_alive():
-            raise TimeoutError("subprocess running command '{}' timed out after {} seconds".format(cmd, timeout))
+            raise TimeoutError(
+                "subprocess running command '{}' timed out after {} seconds".format(
+                    cmd, timeout
+                )
+            )
         process.poll()
 
     # we have returned from the subprocess cancel the timer if it is running

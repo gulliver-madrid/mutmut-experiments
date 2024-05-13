@@ -20,29 +20,31 @@ logger = configure_logger(__name__)
 # We have a global whitelist for constants of the pattern __all__, __version__, etc
 
 dunder_whitelist: Final[list[str]] = [
-    'all',
-    'version',
-    'title',
-    'package_name',
-    'author',
-    'description',
-    'email',
-    'version',
-    'license',
-    'copyright',
+    "all",
+    "version",
+    "title",
+    "package_name",
+    "author",
+    "description",
+    "email",
+    "version",
+    "license",
+    "copyright",
 ]
 
 
 def is_dunder_name(name: str) -> bool:
-    return name.startswith('__') and name.endswith('__') and name[2:-2] in dunder_whitelist
+    return (
+        name.startswith("__") and name.endswith("__") and name[2:-2] in dunder_whitelist
+    )
 
 
 def parse_checking_errors(source: str, filename: str | None) -> Any:
     try:
         result = parse_source(source, error_recovery=False)
     except Exception:
-        print('Failed to parse {}. Internal error from parso follows.'.format(filename))
-        print('----------------------------------')
+        print("Failed to parse {}. Internal error from parso follows.".format(filename))
+        print("----------------------------------")
         raise
     return result
 
@@ -53,9 +55,9 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
     """
     result = parse_checking_errors(context.source, context.filename)
     _mutate_list_of_nodes(result, context=context)
-    mutated_source: str = result.get_code().replace(' not not ', ' ')
+    mutated_source: str = result.get_code().replace(" not not ", " ")
     if context.remove_newline_at_end:
-        assert mutated_source[-1] == '\n'
+        assert mutated_source[-1] == "\n"
         mutated_source = mutated_source[:-1]
 
     # If we said we mutated the code, check that it has actually changed
@@ -63,7 +65,8 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
         if context.source == mutated_source:
             raise RuntimeError(
                 "Mutation context states that a mutation occurred but the "
-                "mutated source remains the same as original")
+                "mutated source remains the same as original"
+            )
     context.mutated_source = mutated_source
     return mutated_source, len(context.performed_mutation_ids)
 
@@ -73,21 +76,21 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
     mutmut_config = get_mutmut_config()
     context.stack.append(node)
     try:
-        if node.type in ('tfpdef', 'import_from', 'import_name'):
+        if node.type in ("tfpdef", "import_from", "import_name"):
             return
 
-        if node.type == 'atom_expr':
+        if node.type == "atom_expr":
             assert isinstance(node, Node)
             if node.children:
                 first = node.children[0]
-                if is_name_node(first) and first.value == '__import__':
+                if is_name_node(first) and first.value == "__import__":
                     return
 
         if node.start_pos[0] - 1 != context.current_line_index:
             context.current_line_index = node.start_pos[0] - 1
             context.index = 0  # indexes are unique per line, so start over here!
 
-        if node.type == 'expr_stmt':
+        if node.type == "expr_stmt":
             assert isinstance(node, ExprStmt)
             if node.children:
                 first = node.children[0]
@@ -95,7 +98,7 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
                     return
 
         # Avoid mutating pure annotations
-        if node.type == 'annassign':
+        if node.type == "annassign":
             assert has_children(node)
             if len(node.children) == 2:
                 return
@@ -120,8 +123,8 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
             new: object = value(
                 context=context,
                 node=node,
-                value=getattr(node, 'value', None),
-                children=getattr(node, 'children', None),
+                value=getattr(node, "value", None),
+                children=getattr(node, "children", None),
             )
 
             assert isinstance(new, (str, list, NoneType))
@@ -139,10 +142,12 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
             for new in reversed(new_list):
                 assert not callable(new)
                 if new is not None and new != old:
-                    if hasattr(mutmut_config, 'pre_mutation_ast'):
+                    if hasattr(mutmut_config, "pre_mutation_ast"):
                         mutmut_config.pre_mutation_ast(context=context)
                     if context.should_mutate(node):
-                        context.performed_mutation_ids.append(context.mutation_id_of_current_index)
+                        context.performed_mutation_ids.append(
+                            context.mutation_id_of_current_index
+                        )
                         setattr(node, key, new)
                     context.index += 1
                 # this is just an optimization to stop early
@@ -158,10 +163,14 @@ def _mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
     return_annotation_started = False
 
     for child_node in node.children:
-        if is_operator(child_node) and child_node.value == '->':
+        if is_operator(child_node) and child_node.value == "->":
             return_annotation_started = True
 
-        if return_annotation_started and is_operator(child_node) and child_node.value == ':':
+        if (
+            return_annotation_started
+            and is_operator(child_node)
+            and child_node.value == ":"
+        ):
             return_annotation_started = False
 
         if return_annotation_started:

@@ -9,11 +9,13 @@ IGNORE = [".venv", "Users"]
 logger = configure_logger(__name__)
 
 
-def print_function_stack(max_deep: int = 3, log: Callable[[str], None] = logger.info) -> None:
+def print_function_stack(
+    max_deep: int = 3, log: Callable[[str], None] = logger.info
+) -> None:
     # Gets the current call stack
     stack = inspect.stack()
     log("\nCall stack:")
-    for frame in stack[1:max_deep + 1]:  # start with the caller
+    for frame in stack[1 : max_deep + 1]:  # start with the caller
         # Relevant information in each stack frame
         info = frame.filename, frame.lineno, frame.function
         filepath = info[0]

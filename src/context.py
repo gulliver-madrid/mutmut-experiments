@@ -24,7 +24,7 @@ class RelativeMutationID:
     filename: Optional[str] = field(default=None, compare=False, hash=False)
 
 
-ALL = RelativeMutationID(filename='%all%', line='%all%', index=-1, line_number=-1)
+ALL = RelativeMutationID(filename="%all%", line="%all%", index=-1, line_number=-1)
 
 
 class Context:
@@ -49,14 +49,17 @@ class Context:
         self.current_line_index = 0
         self.filename = filename
         self.stack: list[NodeOrLeaf] = []
-        self.dict_synonyms: list[str] = (dict_synonyms or []) + ['dict']
+        self.dict_synonyms: list[str] = (dict_synonyms or []) + ["dict"]
         self._source_by_line_number: list[str] | None = None
         self._pragma_no_mutate_lines: set[int] | None = None
         self.config = config
         self.skip: bool = False
 
     def exclude_line(self) -> bool:
-        return self.current_line_index in self.pragma_no_mutate_lines or self.should_exclude()
+        return (
+            self.current_line_index in self.pragma_no_mutate_lines
+            or self.should_exclude()
+        )
 
     def should_exclude(self) -> bool:
         config = self.config
@@ -64,7 +67,9 @@ class Context:
             return False
 
         assert self.filename is not None
-        covered_lines: list[int] | None = config.covered_lines_by_filename.get(self.filename)
+        covered_lines: list[int] | None = config.covered_lines_by_filename.get(
+            self.filename
+        )
 
         if covered_lines is None and config.coverage_data is not None:
             covered_lines = self._get_covered_lines_from_coverage_data()
@@ -94,8 +99,8 @@ class Context:
         return self._source
 
     def _set_source(self, source: str | None) -> None:
-        if source and source[-1] != '\n':
-            source += '\n'
+        if source and source[-1] != "\n":
+            source += "\n"
             self.remove_newline_at_end = True
         self._source = source
 
@@ -112,7 +117,12 @@ class Context:
 
     @property
     def mutation_id_of_current_index(self) -> RelativeMutationID:
-        return RelativeMutationID(filename=self.filename, line=self.current_source_line, index=self.index, line_number=self.current_line_index)
+        return RelativeMutationID(
+            filename=self.filename,
+            line=self.current_source_line,
+            index=self.index,
+            line_number=self.current_line_index,
+        )
 
     @property
     def pragma_no_mutate_lines(self) -> set[int]:
@@ -120,7 +130,8 @@ class Context:
             self._pragma_no_mutate_lines = {
                 i
                 for i, line in enumerate(self.source_by_line_number)
-                if '# pragma:' in line and 'no mutate' in line.partition('# pragma:')[-1]
+                if "# pragma:" in line
+                and "no mutate" in line.partition("# pragma:")[-1]
             }
         return self._pragma_no_mutate_lines
 
