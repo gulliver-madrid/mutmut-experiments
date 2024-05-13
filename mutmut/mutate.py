@@ -3,10 +3,9 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, Final, Tuple
+from typing import Any, Final, Tuple, TYPE_CHECKING
 
-
-from parso.tree import NodeOrLeaf, Node, Leaf, BaseNode
+from parso.tree import NodeOrLeaf, Node, BaseNode
 from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context, RelativeMutationID
@@ -15,7 +14,8 @@ from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
 
 # mutmut_config es la configuracion en forma de archivo python que define el usuario
-mutmut_config: Any
+if TYPE_CHECKING:
+    mutmut_config: Any
 
 if os.getcwd() not in sys.path:
     sys.path.insert(0, os.getcwd())
