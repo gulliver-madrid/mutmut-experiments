@@ -1,4 +1,3 @@
-
 import os
 from pathlib import Path
 from time import sleep
@@ -13,9 +12,7 @@ from src import (
 from src.config import Config
 from src.context import Context
 from src.mutate import mutate_from_context
-from src.mutations import (
-    partition_node_list,
-    name_mutation)
+from src.mutations import partition_node_list, name_mutation
 from src.patch import read_patch_data
 from src.setup_logging import configure_logger
 from src.status import OK_KILLED
@@ -29,7 +26,7 @@ def test_partition_node_list_no_nodes() -> None:
 
 
 def test_name_mutation_simple_mutants() -> None:
-    assert name_mutation(None, 'True') == 'False'
+    assert name_mutation(None, "True") == "False"
 
 
 def test_context_exclude_line() -> None:
@@ -41,11 +38,12 @@ def test_context_exclude_line() -> None:
 
 
 def check_mutants_stub(**kwargs: Any) -> None:
-    def run_mutation_stub(*_: object) -> Literal['ok_killed']:
+    def run_mutation_stub(*_: object) -> Literal["ok_killed"]:
         sleep(0.15)
         return OK_KILLED
+
     check_mutants_original = check_mutants
-    with patch('src.run_mutation', run_mutation_stub):
+    with patch("src.run_mutation", run_mutation_stub):
         check_mutants_original(**kwargs)
 
 
@@ -63,16 +61,19 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
 
     def queue_mutants_stub(**kwargs: Any) -> None:
         for _ in range(total_mutants):
-            kwargs['mutants_queue'].put(('mutant', Context(config=config_stub)))
-        kwargs['mutants_queue'].put(('end', None))
-    monkeypatch.setattr('src.queue_mutants', queue_mutants_stub)
+            kwargs["mutants_queue"].put(("mutant", Context(config=config_stub)))
+        kwargs["mutants_queue"].put(("end", None))
+
+    monkeypatch.setattr("src.queue_mutants", queue_mutants_stub)
 
     def update_mutant_status_stub(**_: Any) -> None:
         sleep(0.1)
 
-    monkeypatch.setattr('src.check_mutants', check_mutants_stub)
-    monkeypatch.setattr('src.cache.cache.update_mutant_status', update_mutant_status_stub)
-    monkeypatch.setattr('src.CYCLE_PROCESS_AFTER', cycle_process_after)
+    monkeypatch.setattr("src.check_mutants", check_mutants_stub)
+    monkeypatch.setattr(
+        "src.cache.cache.update_mutant_status", update_mutant_status_stub
+    )
+    monkeypatch.setattr("src.CYCLE_PROCESS_AFTER", cycle_process_after)
 
     progress_mock = MagicMock()
     progress_mock.registered_mutants = 0
@@ -109,7 +110,9 @@ def test_read_patch_data_new_empty_file_not_in_the_list(testpatches_path: Path) 
     assert not new_empty_file_name in new_empty_file_changes
 
 
-def test_read_patch_data_removed_empty_file_not_in_the_list(testpatches_path: Path) -> None:
+def test_read_patch_data_removed_empty_file_not_in_the_list(
+    testpatches_path: Path,
+) -> None:
     # arrange
     existing_empty_file_name = "existing_empty_file.txt"
     remove_empty_file_patch = testpatches_path / "remove_empty_file.patch"
@@ -121,7 +124,9 @@ def test_read_patch_data_removed_empty_file_not_in_the_list(testpatches_path: Pa
     assert existing_empty_file_name not in remove_empty_file_changes
 
 
-def test_read_patch_data_renamed_empty_file_not_in_the_list(testpatches_path: Path) -> None:
+def test_read_patch_data_renamed_empty_file_not_in_the_list(
+    testpatches_path: Path,
+) -> None:
     # arrange
     renamed_empty_file_name = "renamed_existing_empty_file.txt"
     renamed_empty_file_patch = testpatches_path / "renamed_empty_file.patch"
@@ -159,9 +164,13 @@ def test_read_patch_data_edited_line_is_in_the_list(testpatches_path: Path) -> N
     assert file_changes[file_name] == [2]  # line is added between 2nd and 3rd
 
 
-def test_read_patch_data_edited_line_in_subfolder_is_in_the_list(testpatches_path: Path) -> None:
+def test_read_patch_data_edited_line_in_subfolder_is_in_the_list(
+    testpatches_path: Path,
+) -> None:
     # arrange
-    file_name = os.path.join("sub", "existing_file.txt")  # unix will use "/", windows "\" to join
+    file_name = os.path.join(
+        "sub", "existing_file.txt"
+    )  # unix will use "/", windows "\" to join
     file_patch = testpatches_path / "edit_existing_line_in_subfolder.patch"
 
     # act
@@ -172,7 +181,9 @@ def test_read_patch_data_edited_line_in_subfolder_is_in_the_list(testpatches_pat
     assert file_changes[file_name] == [2]  # line is added between 2nd and 3rd
 
 
-def test_read_patch_data_renamed_file_edited_line_is_in_the_list(testpatches_path: Path) -> None:
+def test_read_patch_data_renamed_file_edited_line_is_in_the_list(
+    testpatches_path: Path,
+) -> None:
     # arrange
     original_file_name = "existing_file.txt"
     new_file_name = "renamed_existing_file.txt"
@@ -192,7 +203,7 @@ def test_read_patch_data_mutliple_files(testpatches_path: Path) -> None:
     expected_changes = {
         "existing_file.txt": [2, 3],
         "existing_file_2.txt": [4, 5],
-        "new_file.txt": [1, 2, 3]
+        "new_file.txt": [1, 2, 3],
     }
     file_patch = testpatches_path / "multiple_files.patch"
 

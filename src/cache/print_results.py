@@ -5,10 +5,23 @@ from io import open
 from itertools import groupby
 from typing import TYPE_CHECKING
 
-from src.cache.cache import db_session, get_unified_diff, init_db, select_mutants_by_status
+from src.cache.cache import (
+    db_session,
+    get_unified_diff,
+    init_db,
+    select_mutants_by_status,
+)
 from src.cache.model import Mutant
 from src.utils import ranges
-from src.status import BAD_SURVIVED, BAD_TIMEOUT, MUTANT_STATUSES, OK_SUSPICIOUS, SKIPPED, UNTESTED, StatusStr
+from src.status import (
+    BAD_SURVIVED,
+    BAD_TIMEOUT,
+    MUTANT_STATUSES,
+    OK_SUSPICIOUS,
+    SKIPPED,
+    UNTESTED,
+    StatusStr,
+)
 
 if TYPE_CHECKING:
     from pony.orm import Query
@@ -16,43 +29,54 @@ if TYPE_CHECKING:
 
 @init_db
 @db_session
-def print_result_cache(show_diffs: bool = False, dict_synonyms: list[str] = [], only_this_file: str | None = None) -> None:
-    print('To apply a mutant on disk:')
-    print('    mutmut apply <id>')
-    print('')
-    print('To show a mutant:')
-    print('    mutmut show <id>')
-    print('')
+def print_result_cache(
+    show_diffs: bool = False,
+    dict_synonyms: list[str] = [],
+    only_this_file: str | None = None,
+) -> None:
+    print("To apply a mutant on disk:")
+    print("    mutmut apply <id>")
+    print("")
+    print("To show a mutant:")
+    print("    mutmut show <id>")
+    print("")
 
-    def print_stuff(title: str, mutant_query: 'Query[Mutant, Mutant]') -> None:
+    def print_stuff(title: str, mutant_query: "Query[Mutant, Mutant]") -> None:
         mutant_list = sorted(mutant_query, key=lambda x: x.line.sourcefile.filename)
 
         if not mutant_list:
             return
 
-        print('')
+        print("")
         print("{} ({})".format(title, len(mutant_list)))
-        for filename, mutants_iterator in groupby(mutant_list, key=lambda x: x.line.sourcefile.filename):
+        for filename, mutants_iterator in groupby(
+            mutant_list, key=lambda x: x.line.sourcefile.filename
+        ):
             if only_this_file and filename != only_this_file:
                 continue
 
             mutants = list(mutants_iterator)
-            print('')
+            print("")
             print("---- {} ({}) ----".format(filename, len(mutants)))
-            print('')
+            print("")
             if show_diffs:
                 with open(filename) as f:
                     source = f.read()
 
                 for x in mutants:
-                    print('# mutant {}'.format(x.id))
-                    print(get_unified_diff(x.id, dict_synonyms, update_cache=False, source=source))
+                    print("# mutant {}".format(x.id))
+                    print(
+                        get_unified_diff(
+                            x.id, dict_synonyms, update_cache=False, source=source
+                        )
+                    )
             else:
                 print(ranges([x.id for x in mutants]))
-    print_stuff('Timed out ⏰', select_mutants_by_status(BAD_TIMEOUT))
-    print_stuff('Suspicious 🤔', select_mutants_by_status(OK_SUSPICIOUS))
-    print_stuff('Survived 🙁', select_mutants_by_status(BAD_SURVIVED))
-    print_stuff('Untested/skipped', select_mutants_by_status((UNTESTED, SKIPPED)))
+
+    print_stuff("Timed out ⏰", select_mutants_by_status(BAD_TIMEOUT))
+    print_stuff("Suspicious 🤔", select_mutants_by_status(OK_SUSPICIOUS))
+    print_stuff("Survived 🙁", select_mutants_by_status(BAD_SURVIVED))
+    print_stuff("Untested/skipped", select_mutants_by_status((UNTESTED, SKIPPED)))
 
 
 @init_db

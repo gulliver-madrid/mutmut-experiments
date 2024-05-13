@@ -16,14 +16,17 @@ def basic_filesystem(tmpdir: FileSystemPath) -> Iterator[FileSystemPath]:
     tests_dir = tmpdir / "tests"
     tests_dir.mkdir()
     test_file = tests_dir / "test_foo.py"
-    test_file.write("""
+    test_file.write(
+        """
 from foo import add
 
 def test_add():
     assert add(1, 1) == 2
-""")
+"""
+    )
     mutmut_config_py = tmpdir / "mutmut_config.py"
-    mutmut_config_py.write("""
+    mutmut_config_py.write(
+        """
 from pathlib import Path
 
 def init():
@@ -34,16 +37,18 @@ def pre_mutation(context):
 
 def pre_mutation_ast(context):
     Path("pre_mutation_ast_hook").touch()
-""")
+"""
+    )
     yield tmpdir
+
 
 @pytest.fixture
 def set_working_dir_and_path(request: Any) -> Iterator[FileSystemPath]:
 
     def get_default() -> FileSystemPath:
-        return request.getfixturevalue('basic_filesystem') # type: ignore [no-any-return]
+        return request.getfixturevalue("basic_filesystem")  # type: ignore [no-any-return]
 
-    if hasattr(request, 'param'):
+    if hasattr(request, "param"):
         basic_filesystem = request.param
     else:
         basic_filesystem = get_default()
@@ -61,11 +66,16 @@ def set_working_dir_and_path(request: Any) -> Iterator[FileSystemPath]:
     os.chdir(original_dir)
 
 
-
 @pytest.mark.usefixtures("set_working_dir_and_path")
 def test_hooks(basic_filesystem: FileSystemPath) -> None:
-    result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py'], catch_exceptions=False)
+    result = CliRunner().invoke(
+        climain, ["run", "--paths-to-mutate=foo.py"], catch_exceptions=False
+    )
     assert result.exit_code == 0
     assert (basic_filesystem / "init_hook").exists(), "init was not called."
-    assert (basic_filesystem / "pre_mutation_hook").exists(), "pre_mutation was not called."
-    assert (basic_filesystem / "pre_mutation_ast_hook").exists(), "pre_mutation_ast was not called."
+    assert (
+        basic_filesystem / "pre_mutation_hook"
+    ).exists(), "pre_mutation was not called."
+    assert (
+        basic_filesystem / "pre_mutation_ast_hook"
+    ).exists(), "pre_mutation_ast was not called."

@@ -16,8 +16,10 @@ def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
         # noinspection PyPackageRequirements,PyUnresolvedReferences
         from coverage import Coverage
     except ImportError as e:
-        raise ImportError('The --use-coverage feature requires the coverage library. Run "pip install --force-reinstall mutmut[coverage]"') from e
-    cov = Coverage(str(get_current_project_path() / '.coverage'))
+        raise ImportError(
+            'The --use-coverage feature requires the coverage library. Run "pip install --force-reinstall mutmut[coverage]"'
+        ) from e
+    cov = Coverage(str(get_current_project_path() / ".coverage"))
     cov.load()
     data = cov.get_data()
     return {
@@ -26,7 +28,11 @@ def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
     }
 
 
-def check_coverage_data_filepaths(coverage_data: Mapping[FilePathStr, ContextsByLineNo]) -> None:
+def check_coverage_data_filepaths(
+    coverage_data: Mapping[FilePathStr, ContextsByLineNo]
+) -> None:
     for filepath in coverage_data:
         if not os.path.exists(filepath):
-            raise ValueError('Filepaths in .coverage not recognized, try recreating the .coverage file manually.')
+            raise ValueError(
+                "Filepaths in .coverage not recognized, try recreating the .coverage file manually."
+            )

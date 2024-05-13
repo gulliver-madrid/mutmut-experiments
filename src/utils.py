@@ -20,7 +20,7 @@ def ranges(numbers: Sequence[int]) -> str:
         if start_range == end_range:
             result.append(str(start_range))
         else:
-            result.append('{}-{}'.format(start_range, end_range))
+            result.append("{}-{}".format(start_range, end_range))
 
     for x in numbers[1:]:
         if end_range + 1 == x:
@@ -33,7 +33,7 @@ def ranges(numbers: Sequence[int]) -> str:
 
     add_result()
 
-    return ', '.join(result)
+    return ", ".join(result)
 
 
 def split_paths(paths: str, directory: Path) -> list[str] | None:
@@ -42,7 +42,7 @@ def split_paths(paths: str, directory: Path) -> list[str] | None:
     original = os.getcwd()
     os.chdir(directory)
     separated: list[str] | None = None
-    for sep in [',', ':']:
+    for sep in [",", ":"]:
         separated = list(filter(lambda p: Path(p).exists(), paths.split(sep)))
         if separated:
             break
@@ -50,7 +50,7 @@ def split_paths(paths: str, directory: Path) -> list[str] | None:
     return separated
 
 
-spinner = itertools.cycle('⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏')
+spinner = itertools.cycle("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")
 
 
 def status_printer() -> Callable[[str], None]:
@@ -63,14 +63,15 @@ def status_printer() -> Callable[[str], None]:
     last_len = [0]
 
     def p(s: str) -> None:
-        s = next(spinner) + ' ' + s
+        s = next(spinner) + " " + s
         len_s = len(s)
-        output = '\r' + s + (' ' * max(last_len[0] - len_s, 0))
+        output = "\r" + s + (" " * max(last_len[0] - len_s, 0))
         sys.stdout.write(output)
         sys.stdout.flush()
         last_len[0] = len_s
+
     return p
 
 
 def split_lines(s: str) -> list[str]:
-    return s.split('\n')
+    return s.split("\n")

@@ -10,12 +10,15 @@ def clear_db() -> None:
     # This is a hack to get pony to forget about the old db file
     # otherwise Pony thinks we've already created the tables
     import src.cache.model as cache
+
     cache.db.provider = None
     cache.db.schema = None
+
 
 @pytest.fixture
 def testdata() -> Path:
     return Path(__file__).parent / "testdata"
+
 
 @pytest.fixture(autouse=True)
 def reset_state() -> Iterator[None]:

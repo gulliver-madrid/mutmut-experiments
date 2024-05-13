@@ -2,27 +2,39 @@
 
 
 from dataclasses import field
-from typing import TYPE_CHECKING, Any, Final, Iterable, Literal, Mapping, NewType, Type, overload, TypeVar
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Final,
+    Iterable,
+    Literal,
+    Mapping,
+    NewType,
+    Type,
+    overload,
+    TypeVar,
+)
 
 from pony.orm import Database, Required, Set, Optional, PrimaryKey
 from typing_extensions import Self
 
 from src.status import StatusResultStr
 
-HashStr = NewType('HashStr', str)
+HashStr = NewType("HashStr", str)
 
-NO_TESTS_FOUND: Final = 'NO TESTS FOUND'
+NO_TESTS_FOUND: Final = "NO TESTS FOUND"
 
-NoTestFoundSentinel = Literal['NO TESTS FOUND']
+NoTestFoundSentinel = Literal["NO TESTS FOUND"]
 
 db = Database()
 
 
 if TYPE_CHECKING:
+
     class DbEntity:
         @classmethod
-        def get(cls, **kwargs: Any) -> Self | None:
-            ...
+        def get(cls, **kwargs: Any) -> Self | None: ...
+
 else:
     DbEntity = db.Entity
 
@@ -33,35 +45,39 @@ class MiscData(DbEntity):
 
 
 if TYPE_CHECKING:
+
     class SourceFile(DbEntity):
         filename: str
         hash: HashStr | None
-        lines: Set['Line']
+        lines: Set["Line"]
+
 else:
+
     class SourceFile(DbEntity):  # type: ignore [valid-type]
         filename = Required(str, autostrip=False)
         hash = Optional(str)
-        lines = Set('Line')
+        lines = Set("Line")
 
 
 if TYPE_CHECKING:
+
     class Line(DbEntity):
         sourcefile: SourceFile
         line: str | None
         line_number: int
-        mutants: Set['Mutant']
+        mutants: Set["Mutant"]
 
-        def __init__(self, *, sourcefile: Any, line: str, line_number: int) -> None:
-            ...
+        def __init__(self, *, sourcefile: Any, line: str, line_number: int) -> None: ...
 
-        def delete(self) -> None:
-            ...
+        def delete(self) -> None: ...
+
 else:
+
     class Line(DbEntity):  # type: ignore [valid-type]
         sourcefile = Required(SourceFile)
         line = Optional(str, autostrip=False)
         line_number = Required(int)
-        mutants = Set('Mutant')
+        mutants = Set("Mutant")
 
 
 if TYPE_CHECKING:
@@ -76,6 +92,7 @@ if TYPE_CHECKING:
         id: int = field(default=0)
 
 else:
+
     class Mutant(DbEntity):
         line = Required(Line)
         index = Required(int)
@@ -88,23 +105,23 @@ def get_mutants() -> Iterable[Mutant]:
 
 
 @overload
-def get_mutant(*, id: int | str) -> Mutant | None:
-    ...
+def get_mutant(*, id: int | str) -> Mutant | None: ...
 
 
 @overload
-def get_mutant(*, line: Line, index: int) -> Mutant | None:
-    ...
+def get_mutant(*, line: Line, index: int) -> Mutant | None: ...
 
 
 def get_mutant(**kwargs: Any) -> Mutant | None:
     return Mutant.get(**kwargs)
 
 
-U = TypeVar('U', bound=DbEntity)
+U = TypeVar("U", bound=DbEntity)
 
 
-def get_or_create(model: Type[U], defaults: Mapping[str, Any] | None = None, **params: Any) -> U:
+def get_or_create(
+    model: Type[U], defaults: Mapping[str, Any] | None = None, **params: Any
+) -> U:
     if defaults is None:
         defaults = {}
     obj = model.get(**params)
