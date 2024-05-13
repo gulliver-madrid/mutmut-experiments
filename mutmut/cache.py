@@ -160,6 +160,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
                         if v is None:
                             existing_db_version = 1
                         else:
+                            assert v.value is not None
                             existing_db_version = int(v.value)
                     except (RowNotFound, ERDiagramError, OperationalError):
                         existing_db_version = 1
@@ -565,6 +566,7 @@ def get_cached_mutation_statuses(filename: str, mutations: List[RelativeMutation
 @init_db
 @db_session
 def cached_mutation_status(filename: str, mutation_id: RelativeMutationID, hash_of_tests: HashOfTestsStr) -> str:
+    assert isinstance(filename, str)  # guess
     assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
