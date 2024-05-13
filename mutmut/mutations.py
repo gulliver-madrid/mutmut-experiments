@@ -60,6 +60,8 @@ class ASTPattern:
             assert isinstance(node, NodeOrLeaf)
             while of_type is not None and node.type != of_type:
                 node = node.parent
+                assert node is not None
+            assert isinstance(node, NodeOrLeaf)
             return node
 
         def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
@@ -151,8 +153,10 @@ class ASTPattern:
                 return False
 
         # Parent
+        assert pattern.parent is not None
         if pattern.parent.type != 'file_input':  # top level matches nothing
             if skip_child != node:
+                assert node.parent is not None
                 return self.matches(node=node.parent, pattern=pattern.parent, skip_child=node)
 
         return True

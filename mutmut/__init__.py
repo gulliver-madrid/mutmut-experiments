@@ -142,6 +142,7 @@ def run_mutation(context: Context, callback: StrConsumer) -> str:
     """
     from mutmut.cache import cached_mutation_status
     assert context.config is not None
+    assert context.filename is not None
     cached_status = cached_mutation_status(context.filename, context.mutation_id, context.config.hash_of_tests)
 
     if cached_status != UNTESTED and context.config.total != 1:

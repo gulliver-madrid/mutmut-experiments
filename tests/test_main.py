@@ -614,6 +614,7 @@ def test_select_unknown_mutation_type(option: str) -> None:
             f"{option}=foo,bar",
         ]
     )
+    assert isinstance(result.exception, SystemExit)
     assert result.exception.code == 2
     assert f"The following are not valid mutation types: bar, foo. Valid mutation types are: {', '.join(mutations_by_type.keys())}" in result.output, result.output
 
@@ -627,6 +628,7 @@ def test_enable_and_disable_mutation_type_are_exclusive() -> None:
             "--disable-mutation-types=string",
         ]
     )
+    assert isinstance(result.exception, SystemExit)
     assert result.exception.code == 2
     assert "You can't combine --disable-mutation-types and --enable-mutation-types" in result.output
 
