@@ -5,7 +5,11 @@ import pytest
 
 from src.context import ALL, Context, RelativeMutationID
 from src.mutate import mutate_from_context, list_mutations
-from src.mutations import array_subscript_pattern, function_call_pattern, ASTPattern
+from src.mutations import (
+    array_subscript_pattern,
+    function_call_pattern,
+    ASTPattern,
+)
 from src.parse import parse_source
 from src.utils import split_lines
 

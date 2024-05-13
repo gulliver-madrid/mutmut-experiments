@@ -9,7 +9,12 @@ from parso.python.tree import ExprStmt
 
 from src.context import ALL, Context, RelativeMutationID
 from src.mut_config_storage import get_mutmut_config
-from src.mutations import has_children, is_name_node, is_operator, mutations_by_type
+from src.mutations import (
+    has_children,
+    is_name_node,
+    is_operator,
+    mutations_by_type,
+)
 from src.parse import parse_source
 from src.setup_logging import configure_logger
 
