@@ -120,12 +120,19 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if mutation is None:
             return
 
+        assert isinstance(mutation, dict), mutation
+        assert len(mutation) == 1
+
         for key, value in sorted(mutation.items()):
+            assert callable(value)
+            mutation_func = value
+            del value
+
             old = getattr(node, key)
             if context.exclude_line():
                 continue
 
-            new: object = value(
+            new: object = mutation_func(
                 context=context,
                 node=node,
                 value=getattr(node, "value", None),
