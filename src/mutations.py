@@ -303,9 +303,6 @@ def lambda_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
         return pre + [op] + [Keyword(value=" None", start_pos=post[0].start_pos)]
 
 
-# unused: NEWLINE = {'formatting': [], 'indent': '', 'type': 'endl', 'value': ''}
-
-
 def argument_mutation(
     children: list[NodeOrLeaf], context: Context, **_: Any
 ) -> list[NodeOrLeaf] | None:
