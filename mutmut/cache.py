@@ -352,10 +352,10 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
 
         index_file.write('<table><thead><tr><th>File</th><th>Total</th><th>Skipped</th><th>Killed</th><th>% killed</th><th>Survived</th></thead>')
 
-        for filename, mutants in groupby(mutants, key=lambda x: x.line.sourcefile.filename):
+        for filename, mutants_it in groupby(mutants, key=lambda x: x.line.sourcefile.filename):
             report_filename = join(directory, filename)
 
-            mutants = list(mutants)
+            mutants = list(mutants_it)
 
             with open(filename) as f:
                 source = f.read()
@@ -386,7 +386,9 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
                 def print_diffs(status: str) -> None:
                     mutants = mutants_by_status[status]
                     for mutant in sorted(mutants, key=lambda m: m.id):
-                        diff = _get_unified_diff(source, filename, RelativeMutationID(mutant.line.line, mutant.index, mutant.line.line_number), dict_synonyms, update_cache=False)
+                        assert isinstance(mutant.line.line, str)  # guess
+                        mutation_id = RelativeMutationID(mutant.line.line, mutant.index, mutant.line.line_number)
+                        diff = _get_unified_diff(source, filename, mutation_id, dict_synonyms, update_cache=False)
                         f.write('<h3>Mutant %s</h3>' % mutant.id)
                         f.write('<pre>%s</pre>' % diff)
 
@@ -617,7 +619,10 @@ def filename_and_mutation_id_from_pk(pk: int | str) -> Tuple[str, RelativeMutati
 @db_session
 def cached_test_time() -> float | None:
     d = MiscData.get(key='baseline_time_elapsed')
-    return float(d.value) if d else None
+    if d:
+        assert d.value is not None
+        return float(d.value)
+    return None
 
 
 @init_db
@@ -630,5 +635,5 @@ def set_cached_test_time(baseline_time_elapsed: float, current_hash_of_tests: st
 @init_db
 @db_session
 def cached_hash_of_tests() -> str | None:
-    d: MiscData = MiscData.get(key='hash_of_tests')
+    d = MiscData.get(key='hash_of_tests')
     return d.value if d else None

@@ -67,7 +67,6 @@ class ASTPattern:
         def parse_markers(node: PrefixPart | Module | NodeOrLeaf) -> None:
             assert isinstance(node, (PrefixPart, Module, NodeOrLeaf))
             if hasattr(node, '_split_prefix'):
-                # logger.info("slpit prefix:" + str(type(node)))
                 assert isinstance(node, PythonLeaf), type(node)
                 for x in node._split_prefix():  # type: ignore [no-untyped-call]
                     parse_markers(x)
