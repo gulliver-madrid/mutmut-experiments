@@ -31,7 +31,7 @@ class SkipException(Exception):
     pass
 
 
-def number_mutation(value: str, **_: Any) -> str:
+def number_mutation(*, value: str) -> str:
     assert isinstance(value, str)
     suffix = ""
     if value.upper().endswith("L"):  # pragma: no cover (python 2 specific)
@@ -78,7 +78,7 @@ def number_mutation(value: str, **_: Any) -> str:
     return result
 
 
-def string_mutation(value: str, **_: Any) -> str:
+def string_mutation(*, value: str) -> str:
     assert isinstance(value, str)
     prefix = value[: min(x for x in [value.find('"'), value.find("'")] if x != -1)]
     value = value[len(prefix) :]
@@ -90,7 +90,7 @@ def string_mutation(value: str, **_: Any) -> str:
     return prefix + value[0] + "XX" + value[1:-1] + "XX" + value[-1]
 
 
-def fstring_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
+def fstring_mutation(*, children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
     fstring_start = children[0]
     fstring_end = children[-1]
     assert isinstance(fstring_start, FStringStart)
@@ -128,7 +128,7 @@ def partition_node_list(
     assert False, "didn't find node to split on"
 
 
-def lambda_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
+def lambda_mutation(children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
     pre, op, post = partition_node_list(children, value=":")
 
     if len(post) == 1 and getattr(post[0], "value", None) == "None":
@@ -138,7 +138,7 @@ def lambda_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
 
 
 def argument_mutation(
-    children: list[NodeOrLeaf], context: Context, **_: Any
+    *, children: list[NodeOrLeaf], context: Context
 ) -> list[NodeOrLeaf] | None:
     """Mutate the arguments one by one from dict(a=b) to dict(aXXX=b).
 
@@ -167,7 +167,7 @@ def argument_mutation(
     return None
 
 
-def keyword_mutation(value: str, context: Context, **_: Any) -> str | None:
+def keyword_mutation(*, value: str, context: Context) -> str | None:
     if (
         len(context.stack) > 2
         and context.stack[-2].type in ("comp_op", "sync_comp_for")
@@ -198,7 +198,7 @@ from _name import *
 )
 
 
-def operator_mutation(value: str, node: Leaf, **_: Any) -> str | list[str] | None:
+def operator_mutation(*, value: str, node: Leaf) -> str | list[str] | None:
     assert isinstance(node, Leaf)
     if import_from_star_pattern.matches(node=node):
         return None
@@ -257,9 +257,7 @@ def operator_mutation(value: str, node: Leaf, **_: Any) -> str | list[str] | Non
     return data.get(value)
 
 
-def and_or_test_mutation(
-    children: list[NodeOrLeaf], node: Node, **_: Any
-) -> list[NodeOrLeaf]:
+def and_or_test_mutation(*, children: list[NodeOrLeaf], node: Node) -> list[NodeOrLeaf]:
     assert isinstance(node, Node)
     assert all(isinstance(child, NodeOrLeaf) for child in children), children
     children = children[:]
@@ -271,7 +269,7 @@ def and_or_test_mutation(
     return children
 
 
-def expression_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
+def expression_mutation(*, children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
     assert all(isinstance(child, NodeOrLeaf) for child in children)
 
     def handle_assignment(children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
@@ -302,7 +300,7 @@ def expression_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf
     return children
 
 
-def decorator_mutation(children: list[NodeOrLeaf], **_: Any) -> list[NodeOrLeaf]:
+def decorator_mutation(*, children: list[NodeOrLeaf]) -> list[NodeOrLeaf]:
     assert all(isinstance(child, NodeOrLeaf) for child in children), children
     assert children[-1].type == "newline"
     return children[-1:]
@@ -324,7 +322,7 @@ _name(_any)
 )
 
 
-def name_mutation(node: Leaf | None, value: str, **_: Any) -> str | None:
+def name_mutation(*, node: Leaf | None, value: str) -> str | None:
     assert isinstance(value, str)
     assert isinstance(node, (Leaf, NoneType))  # guess
     simple_mutants = {
@@ -391,24 +389,146 @@ class OtherMutFunc(Protocol):
     ) -> list[NodeOrLeaf] | None: ...
 
 
+class OperatorMutation:
+    def __call__(
+        self,
+        *,
+        node: Leaf | None,
+        context: Context,
+        value: str,
+    ) -> str | list[str] | None:
+        assert node is not None
+        return operator_mutation(value=value, node=node)
+
+
+class KeywordMutation:
+    def __call__(
+        self,
+        *,
+        node: Leaf | None,
+        context: Context,
+        value: str,
+    ) -> str | list[str] | None:
+        return keyword_mutation(value=value, context=context)
+
+
+class NumberMutation:
+    def __call__(
+        self,
+        *,
+        node: Leaf | None,
+        context: Context,
+        value: str,
+    ) -> str | list[str] | None:
+        return number_mutation(value=value)
+
+
+class NameMutation:
+    def __call__(
+        self,
+        *,
+        node: Leaf | None,
+        context: Context,
+        value: str,
+    ) -> str | list[str] | None:
+        return name_mutation(node=node, value=value)
+
+
+class StringMutation:
+    def __call__(
+        self,
+        *,
+        node: Leaf | None,
+        context: Context,
+        value: str,
+    ) -> str | list[str] | None:
+        return string_mutation(value=value)
+
+
+class FStringMutation:
+    def __call__(
+        self,
+        *,
+        node: BaseNode,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None:
+        return fstring_mutation(children=children)
+
+
+class ArgumentMutation:
+    def __call__(
+        self,
+        *,
+        node: BaseNode,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None:
+        return argument_mutation(children=children, context=context)
+
+
+class AndOrTestMutation:
+    def __call__(
+        self,
+        *,
+        node: BaseNode,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None:
+        assert isinstance(node, Node)
+        return and_or_test_mutation(children=children, node=node)
+
+
+class LambdaMutation:
+    def __call__(
+        self,
+        *,
+        node: BaseNode,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None:
+        return lambda_mutation(children=children)
+
+
+class ExpressionMutation:
+    def __call__(
+        self,
+        *,
+        node: BaseNode,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None:
+        return expression_mutation(children=children)
+
+
+class DecoratorMutation:
+    def __call__(
+        self,
+        *,
+        node: BaseNode,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None:
+        return decorator_mutation(children=children)
+
 
 MutationFunc = LeafNodeMutFunc | OptLeafNodeMutFunc | NodeNodeMutFunc | OtherMutFunc
 
 
 mutations_by_type: Final[Mapping[str, tuple[MutationInputType, MutationFunc]]] = {
-    "operator": ("value", operator_mutation),
-    "keyword": ("value", keyword_mutation),
-    "number": ("value", number_mutation),
-    "name": ("value", name_mutation),
-    "string": ("value", string_mutation),
-    "fstring": ("children", fstring_mutation),
-    "argument": ("children", argument_mutation),
-    "or_test": ("children", and_or_test_mutation),
-    "and_test": ("children", and_or_test_mutation),
-    "lambdef": ("children", lambda_mutation),
-    "expr_stmt": ("children", expression_mutation),
-    "decorator": ("children", decorator_mutation),
-    "annassign": ("children", expression_mutation),
+    "operator": ("value", OperatorMutation()),
+    "keyword": ("value", KeywordMutation()),
+    "number": ("value", NumberMutation()),
+    "name": ("value", NameMutation()),
+    "string": ("value", StringMutation()),
+    "fstring": ("children", FStringMutation()),
+    "argument": ("children", ArgumentMutation()),
+    "or_test": ("children", AndOrTestMutation()),
+    "and_test": ("children", AndOrTestMutation()),
+    "lambdef": ("children", LambdaMutation()),
+    "expr_stmt": ("children", ExpressionMutation()),
+    "decorator": ("children", DecoratorMutation()),
+    "annassign": ("children", ExpressionMutation()),
 }
 
 # TODO: detect regexes and mutate them in nasty ways? Maybe mutate all strings as if they are regexes
