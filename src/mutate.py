@@ -116,19 +116,19 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
             if context.performed_mutation_ids and context.mutation_id != ALL:
                 return
 
-        mutation = mutations_by_type.get(node.type)
+        mutation_shape = mutations_by_type.get(node.type)
 
-        if mutation is None:
+        if mutation_shape is None:
             return
 
-        assert isinstance(mutation, tuple), mutation
-        assert len(mutation) == 2
+        assert isinstance(mutation_shape, tuple), mutation_shape
+        assert len(mutation_shape) == 2
 
-        key, mutation_func = mutation
+        input_type, mutation = mutation_shape
 
-        assert callable(mutation_func)
+        assert callable(mutation)
 
-        old = getattr(node, key)
+        old = getattr(node, input_type)
         if context.exclude_line():
             return
 
@@ -141,8 +141,8 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if value:
             assert isinstance(node, Leaf)
             assert isinstance(node.value, str)
-            assert isinstance(mutation_func, LeafMutation)
-            new = mutation_func(
+            assert isinstance(mutation, LeafMutation)
+            new = mutation(
                 context=context,
                 node=node,
                 value=node.value,
@@ -150,8 +150,8 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         else:
             assert children
             assert has_children(node)
-            assert isinstance(mutation_func, NodeWithChildrenMutation)
-            new = mutation_func(
+            assert isinstance(mutation, NodeWithChildrenMutation)
+            new = mutation(
                 context=context,
                 node=node,
                 children=node.children,
@@ -178,7 +178,7 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
                     context.performed_mutation_ids.append(
                         context.mutation_id_of_current_index
                     )
-                    setattr(node, key, new)
+                    setattr(node, input_type, new)
                 context.index += 1
             # this is just an optimization to stop early
             if context.performed_mutation_ids and context.mutation_id != ALL:
