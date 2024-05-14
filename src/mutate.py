@@ -132,13 +132,13 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if context.exclude_line():
             return
 
-        assert getattr(node, "value", None) or getattr(node, "children", None)
-        assert (
-            getattr(node, "value", None) is None
-            or getattr(node, "children", None) is None
-        )
+        value = getattr(node, "value", None)
+        children = getattr(node, "children", None)
+        assert value or children
+        assert value is None or children is None
+
         new: object = None
-        if getattr(node, "value", None):
+        if value:
             assert isinstance(node, Leaf)
             assert isinstance(node.value, str)
             assert isinstance(mutation_func, LeafMutation)
@@ -148,7 +148,7 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
                 value=node.value,
             )
         else:
-            assert getattr(node, "children", None)
+            assert children
             assert has_children(node)
             assert isinstance(mutation_func, NodeWithChildrenMutation)
             new = mutation_func(
