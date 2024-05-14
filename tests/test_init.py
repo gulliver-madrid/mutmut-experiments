@@ -26,7 +26,7 @@ def test_partition_node_list_no_nodes() -> None:
 
 
 def test_name_mutation_simple_mutants() -> None:
-    assert name_mutation(None, "True") == "False"
+    assert name_mutation(node=None, value="True") == "False"
 
 
 def test_context_exclude_line() -> None:
