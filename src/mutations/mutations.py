@@ -4,6 +4,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from types import NoneType
 from typing import Final, Literal, Mapping, Tuple, TypeGuard
+from typing_extensions import Protocol
 
 from parso.python.tree import (
     Name,
@@ -429,17 +430,6 @@ class StringMutation(LeafMutation):
         return string_mutation(value=value)
 
 
-class FStringMutation(NodeWithChildrenMutation):
-    def __call__(
-        self,
-        *,
-        node: BaseNode,
-        context: Context,
-        children: list[NodeOrLeaf],
-    ) -> list[NodeOrLeaf] | None:
-        return fstring_mutation(children=children)
-
-
 class ArgumentMutation(NodeWithChildrenMutation):
     def __call__(
         self,
@@ -463,7 +453,18 @@ class AndOrTestMutation(NodeWithChildrenMutation):
         return and_or_test_mutation(children=children, node=node)
 
 
-class LambdaMutation(NodeWithChildrenMutation):
+class _GetChildrenMutation(Protocol):
+    def __call__(
+        self,
+        *,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf]: ...
+
+
+class GetChildrenMutation(NodeWithChildrenMutation):
+    def __init__(self, mutation_func: _GetChildrenMutation):
+        self._mutation_func = mutation_func
+
     def __call__(
         self,
         *,
@@ -471,48 +472,26 @@ class LambdaMutation(NodeWithChildrenMutation):
         context: Context,
         children: list[NodeOrLeaf],
     ) -> list[NodeOrLeaf] | None:
-        return lambda_mutation(children=children)
+        return self._mutation_func(children=children)
 
 
-class ExpressionMutation(NodeWithChildrenMutation):
-    def __call__(
-        self,
-        *,
-        node: BaseNode,
-        context: Context,
-        children: list[NodeOrLeaf],
-    ) -> list[NodeOrLeaf] | None:
-        return expression_mutation(children=children)
+Mutation = LeafMutation | NodeWithChildrenMutation
 
 
-class DecoratorMutation(NodeWithChildrenMutation):
-    def __call__(
-        self,
-        *,
-        node: BaseNode,
-        context: Context,
-        children: list[NodeOrLeaf],
-    ) -> list[NodeOrLeaf] | None:
-        return decorator_mutation(children=children)
-
-
-MutationFunc = LeafMutation | NodeWithChildrenMutation
-
-
-mutations_by_type: Final[Mapping[str, tuple[MutationInputType, MutationFunc]]] = {
+mutations_by_type: Final[Mapping[str, tuple[MutationInputType, Mutation]]] = {
     "operator": ("value", OperatorMutation()),
     "keyword": ("value", KeywordMutation()),
     "number": ("value", NumberMutation()),
     "name": ("value", NameMutation()),
     "string": ("value", StringMutation()),
-    "fstring": ("children", FStringMutation()),
+    "fstring": ("children", GetChildrenMutation(fstring_mutation)),
     "argument": ("children", ArgumentMutation()),
     "or_test": ("children", AndOrTestMutation()),
     "and_test": ("children", AndOrTestMutation()),
-    "lambdef": ("children", LambdaMutation()),
-    "expr_stmt": ("children", ExpressionMutation()),
-    "decorator": ("children", DecoratorMutation()),
-    "annassign": ("children", ExpressionMutation()),
+    "lambdef": ("children", GetChildrenMutation(lambda_mutation)),
+    "expr_stmt": ("children", GetChildrenMutation(expression_mutation)),
+    "decorator": ("children", GetChildrenMutation(decorator_mutation)),
+    "annassign": ("children", GetChildrenMutation(expression_mutation)),
 }
 
 # TODO: detect regexes and mutate them in nasty ways? Maybe mutate all strings as if they are regexes
