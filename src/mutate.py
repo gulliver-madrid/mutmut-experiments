@@ -120,51 +120,56 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if mutation is None:
             return
 
-        assert isinstance(mutation, dict), mutation
-        assert len(mutation) == 1
+        assert isinstance(mutation, tuple), mutation
+        assert len(mutation) == 2
 
-        for key, value in sorted(mutation.items()):
-            assert callable(value)
-            mutation_func = value
-            del value
+        key, mutation_func = mutation
 
-            old = getattr(node, key)
-            if context.exclude_line():
-                continue
+        assert callable(mutation_func)
 
-            new: object = mutation_func(
-                context=context,
-                node=node,
-                value=getattr(node, "value", None),
-                children=getattr(node, "children", None),
-            )
+        old = getattr(node, key)
+        if context.exclude_line():
+            return
 
-            assert isinstance(new, (str, list, NoneType))
+        assert getattr(node, "value", None) or getattr(node, "children", None)
+        assert (
+            getattr(node, "value", None) is None
+            or getattr(node, "children", None) is None
+        )
 
-            if isinstance(new, list) and not isinstance(old, list):
-                # multiple mutations
-                new_list = new
-            else:
-                # one mutation
-                new_list = [new]
+        new: object = mutation_func(
+            context=context,
+            node=node,
+            value=getattr(node, "value", None),
+            children=getattr(node, "children", None),
+        )
 
-            # go through the alternate mutations in reverse as they may have
-            # adverse effects on subsequent mutations, this ensures the last
-            # mutation applied is the original/default/legacy mutmut mutation
-            for new in reversed(new_list):
-                assert not callable(new)
-                if new is not None and new != old:
-                    if hasattr(mutmut_config, "pre_mutation_ast"):
-                        mutmut_config.pre_mutation_ast(context=context)
-                    if context.should_mutate(node):
-                        context.performed_mutation_ids.append(
-                            context.mutation_id_of_current_index
-                        )
-                        setattr(node, key, new)
-                    context.index += 1
-                # this is just an optimization to stop early
-                if context.performed_mutation_ids and context.mutation_id != ALL:
-                    return
+        assert isinstance(new, (str, list, NoneType))
+
+        if isinstance(new, list) and not isinstance(old, list):
+            # multiple mutations
+            new_list = new
+        else:
+            # one mutation
+            new_list = [new]
+
+        # go through the alternate mutations in reverse as they may have
+        # adverse effects on subsequent mutations, this ensures the last
+        # mutation applied is the original/default/legacy mutmut mutation
+        for new in reversed(new_list):
+            assert not callable(new)
+            if new is not None and new != old:
+                if hasattr(mutmut_config, "pre_mutation_ast"):
+                    mutmut_config.pre_mutation_ast(context=context)
+                if context.should_mutate(node):
+                    context.performed_mutation_ids.append(
+                        context.mutation_id_of_current_index
+                    )
+                    setattr(node, key, new)
+                context.index += 1
+            # this is just an optimization to stop early
+            if context.performed_mutation_ids and context.mutation_id != ALL:
+                return
     finally:
         context.stack.pop()
 

@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from types import NoneType
-from typing import Any, Callable, Final, Mapping, Tuple, TypeGuard
+from typing import Any, Callable, Final, Literal, Mapping, Tuple, TypeGuard
 
 from parso.python.tree import (
     Name,
@@ -347,20 +347,22 @@ def name_mutation(node: Leaf | None, value: str, **_: Any) -> str | None:
     return None
 
 
-mutations_by_type: Final[Mapping[str, Mapping[str, Callable[..., Any]]]] = {
-    "operator": dict(value=operator_mutation),
-    "keyword": dict(value=keyword_mutation),
-    "number": dict(value=number_mutation),
-    "name": dict(value=name_mutation),
-    "string": dict(value=string_mutation),
-    "fstring": dict(children=fstring_mutation),
-    "argument": dict(children=argument_mutation),
-    "or_test": dict(children=and_or_test_mutation),
-    "and_test": dict(children=and_or_test_mutation),
-    "lambdef": dict(children=lambda_mutation),
-    "expr_stmt": dict(children=expression_mutation),
-    "decorator": dict(children=decorator_mutation),
-    "annassign": dict(children=expression_mutation),
+MutationInputType = Literal["value", "children"]
+
+mutations_by_type: Final[Mapping[str, tuple[MutationInputType, Callable[..., Any]]]] = {
+    "operator": ("value", operator_mutation),
+    "keyword": ("value", keyword_mutation),
+    "number": ("value", number_mutation),
+    "name": ("value", name_mutation),
+    "string": ("value", string_mutation),
+    "fstring": ("children", fstring_mutation),
+    "argument": ("children", argument_mutation),
+    "or_test": ("children", and_or_test_mutation),
+    "and_test": ("children", and_or_test_mutation),
+    "lambdef": ("children", lambda_mutation),
+    "expr_stmt": ("children", expression_mutation),
+    "decorator": ("children", decorator_mutation),
+    "annassign": ("children", expression_mutation),
 }
 
 # TODO: detect regexes and mutate them in nasty ways? Maybe mutate all strings as if they are regexes
