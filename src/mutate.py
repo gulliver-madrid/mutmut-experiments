@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from types import NoneType
-from typing import Any, Final, Tuple, cast
+from typing import Any, Final, Tuple
 
 from parso.tree import NodeOrLeaf, Node, BaseNode, Leaf
 from parso.python.tree import ExprStmt
@@ -15,7 +15,7 @@ from src.mutations import (
     is_operator,
     mutations_by_type,
 )
-from src.mutations.mutations import LeafNodeMutFunc, OptLeafNodeMutFunc, OtherMutFunc
+from src.mutations.mutations import LeafMutation, NodeWithChildrenMutation
 from src.parse import parse_source
 from src.setup_logging import configure_logger
 
@@ -141,7 +141,7 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         if getattr(node, "value", None):
             assert isinstance(node, Leaf)
             assert isinstance(node.value, str)
-            mutation_func = cast(LeafNodeMutFunc | OptLeafNodeMutFunc, mutation_func)
+            assert isinstance(mutation_func, LeafMutation)
             new = mutation_func(
                 context=context,
                 node=node,
@@ -150,7 +150,7 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         else:
             assert getattr(node, "children", None)
             assert has_children(node)
-            mutation_func = cast(OtherMutFunc, mutation_func)
+            assert isinstance(mutation_func, NodeWithChildrenMutation)
             new = mutation_func(
                 context=context,
                 node=node,

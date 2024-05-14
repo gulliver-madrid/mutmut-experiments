@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from types import NoneType
-from typing import Any, Final, Literal, Mapping, Tuple, TypeGuard
-from typing_extensions import Protocol
+from typing import Final, Literal, Mapping, Tuple, TypeGuard
 
 from parso.python.tree import (
     Name,
@@ -349,47 +349,31 @@ def name_mutation(*, node: Leaf | None, value: str) -> str | None:
 MutationInputType = Literal["value", "children"]
 
 
-class LeafNodeMutFunc(Protocol):
-    def __call__(
-        self,
-        *,
-        node: Leaf,
-        context: Context,
-        value: str,
-    ) -> str | list[str] | None: ...
-
-
-class OptLeafNodeMutFunc(Protocol):
+class LeafMutation(ABC):
+    @abstractmethod
     def __call__(
         self,
         *,
         node: Leaf | None,
         context: Context,
         value: str,
-    ) -> str | None: ...
+    ) -> str | list[str] | None:
+        pass
 
 
-class NodeNodeMutFunc(Protocol):
-    def __call__(
-        self,
-        *,
-        node: Node,
-        context: Context,
-        children: list[NodeOrLeaf],
-    ) -> list[NodeOrLeaf] | None: ...
-
-
-class OtherMutFunc(Protocol):
+class NodeWithChildrenMutation(ABC):
+    @abstractmethod
     def __call__(
         self,
         *,
         node: BaseNode,
         context: Context,
         children: list[NodeOrLeaf],
-    ) -> list[NodeOrLeaf] | None: ...
+    ) -> list[NodeOrLeaf] | None:
+        pass
 
 
-class OperatorMutation:
+class OperatorMutation(LeafMutation):
     def __call__(
         self,
         *,
@@ -401,7 +385,7 @@ class OperatorMutation:
         return operator_mutation(value=value, node=node)
 
 
-class KeywordMutation:
+class KeywordMutation(LeafMutation):
     def __call__(
         self,
         *,
@@ -412,7 +396,7 @@ class KeywordMutation:
         return keyword_mutation(value=value, context=context)
 
 
-class NumberMutation:
+class NumberMutation(LeafMutation):
     def __call__(
         self,
         *,
@@ -423,7 +407,7 @@ class NumberMutation:
         return number_mutation(value=value)
 
 
-class NameMutation:
+class NameMutation(LeafMutation):
     def __call__(
         self,
         *,
@@ -434,7 +418,7 @@ class NameMutation:
         return name_mutation(node=node, value=value)
 
 
-class StringMutation:
+class StringMutation(LeafMutation):
     def __call__(
         self,
         *,
@@ -445,7 +429,7 @@ class StringMutation:
         return string_mutation(value=value)
 
 
-class FStringMutation:
+class FStringMutation(NodeWithChildrenMutation):
     def __call__(
         self,
         *,
@@ -456,7 +440,7 @@ class FStringMutation:
         return fstring_mutation(children=children)
 
 
-class ArgumentMutation:
+class ArgumentMutation(NodeWithChildrenMutation):
     def __call__(
         self,
         *,
@@ -467,7 +451,7 @@ class ArgumentMutation:
         return argument_mutation(children=children, context=context)
 
 
-class AndOrTestMutation:
+class AndOrTestMutation(NodeWithChildrenMutation):
     def __call__(
         self,
         *,
@@ -479,7 +463,7 @@ class AndOrTestMutation:
         return and_or_test_mutation(children=children, node=node)
 
 
-class LambdaMutation:
+class LambdaMutation(NodeWithChildrenMutation):
     def __call__(
         self,
         *,
@@ -490,7 +474,7 @@ class LambdaMutation:
         return lambda_mutation(children=children)
 
 
-class ExpressionMutation:
+class ExpressionMutation(NodeWithChildrenMutation):
     def __call__(
         self,
         *,
@@ -501,7 +485,7 @@ class ExpressionMutation:
         return expression_mutation(children=children)
 
 
-class DecoratorMutation:
+class DecoratorMutation(NodeWithChildrenMutation):
     def __call__(
         self,
         *,
@@ -512,7 +496,7 @@ class DecoratorMutation:
         return decorator_mutation(children=children)
 
 
-MutationFunc = LeafNodeMutFunc | OptLeafNodeMutFunc | NodeNodeMutFunc | OtherMutFunc
+MutationFunc = LeafMutation | NodeWithChildrenMutation
 
 
 mutations_by_type: Final[Mapping[str, tuple[MutationInputType, MutationFunc]]] = {
