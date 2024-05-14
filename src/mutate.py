@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 from types import NoneType
-from typing import Any, Final, Tuple
+from typing import Any, Final, Tuple, cast
 
-from parso.tree import NodeOrLeaf, Node, BaseNode
+from parso.tree import NodeOrLeaf, Node, BaseNode, Leaf
 from parso.python.tree import ExprStmt
 
 from src.context import ALL, Context, RelativeMutationID
@@ -15,6 +15,7 @@ from src.mutations import (
     is_operator,
     mutations_by_type,
 )
+from src.mutations.mutations import LeafNodeMutFunc, OptLeafNodeMutFunc, OtherMutFunc
 from src.parse import parse_source
 from src.setup_logging import configure_logger
 
@@ -136,13 +137,25 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
             getattr(node, "value", None) is None
             or getattr(node, "children", None) is None
         )
-
-        new: object = mutation_func(
-            context=context,
-            node=node,
-            value=getattr(node, "value", None),
-            children=getattr(node, "children", None),
-        )
+        new: object = None
+        if getattr(node, "value", None):
+            assert isinstance(node, Leaf)
+            assert isinstance(node.value, str)
+            mutation_func = cast(LeafNodeMutFunc | OptLeafNodeMutFunc, mutation_func)
+            new = mutation_func(
+                context=context,
+                node=node,
+                value=node.value,
+            )
+        else:
+            assert getattr(node, "children", None)
+            assert has_children(node)
+            mutation_func = cast(OtherMutFunc, mutation_func)
+            new = mutation_func(
+                context=context,
+                node=node,
+                children=node.children,
+            )
 
         assert isinstance(new, (str, list, NoneType))
 

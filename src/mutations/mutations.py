@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from types import NoneType
-from typing import Any, Callable, Final, Literal, Mapping, Tuple, TypeGuard
+from typing import Any, Final, Literal, Mapping, Tuple, TypeGuard
 from typing_extensions import Protocol
 
 from parso.python.tree import (
@@ -356,8 +356,9 @@ class LeafNodeMutFunc(Protocol):
         self,
         *,
         node: Leaf,
+        context: Context,
         value: str,
-    ) -> Any: ...
+    ) -> str | list[str] | None: ...
 
 
 class OptLeafNodeMutFunc(Protocol):
@@ -365,22 +366,34 @@ class OptLeafNodeMutFunc(Protocol):
         self,
         *,
         node: Leaf | None,
+        context: Context,
         value: str,
-    ) -> Any: ...
+    ) -> str | None: ...
+
+
+class NodeNodeMutFunc(Protocol):
+    def __call__(
+        self,
+        *,
+        node: Node,
+        context: Context,
+        children: list[NodeOrLeaf],
+    ) -> list[NodeOrLeaf] | None: ...
 
 
 class OtherMutFunc(Protocol):
     def __call__(
         self,
         *,
+        node: BaseNode,
         context: Context,
-        node: NodeOrLeaf,
-        value: str,
         children: list[NodeOrLeaf],
-    ) -> Any: ...
+    ) -> list[NodeOrLeaf] | None: ...
 
 
-MutationFunc = LeafNodeMutFunc | OptLeafNodeMutFunc | OtherMutFunc
+
+MutationFunc = LeafNodeMutFunc | OptLeafNodeMutFunc | NodeNodeMutFunc | OtherMutFunc
+
 
 mutations_by_type: Final[Mapping[str, tuple[MutationInputType, MutationFunc]]] = {
     "operator": ("value", operator_mutation),
