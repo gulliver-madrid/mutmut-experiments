@@ -22,13 +22,13 @@ from click.testing import CliRunner
 
 from src import (
     compute_exit_code,
-    Progress,
     python_source_files,
     __version__,
 )
 from src.__main__ import climain
 from src.coverage import read_coverage_data
 from src.mutations import mutations_by_type
+from src.progress import Progress
 from src.project import set_project_path
 from src.process import popen_streaming_output
 from src.status import MUTANT_STATUSES

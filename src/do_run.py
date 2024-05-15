@@ -13,6 +13,7 @@ import click
 from glob2 import glob  # type: ignore [import-untyped]
 
 from src.process import popen_streaming_output
+from src.progress import Progress
 
 # ensure mutmut modules are detected
 base = Path(__file__).parent.parent
@@ -23,11 +24,9 @@ from src import (
     MutationTestsRunner,
     __version__,
     guess_paths_to_mutate,
-    Progress,
     add_mutations_by_file,
     python_source_files,
     compute_exit_code,
-    print_status,
 )
 from src.cache.cache import (
     cached_hash_of_tests,
@@ -48,7 +47,7 @@ from src.mut_config_storage import (
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
 from src.project import get_current_project_path, get_project_path, set_project_path
-from src.utils import split_lines, split_paths
+from src.utils import split_lines, split_paths, print_status
 
 DEFAULT_RUNNER = "python -m pytest -x --assert=plain"
 
