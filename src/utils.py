@@ -75,3 +75,6 @@ def status_printer() -> Callable[[str], None]:
 
 def split_lines(s: str) -> list[str]:
     return s.split("\n")
+
+
+print_status = status_printer()
