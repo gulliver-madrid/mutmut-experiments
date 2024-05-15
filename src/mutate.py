@@ -23,43 +23,17 @@ from src.setup_logging import configure_logger
 logger = configure_logger(__name__)
 
 
-# We have a global whitelist for constants of the pattern __all__, __version__, etc
-
-dunder_whitelist: Final[list[str]] = [
-    "all",
-    "version",
-    "title",
-    "package_name",
-    "author",
-    "description",
-    "email",
-    "version",
-    "license",
-    "copyright",
-]
-
-
-def is_dunder_name(name: str) -> bool:
-    return (
-        name.startswith("__") and name.endswith("__") and name[2:-2] in dunder_whitelist
-    )
-
-
-def parse_checking_errors(source: str, filename: str | None) -> Any:
-    try:
-        result = parse_source(source, error_recovery=False)
-    except Exception:
-        print("Failed to parse {}. Internal error from parso follows.".format(filename))
-        print("----------------------------------")
-        raise
-    return result
+def list_mutations(context: Context) -> list[RelativeMutationID]:
+    assert context.mutation_id == ALL
+    mutate_from_context(context)
+    return context.performed_mutation_ids
 
 
 def mutate_from_context(context: Context) -> Tuple[str, int]:
     """
     :return: tuple of mutated source code and number of mutations performed
     """
-    result = parse_checking_errors(context.source, context.filename)
+    result = _parse_checking_errors(context.source, context.filename)
     _mutate_list_of_nodes(result, context=context)
     mutated_source: str = result.get_code().replace(" not not ", " ")
     if context.remove_newline_at_end:
@@ -187,6 +161,38 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         context.stack.pop()
 
 
+# We have a global whitelist for constants of the pattern __all__, __version__, etc
+
+dunder_whitelist: Final[list[str]] = [
+    "all",
+    "version",
+    "title",
+    "package_name",
+    "author",
+    "description",
+    "email",
+    "version",
+    "license",
+    "copyright",
+]
+
+
+def is_dunder_name(name: str) -> bool:
+    return (
+        name.startswith("__") and name.endswith("__") and name[2:-2] in dunder_whitelist
+    )
+
+
+def _parse_checking_errors(source: str, filename: str | None) -> Any:
+    try:
+        result = parse_source(source, error_recovery=False)
+    except Exception:
+        print("Failed to parse {}. Internal error from parso follows.".format(filename))
+        print("----------------------------------")
+        raise
+    return result
+
+
 
 def _mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
     assert isinstance(node, BaseNode)
@@ -211,9 +217,3 @@ def _mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
         # this is just an optimization to stop early
         if context.performed_mutation_ids and context.mutation_id != ALL:
             return
-
-
-def list_mutations(context: Context) -> list[RelativeMutationID]:
-    assert context.mutation_id == ALL
-    mutate_from_context(context)
-    return context.performed_mutation_ids
