@@ -25,7 +25,10 @@ class ProjectPathStorage:
         """It could to be None. In that case, calling code probably should use os.getcwd()."""
         return self._cached_project_path
 
-    def set_project_path(self, project: str | Path | None = None) -> None:
+    def reset(self) -> None:
+        self._cached_project_path = None
+
+    def set_project_path(self, project: str | Path | None) -> None:
         if isinstance(project, str):
             project = Path(project)
         if project is None:
