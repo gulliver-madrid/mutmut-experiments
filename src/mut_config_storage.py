@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Final
 
-from src.project import get_current_project_path, set_project_path
+from src.project import project_path_storage
 
 
 MUTMUT_CONFIG_NOT_DEFINED = "Mutmut Config Not Defined"
@@ -14,12 +14,13 @@ MUTMUT_CONFIG_NOT_DEFINED = "Mutmut Config Not Defined"
 
 def reset_global_vars() -> None:
     user_dynamic_config_storage.clear_mutmut_config_cache()
-    set_project_path()
+    project_path_storage.set_project_path()  # TODO: change to clear or reset
 
 
 class UserDynamicConfigStorage:
     def __init__(self) -> None:
         self._cached_mutmut_config: Any = MUTMUT_CONFIG_NOT_DEFINED
+        self._project_path_storage = project_path_storage
 
     def clear_mutmut_config_cache(self) -> None:
         self._cached_mutmut_config = MUTMUT_CONFIG_NOT_DEFINED
@@ -35,7 +36,7 @@ class UserDynamicConfigStorage:
         if self._cached_mutmut_config != MUTMUT_CONFIG_NOT_DEFINED:
             return self._cached_mutmut_config
 
-        current_project_path = get_current_project_path()
+        current_project_path = self._project_path_storage.get_current_project_path()
         _cached_mutmut_config = self._import_mutmut_config(current_project_path)
         return _cached_mutmut_config
 

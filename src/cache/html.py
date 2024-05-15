@@ -15,7 +15,7 @@ from src.cache.cache import (
 )
 from src.cache.model import Mutant, get_mutants
 from src.context import RelativeMutationID
-from src.project import get_current_project_path
+from src.project import project_path_storage
 from src.status import (
     BAD_SURVIVED,
     BAD_TIMEOUT,
@@ -33,7 +33,7 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
         list(select(x for x in get_mutants())), key=lambda x: x.line.sourcefile.filename
     )
 
-    project_path = get_current_project_path()
+    project_path = project_path_storage.get_current_project_path()
     original = os.getcwd()
     os.chdir(project_path)
 

@@ -9,7 +9,7 @@ from typing import Optional
 from parso.tree import NodeOrLeaf
 
 from src.config import Config
-from src.project import get_current_project_path
+from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.utils import split_lines
 
@@ -93,7 +93,9 @@ class Context:
     def source(self) -> str:
         if self._source is None:
             assert self.filename
-            with open(get_current_project_path() / self.filename) as f:
+            with open(
+                project_path_storage.get_current_project_path() / self.filename
+            ) as f:
                 self._set_source(f.read())
         assert self._source is not None
         return self._source
