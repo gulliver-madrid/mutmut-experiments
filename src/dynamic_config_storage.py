@@ -17,7 +17,7 @@ DYNAMIC_CONFIG_FILENAME: Final = DYNAMIC_CONFIG_NAME + ".py"
 
 def reset_global_vars() -> None:
     user_dynamic_config_storage.clear_dynamic_config_cache()
-    project_path_storage.set_project_path()  # TODO: change to clear or reset
+    project_path_storage.reset()
 
 
 class UserDynamicConfigStorage:
