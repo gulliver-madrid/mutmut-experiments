@@ -41,7 +41,7 @@ from src.context import RelativeMutationID
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.mutations import mutations_by_type
 from src.dynamic_config_storage import (
-    MUTMUT_CONFIG_NOT_DEFINED,
+    DYNAMIC_CONFIG_NOT_DEFINED,
     user_dynamic_config_storage,
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
@@ -112,7 +112,7 @@ def do_run(
     dynamic_config = user_dynamic_config_storage.get_dynamic_config()
 
     print(
-        f"Dynamic config config found: {dynamic_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}"
+        f"Dynamic config config found: {dynamic_config not in (None,DYNAMIC_CONFIG_NOT_DEFINED)}"
     )
 
     no_progress = no_progress or False

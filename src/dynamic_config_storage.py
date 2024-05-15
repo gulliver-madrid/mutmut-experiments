@@ -9,7 +9,7 @@ from typing import Any, Final
 from src.project import project_path_storage
 
 
-MUTMUT_CONFIG_NOT_DEFINED = "Mutmut Config Not Defined"
+DYNAMIC_CONFIG_NOT_DEFINED: Final = "Dynamic Config Not Defined"
 
 DYNAMIC_CONFIG_NAME: Final = "mutmut_config"
 DYNAMIC_CONFIG_FILENAME: Final = DYNAMIC_CONFIG_NAME + ".py"
@@ -24,18 +24,18 @@ class UserDynamicConfigStorage:
     """Dynamic configuration is the configuration in the form of a Python file that is defined by the user."""
 
     def __init__(self) -> None:
-        self._cached_dynamic_config: Any = MUTMUT_CONFIG_NOT_DEFINED
+        self._cached_dynamic_config: Any = DYNAMIC_CONFIG_NOT_DEFINED
         self._project_path_storage = project_path_storage
 
     def clear_dynamic_config_cache(self) -> None:
-        self._cached_dynamic_config = MUTMUT_CONFIG_NOT_DEFINED
+        self._cached_dynamic_config = DYNAMIC_CONFIG_NOT_DEFINED
 
     def get_dynamic_config(self) -> Any:
         dynamic_config = self._get_dynamic_config()
         return dynamic_config
 
     def _get_dynamic_config(self) -> Any:
-        if self._cached_dynamic_config != MUTMUT_CONFIG_NOT_DEFINED:
+        if self._cached_dynamic_config != DYNAMIC_CONFIG_NOT_DEFINED:
             return self._cached_dynamic_config
 
         current_project_path = self._project_path_storage.get_current_project_path()
