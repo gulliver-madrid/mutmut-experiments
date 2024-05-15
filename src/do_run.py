@@ -42,8 +42,7 @@ from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.mutations import mutations_by_type
 from src.mut_config_storage import (
     MUTMUT_CONFIG_NOT_DEFINED,
-    clear_mutmut_config_cache,
-    get_mutmut_config,
+    user_dynamic_config_storage,
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
 from src.project import get_current_project_path, get_project_path, set_project_path
@@ -109,8 +108,8 @@ def do_run(
 
     set_project_path(project)
     project_path = get_project_path()
-    clear_mutmut_config_cache()
-    mutmut_config = get_mutmut_config()
+    user_dynamic_config_storage.clear_mutmut_config_cache()
+    mutmut_config = user_dynamic_config_storage.get_mutmut_config()
 
     print(
         f"Mutmut config found: {mutmut_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}"
