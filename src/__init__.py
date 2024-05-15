@@ -35,7 +35,7 @@ import toml
 
 from src.config import Config
 from src.context import Context, RelativeMutationID
-from src.mut_config_storage import clear_mutmut_config_cache, get_mutmut_config
+from src.mut_config_storage import user_dynamic_config_storage
 from src.mutate import list_mutations, mutate_from_context
 from src.process import popen_streaming_output
 from src.progress import Progress
@@ -141,7 +141,7 @@ def check_mutants(
     # if directory has changed.
     # This is probably not really needed in the regular program flow (that uses spawn).
     # More info: https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
-    clear_mutmut_config_cache()
+    user_dynamic_config_storage.clear_mutmut_config_cache()
 
     def feedback(line: str) -> None:
         results_queue.put(("progress", line, None, None))
@@ -181,7 +181,7 @@ def run_mutation(
     if project_path is not None:
         set_project_path(project_path)
     os.chdir(get_current_project_path())
-    mutmut_config = get_mutmut_config()
+    mutmut_config = user_dynamic_config_storage.get_mutmut_config()
     cached_status = cached_mutation_status(
         context.filename, context.mutation_id, context.config.hash_of_tests
     )

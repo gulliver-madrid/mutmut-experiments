@@ -8,7 +8,7 @@ from parso.tree import NodeOrLeaf, Node, BaseNode, Leaf
 from parso.python.tree import ExprStmt
 
 from src.context import ALL, Context, RelativeMutationID
-from src.mut_config_storage import get_mutmut_config
+from src.mut_config_storage import user_dynamic_config_storage
 from src.mutations import (
     has_children,
     is_name_node,
@@ -55,7 +55,7 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
 
 def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
     assert isinstance(node, NodeOrLeaf)
-    mutmut_config = get_mutmut_config()
+    mutmut_config = user_dynamic_config_storage.get_mutmut_config()
     context.stack.append(node)
     try:
         if node.type in ("tfpdef", "import_from", "import_name"):
