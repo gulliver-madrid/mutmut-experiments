@@ -8,7 +8,7 @@ from parso.tree import NodeOrLeaf, Node, BaseNode, Leaf
 from parso.python.tree import ExprStmt
 
 from src.context import ALL, Context, RelativeMutationID
-from src.mut_config_storage import user_dynamic_config_storage
+from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutations import (
     has_children,
     is_name_node,

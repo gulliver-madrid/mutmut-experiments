@@ -3,7 +3,7 @@ from typing import Iterator
 
 import pytest
 
-from src.mut_config_storage import reset_global_vars
+from src.dynamic_config_storage import reset_global_vars
 
 
 def clear_db() -> None:

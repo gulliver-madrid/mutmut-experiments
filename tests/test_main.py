@@ -27,7 +27,7 @@ from src import (
 )
 from src.__main__ import climain
 from src.coverage import read_coverage_data
-from src.mut_config_storage import DYNAMIC_CONFIG_FILENAME
+from src.dynamic_config_storage import DYNAMIC_CONFIG_FILENAME
 from src.mutations import mutations_by_type
 from src.progress import Progress
 from src.project import project_path_storage
