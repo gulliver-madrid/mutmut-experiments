@@ -314,6 +314,10 @@ def config_from_file(
             return cast(dict[str, object], data)
         except (FileNotFoundError, KeyError):
             return {}
+        except Exception as err:
+            raise RuntimeError(
+                "Error trying to read mutation config from pyproject.toml"
+            ) from err
         finally:
             os.chdir(original)
 
