@@ -1,7 +1,7 @@
 import os
 from typing import Dict, List, Mapping, TypeAlias
 
-from src.project import get_current_project_path
+from src.project import project_path_storage
 
 
 FilePathStr: TypeAlias = str
@@ -19,7 +19,7 @@ def read_coverage_data() -> Dict[FilePathStr, ContextsByLineNo]:
         raise ImportError(
             'The --use-coverage feature requires the coverage library. Run "pip install --force-reinstall mutmut[coverage]"'
         ) from e
-    cov = Coverage(str(get_current_project_path() / ".coverage"))
+    cov = Coverage(str(project_path_storage.get_current_project_path() / ".coverage"))
     cov.load()
     data = cov.get_data()
     return {

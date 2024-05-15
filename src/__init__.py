@@ -39,7 +39,7 @@ from src.mut_config_storage import user_dynamic_config_storage
 from src.mutate import list_mutations, mutate_from_context
 from src.process import popen_streaming_output
 from src.progress import Progress
-from src.project import ProjectPath, get_current_project_path, set_project_path
+from src.project import ProjectPath, project_path_storage
 from src.mutations import SkipException
 from src.setup_logging import configure_logger
 from src.status import (
@@ -63,13 +63,19 @@ StrConsumer = Callable[[str], None]
 
 def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     assert isinstance(context.filename, str)
-    with open(get_current_project_path() / context.filename) as f:
+    with open(project_path_storage.get_current_project_path() / context.filename) as f:
         original = f.read()
     if backup:
-        with open(get_current_project_path() / (context.filename + ".bak"), "w") as f:
+        with open(
+            project_path_storage.get_current_project_path()
+            / (context.filename + ".bak"),
+            "w",
+        ) as f:
             f.write(original)
     mutated, _ = mutate_from_context(context)
-    with open(get_current_project_path() / context.filename, "w") as f:
+    with open(
+        project_path_storage.get_current_project_path() / context.filename, "w"
+    ) as f:
         f.write(mutated)
     return original, mutated
 
@@ -90,7 +96,7 @@ def queue_mutants(
 ) -> None:
     from src.cache.cache import get_cached_mutation_statuses
 
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
 
     try:
         index = 0
@@ -98,7 +104,7 @@ def queue_mutants(
             cached_mutation_statuses = get_cached_mutation_statuses(
                 filename, mutations, config.hash_of_tests
             )
-            with open(get_current_project_path() / filename) as f:
+            with open(project_path_storage.get_current_project_path() / filename) as f:
                 source = f.read()
             for mutation_id in mutations:
                 cached_status = cached_mutation_statuses.get(mutation_id)
@@ -179,8 +185,8 @@ def run_mutation(
     assert context.config is not None
     assert context.filename is not None
     if project_path is not None:
-        set_project_path(project_path)
-    os.chdir(get_current_project_path())
+        project_path_storage.set_project_path(project_path)
+    os.chdir(project_path_storage.get_current_project_path())
     mutmut_config = user_dynamic_config_storage.get_mutmut_config()
     cached_status = cached_mutation_status(
         context.filename, context.mutation_id, context.config.hash_of_tests
@@ -238,7 +244,7 @@ def run_mutation(
     finally:
         assert isinstance(context.filename, str)
         original = os.getcwd()
-        os.chdir(get_current_project_path())
+        os.chdir(project_path_storage.get_current_project_path())
         move(context.filename + ".bak", context.filename)
         os.chdir(original)
         config.test_command = (
@@ -341,7 +347,7 @@ def config_from_file(
 
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
-    project_dir = get_current_project_path()
+    project_dir = project_path_storage.get_current_project_path()
     project_dir_name = str(project_dir).split(os.sep)[-1]
     original = os.getcwd()
     os.chdir(project_dir_name)
@@ -478,7 +484,7 @@ class MutationTestsRunner:
                 config=config,
                 mutants_queue=mutants_queue,
                 mutations_by_file=mutations_by_file,
-                project=get_current_project_path(),
+                project=project_path_storage.get_current_project_path(),
             ),
         )
 
@@ -582,17 +588,21 @@ def python_source_files(
     :return: generator listing the paths to the python source files to mutate (absolute paths!)
     """
     if path.is_absolute():
-        parent = get_current_project_path().resolve()
+        parent = project_path_storage.get_current_project_path().resolve()
         child = path.resolve()
         assert child == parent or parent in child.parents, (child, parent)
         absolute_path = path
     else:
-        absolute_path = (get_current_project_path() / path).resolve()
+        absolute_path = (
+            project_path_storage.get_current_project_path() / path
+        ).resolve()
     assert absolute_path.exists(), absolute_path
-    relative_path = absolute_path.relative_to(get_current_project_path())
+    relative_path = absolute_path.relative_to(
+        project_path_storage.get_current_project_path()
+    )
     paths_to_exclude = paths_to_exclude or []
     original = os.getcwd()
-    os.chdir(get_current_project_path())
+    os.chdir(project_path_storage.get_current_project_path())
     if absolute_path.is_dir():
         for root, dirs, files in os.walk(relative_path, topdown=True):
             for exclude_pattern in paths_to_exclude:

@@ -32,7 +32,7 @@ from src.cache.junitxml import print_result_cache_junitxml
 from src.cache.print_results import print_result_cache, print_result_ids_cache
 from src.context import Context, RelativeMutationID
 from src.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
-from src.project import set_project_path
+from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.status import MUTANT_STATUSES, StatusStr
 
@@ -257,7 +257,7 @@ def results(project: str | None) -> NoReturn:
     Print the results.
     """
     assert isinstance(project, (str, NoneType))
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
     if not get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
@@ -280,7 +280,7 @@ def result_ids(status: str, project: str | None) -> NoReturn:
             f"The result-ids command needs a status class of mutants "
             f"(one of : {set(MUTANT_STATUSES.keys())}) but was {status}"
         )
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
     if not get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
@@ -305,7 +305,7 @@ def apply(
     """
     Apply a mutation on disk.
     """
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
     if not get_cache_path().exists():
         print("There is no mutants to apply yet. Please run `mutmut run` first.\n")
         sys.exit(1)
@@ -327,12 +327,12 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
     Show a mutation diff.
     """
     assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
     if not get_cache_path().exists():
         print("There is no results to show yet. Please run `mutmut run` first.\n")
         sys.exit(1)
 
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
 
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
     if not id_or_file:
@@ -383,7 +383,7 @@ def junitxml(
     Show a mutation diff with junitxml format.
     """
     assert isinstance(dict_synonyms, str)
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
     if not get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
@@ -408,7 +408,7 @@ def html(dict_synonyms: str, directory: str, project: str | None) -> NoReturn:
     """
     Generate a HTML report of surviving mutants.
     """
-    set_project_path(project)
+    project_path_storage.set_project_path(project)
     if not get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)

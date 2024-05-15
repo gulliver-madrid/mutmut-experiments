@@ -45,7 +45,7 @@ from src.mut_config_storage import (
     user_dynamic_config_storage,
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
-from src.project import get_current_project_path, get_project_path, set_project_path
+from src.project import project_path_storage
 from src.utils import split_lines, split_paths, print_status
 
 DEFAULT_RUNNER = "python -m pytest -x --assert=plain"
@@ -106,8 +106,8 @@ def do_run(
     print(f"Runner: {runner}")
     print(f"Project: {project}")
 
-    set_project_path(project)
-    project_path = get_project_path()
+    project_path_storage.set_project_path(project)
+    project_path = project_path_storage.get_project_path()
     user_dynamic_config_storage.clear_mutmut_config_cache()
     mutmut_config = user_dynamic_config_storage.get_mutmut_config()
 
@@ -150,7 +150,10 @@ def do_run(
 
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
 
-    if use_coverage and not (get_current_project_path() / ".coverage").exists():
+    if (
+        use_coverage
+        and not (project_path_storage.get_current_project_path() / ".coverage").exists()
+    ):
         raise FileNotFoundError(
             "No .coverage file found. You must generate a coverage file to use this feature."
         )
@@ -159,7 +162,9 @@ def do_run(
         paths_to_mutate = guess_paths_to_mutate()
     assert isinstance(paths_to_mutate, str)
 
-    paths_to_mutate = split_paths(paths_to_mutate, get_current_project_path())
+    paths_to_mutate = split_paths(
+        paths_to_mutate, project_path_storage.get_current_project_path()
+    )
 
     if not paths_to_mutate:
         raise click.BadOptionUsage(
@@ -170,7 +175,7 @@ def do_run(
         )
 
     assert tests_dir is not None
-    test_paths = split_paths(tests_dir, get_current_project_path())
+    test_paths = split_paths(tests_dir, project_path_storage.get_current_project_path())
     if test_paths is None:
         raise FileNotFoundError(
             'No test folders found in current folder. Run this where there is a "tests" or "test" folder.'
@@ -230,7 +235,7 @@ Legend for output:
     project_path_customized: Final = bool(project_path)
     if project_path_customized:
         original_cwd = os.getcwd()
-        os.chdir(get_current_project_path())
+        os.chdir(project_path_storage.get_current_project_path())
     baseline_time_elapsed = time_test_suite(
         swallow_output=not swallow_output,
         test_command=runner,
@@ -350,7 +355,7 @@ def parse_run_argument(
             assert not Path(path).is_absolute()
             print("Analizando path", str(Path(path)))
             original = os.getcwd()
-            os.chdir(get_current_project_path())
+            os.chdir(project_path_storage.get_current_project_path())
             for filename in python_source_files(
                 Path(path), tests_dirs, paths_to_exclude
             ):
@@ -384,12 +389,16 @@ def _get_tests_dirs(
 ) -> list[str]:
     tests_dirs: list[str] = []
     original_cwd = os.getcwd()
-    os.chdir(get_current_project_path())  # parece que es irrelevante # TODO: review
+    os.chdir(
+        project_path_storage.get_current_project_path()
+    )  # parece que es irrelevante # TODO: review
     for p in test_paths:
         tests_dirs.extend(glob(p, recursive=True))
 
     for p in paths_to_mutate:
-        paths_splitted = split_paths(tests_dir, get_current_project_path())
+        paths_splitted = split_paths(
+            tests_dir, project_path_storage.get_current_project_path()
+        )
         assert paths_splitted is not None
         for pt in paths_splitted:
             assert pt is not None
