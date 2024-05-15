@@ -35,7 +35,7 @@ import toml
 
 from src.config import Config
 from src.context import Context, RelativeMutationID
-from src.mut_config_storage import user_dynamic_config_storage
+from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutate import list_mutations, mutate_from_context
 from src.process import popen_streaming_output
 from src.progress import Progress

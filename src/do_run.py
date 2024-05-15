@@ -40,7 +40,7 @@ from src.config import Config
 from src.context import RelativeMutationID
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.mutations import mutations_by_type
-from src.mut_config_storage import (
+from src.dynamic_config_storage import (
     MUTMUT_CONFIG_NOT_DEFINED,
     user_dynamic_config_storage,
 )
