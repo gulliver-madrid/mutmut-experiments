@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from types import NoneType
-from typing import Any, Final, Tuple
+from typing import Any, Tuple
 
 from parso.tree import NodeOrLeaf, Node, BaseNode, Leaf
 from parso.python.tree import ExprStmt
@@ -18,6 +18,8 @@ from src.mutations import (
 from src.mutations.mutations import LeafMutation, NodeWithChildrenMutation
 from src.parse import parse_source
 from src.setup_logging import configure_logger
+
+from .dunder import is_dunder_name
 
 
 logger = configure_logger(__name__)
@@ -159,28 +161,6 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
                 return
     finally:
         context.stack.pop()
-
-
-# We have a global whitelist for constants of the pattern __all__, __version__, etc
-
-dunder_whitelist: Final[list[str]] = [
-    "all",
-    "version",
-    "title",
-    "package_name",
-    "author",
-    "description",
-    "email",
-    "version",
-    "license",
-    "copyright",
-]
-
-
-def is_dunder_name(name: str) -> bool:
-    return (
-        name.startswith("__") and name.endswith("__") and name[2:-2] in dunder_whitelist
-    )
 
 
 def _parse_checking_errors(source: str, filename: str | None) -> Any:
