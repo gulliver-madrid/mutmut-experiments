@@ -53,7 +53,7 @@ from src.status import (
 )
 from src.utils import status_printer
 
-__version__ = "2.4.5"
+__version__ = "2.5.0"
 
 logger = configure_logger(__name__)
 
