@@ -55,7 +55,7 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
 
 def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
     assert isinstance(node, NodeOrLeaf)
-    mutmut_config = user_dynamic_config_storage.get_mutmut_config()
+    dynamic_config = user_dynamic_config_storage.get_dynamic_config()
     context.stack.append(node)
     try:
         if node.type in ("tfpdef", "import_from", "import_name"):
@@ -148,8 +148,8 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         for new in reversed(new_list):
             assert not callable(new)
             if new is not None and new != old:
-                if hasattr(mutmut_config, "pre_mutation_ast"):
-                    mutmut_config.pre_mutation_ast(context=context)
+                if hasattr(dynamic_config, "pre_mutation_ast"):
+                    dynamic_config.pre_mutation_ast(context=context)
                 if context.should_mutate(node):
                     context.performed_mutation_ids.append(
                         context.mutation_id_of_current_index

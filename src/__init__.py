@@ -142,12 +142,12 @@ def check_mutants(
 ) -> None:
     assert isinstance(cycle_process_after, int)
 
-    # We want be sure than when mutation tests get called, mutmut_config.py is obtained again.
-    # If not, executing tests after mutmut_config is set could prevent to get a new mutmut_config
+    # We want be sure than when mutation tests get called, the dynamic config is obtained again.
+    # If not, executing tests after the dynamic config is set could prevent to get a new dynamic config.
     # if directory has changed.
     # This is probably not really needed in the regular program flow (that uses spawn).
     # More info: https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
-    user_dynamic_config_storage.clear_mutmut_config_cache()
+    user_dynamic_config_storage.clear_dynamic_config_cache()
 
     def feedback(line: str) -> None:
         results_queue.put(("progress", line, None, None))
@@ -187,7 +187,7 @@ def run_mutation(
     if project_path is not None:
         project_path_storage.set_project_path(project_path)
     os.chdir(project_path_storage.get_current_project_path())
-    mutmut_config = user_dynamic_config_storage.get_mutmut_config()
+    dynamic_config = user_dynamic_config_storage.get_dynamic_config()
     cached_status = cached_mutation_status(
         context.filename, context.mutation_id, context.config.hash_of_tests
     )
@@ -196,10 +196,10 @@ def run_mutation(
         return cached_status
 
     config = context.config
-    if mutmut_config is not None and hasattr(mutmut_config, "pre_mutation"):
+    if dynamic_config is not None and hasattr(dynamic_config, "pre_mutation"):
         context.current_line_index = context.mutation_id.line_number
         try:
-            mutmut_config.pre_mutation(context=context)
+            dynamic_config.pre_mutation(context=context)
         except SkipException:
             return SKIPPED
         if context.skip:
