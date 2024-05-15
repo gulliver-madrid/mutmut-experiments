@@ -7,6 +7,7 @@ import pytest
 
 from helpers import FileSystemPath
 from src.__main__ import climain
+from src.mut_config_storage import DYNAMIC_CONFIG_FILENAME
 
 
 @pytest.fixture
@@ -24,8 +25,8 @@ def test_add():
     assert add(1, 1) == 2
 """
     )
-    mutmut_config_py = tmpdir / "mutmut_config.py"
-    mutmut_config_py.write(
+    dynamic_config_path = tmpdir / DYNAMIC_CONFIG_FILENAME
+    dynamic_config_path.write(
         """
 from pathlib import Path
 

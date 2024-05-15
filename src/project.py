@@ -15,8 +15,7 @@ class ProjectPathStorage:
 
     def get_current_project_path(self) -> Path:
         """
-        Returns the path of the current project, where files such as .mutmut_cache, mutmut_config.py,
-        .coverage, etc, are located.
+        Returns the path of the current project, where files such as .mutmut_cache, .coverage, or the dynamic config, are located.
         """
         current_project_path = self.get_project_path() or Path(os.getcwd())
         assert current_project_path.exists()

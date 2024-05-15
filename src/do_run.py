@@ -108,11 +108,11 @@ def do_run(
 
     project_path_storage.set_project_path(project)
     project_path = project_path_storage.get_project_path()
-    user_dynamic_config_storage.clear_mutmut_config_cache()
-    mutmut_config = user_dynamic_config_storage.get_mutmut_config()
+    user_dynamic_config_storage.clear_dynamic_config_cache()
+    dynamic_config = user_dynamic_config_storage.get_dynamic_config()
 
     print(
-        f"Mutmut config found: {mutmut_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}"
+        f"Dynamic config config found: {dynamic_config not in (None,MUTMUT_CONFIG_NOT_DEFINED)}"
     )
 
     no_progress = no_progress or False
@@ -229,8 +229,8 @@ Legend for output:
         except ImportError:
             runner = "python -m unittest"
 
-    if hasattr(mutmut_config, "init"):
-        mutmut_config.init()
+    if hasattr(dynamic_config, "init"):
+        dynamic_config.init()
 
     project_path_customized: Final = bool(project_path)
     if project_path_customized:

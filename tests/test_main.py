@@ -27,6 +27,7 @@ from src import (
 )
 from src.__main__ import climain
 from src.coverage import read_coverage_data
+from src.mut_config_storage import DYNAMIC_CONFIG_FILENAME
 from src.mutations import mutations_by_type
 from src.progress import Progress
 from src.project import project_path_storage
@@ -374,8 +375,8 @@ def test_full_run_no_surviving_mutants_junit(filesystem: FileSystemPath) -> None
 
 
 def test_mutant_only_killed_after_rerun(filesystem: FileSystemPath) -> None:
-    mutmut_config = filesystem / "mutmut_config.py"
-    mutmut_config.write(
+    dynamic_config = filesystem / DYNAMIC_CONFIG_FILENAME
+    dynamic_config.write(
         """
 def pre_mutation(context):
     context.config.test_command = "echo True"
@@ -402,8 +403,8 @@ To show a mutant:
 
 
 def test_no_rerun_if_not_specified(filesystem: FileSystemPath) -> None:
-    mutmut_config = filesystem / "mutmut_config.py"
-    mutmut_config.write(
+    dynamic_config = filesystem / DYNAMIC_CONFIG_FILENAME
+    dynamic_config.write(
         """
 def pre_mutation(context):
     context.config.test_command = "echo True"
