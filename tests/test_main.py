@@ -721,6 +721,20 @@ def test_html_output(surviving_mutants_filesystem):
             '<tr><td><a href="foo.py.html">foo.py</a></td><td>2</td><td>0</td><td>0</td><td>0.00</td><td>2</td>'
             '</table></body></html>')
 
+
+def test_html_output_not_slow(surviving_mutants_filesystem: Path) -> None:
+    CliRunner().invoke(
+        climain,
+        ["run", "--paths-to-mutate=foo.py", "--test-time-base=15.0"],
+        catch_exceptions=False,
+    )
+    import time
+
+    t = time.time()
+    CliRunner().invoke(climain, ["html"])
+    elapsed = time.time() - t
+    assert elapsed < 0.2
+
 def test_html_custom_output(surviving_mutants_filesystem):
     result = CliRunner().invoke(climain, ['run', '--paths-to-mutate=foo.py', "--test-time-base=15.0"], catch_exceptions=False)
     print(repr(result.output))
