@@ -15,7 +15,7 @@ def ranges(numbers: Sequence[int]) -> str:
     start_range = numbers[0]
     end_range = numbers[0]
 
-    def add_result():
+    def add_result() -> None:
         if start_range == end_range:
             result.append(str(start_range))
         else:

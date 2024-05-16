@@ -25,5 +25,5 @@ class Config:
     ci: bool
     rerun_all: bool
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self._default_test_command = self.test_command
