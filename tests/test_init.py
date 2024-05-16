@@ -2,7 +2,7 @@
 import os
 from pathlib import Path
 from time import sleep
-from typing import Literal
+from typing import Any, Literal
 from pytest import raises, fixture
 from unittest.mock import MagicMock, patch
 
@@ -53,12 +53,12 @@ class ConfigStub:
 config_stub = ConfigStub()
 
 
-def test_run_mutation_tests_thread_synchronization(monkeypatch) -> None:
+def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
     # arrange
     total_mutants = 3
     cycle_process_after = 1
 
-    def queue_mutants_stub(**kwargs):
+    def queue_mutants_stub(**kwargs: Any) -> None:
         for _ in range(total_mutants):
             kwargs['mutants_queue'].put(('mutant', Context(config=config_stub)))
         kwargs['mutants_queue'].put(('end', None))
@@ -89,7 +89,7 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch) -> None:
 
 
 @fixture
-def testpatches_path(testdata: Path):
+def testpatches_path(testdata: Path) -> Path:
     return testdata / "test_patches"
 
 
