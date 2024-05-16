@@ -530,7 +530,7 @@ def parse_run_argument(
         mutations_by_file: dict[str, list[RelativeMutationID]],
         paths_to_exclude: list[str],
         paths_to_mutate: list[str],
-        tests_dirs: list[str]):
+        tests_dirs: list[str]) -> None:
     assert isinstance(mutations_by_file, dict)
     assert isinstance(dict_synonyms, (list, str))
     assert isinstance(paths_to_exclude, list)
