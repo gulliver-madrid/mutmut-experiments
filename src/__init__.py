@@ -604,6 +604,7 @@ def python_source_files(
     relative_path = absolute_path.relative_to(
         project_path_storage.get_current_project_path()
     )
+    # TODO: review if exclusion works with file paths
     paths_to_exclude = paths_to_exclude or []
     original = os.getcwd()
     os.chdir(project_path_storage.get_current_project_path())
