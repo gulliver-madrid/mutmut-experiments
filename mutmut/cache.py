@@ -9,7 +9,7 @@ from functools import wraps
 from io import open
 from itertools import groupby, zip_longest
 from os.path import join, dirname
-from typing import Dict, List, Tuple
+from typing import TYPE_CHECKING, Any, Dict, List, Tuple
 
 
 from junit_xml import TestSuite, TestCase, to_xml_report_string
@@ -17,11 +17,19 @@ from pony.orm import Database, Required, db_session, Set, Optional, select, \
     PrimaryKey, RowNotFound, ERDiagramError, OperationalError
 from pony.orm.core import Query
 
+
 from mutmut import MUTANT_STATUSES, BAD_TIMEOUT, OK_SUSPICIOUS, BAD_SURVIVED, SKIPPED, UNTESTED, \
     OK_KILLED, RelativeMutationID, Context, mutate
 from mutmut.utils import ranges
 
 db = Database()
+
+# type checking
+if TYPE_CHECKING:
+    DbEntity = Any
+else:
+    DbEntity = db.Entity
+
 
 current_db_version = 4
 
@@ -29,25 +37,25 @@ current_db_version = 4
 NO_TESTS_FOUND = 'NO TESTS FOUND'
 
 
-class MiscData(db.Entity):
+class MiscData(DbEntity):  # type: ignore [valid-type]
     key = PrimaryKey(str, auto=True)
     value = Optional(str, autostrip=False)
 
 
-class SourceFile(db.Entity):
+class SourceFile(DbEntity):  # type: ignore [valid-type]
     filename = Required(str, autostrip=False)
     hash = Optional(str)
     lines = Set('Line')
 
 
-class Line(db.Entity):
+class Line(DbEntity):  # type: ignore [valid-type]
     sourcefile = Required(SourceFile)
     line = Optional(str, autostrip=False)
     line_number = Required(int)
     mutants = Set('Mutant')
 
 
-class Mutant(db.Entity):
+class Mutant(DbEntity):  # type: ignore [valid-type]
     id: int
     line = Required(Line)
     index = Required(int)
@@ -343,7 +351,7 @@ def sequence_ops(a, b):
 
 @init_db
 @db_session
-def update_line_numbers(filename):
+def update_line_numbers(filename: str) -> None:
     hash = hash_of(filename)
     sourcefile = get_or_create(SourceFile, filename=filename)
     if hash == sourcefile.hash:
@@ -406,7 +414,7 @@ def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]):
 
 @init_db
 @db_session
-def update_mutant_status(file_to_mutate, mutation_id, status, tests_hash):
+def update_mutant_status(file_to_mutate: str, mutation_id, status, tests_hash):
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = Line.get(sourcefile=sourcefile, line=mutation_id.line, line_number=mutation_id.line_number)
     mutant = Mutant.get(line=line, index=mutation_id.index)
@@ -416,7 +424,7 @@ def update_mutant_status(file_to_mutate, mutation_id, status, tests_hash):
 
 @init_db
 @db_session
-def get_cached_mutation_statuses(filename, mutations, hash_of_tests):
+def get_cached_mutation_statuses(filename: str, mutations, hash_of_tests):
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
 
