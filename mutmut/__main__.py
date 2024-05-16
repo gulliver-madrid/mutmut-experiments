@@ -142,7 +142,7 @@ def version() -> NoReturn:
     use_patch_file=None,
 )
 def run(
-    argument,
+    argument: str | None,
     paths_to_mutate: str | None,
     disable_mutation_types: str,
     enable_mutation_types: str,
@@ -157,10 +157,10 @@ def run(
     post_mutation: str | None,
     use_patch_file: str | None,
     paths_to_exclude: str,
-    simple_output,
-    no_progress: bool,
-    ci,
-    rerun_all
+    simple_output: bool | None,
+    no_progress: bool | None,
+    ci: bool | None,
+    rerun_all: bool | None
 ) -> NoReturn:
     """
     Runs mutmut. You probably want to start with just trying this. If you supply a mutation ID mutmut will check just this mutant.
@@ -188,8 +188,13 @@ def run(
     With --CI flag enabled, the exit code will always be
     1 for a fatal error or 0 for any other case.
     """
+    assert isinstance(argument, (NoneType, str))
     assert isinstance(test_time_base, (float, NoneType))
     assert isinstance(test_time_multiplier, (float, NoneType))
+    assert isinstance(simple_output, (bool, NoneType)), type(simple_output)
+    assert isinstance(no_progress, (bool, NoneType)), type(no_progress)
+    assert isinstance(ci, (bool, NoneType)), type(ci)
+    assert isinstance(rerun_all, (bool, NoneType)), type(rerun_all)
     if test_time_base is None:  # click sets the default=0.0 to None
         test_time_base = 0.0
     if test_time_multiplier is None:  # click sets the default=0.0 to None
@@ -312,10 +317,10 @@ def do_run(
     pre_mutation: str | None,
     post_mutation: str | None,
     use_patch_file: str | None,
-    paths_to_exclude: str,  # ?
+    paths_to_exclude: str,
     simple_output: bool | None,
     no_progress: bool | None,
-    ci: None,
+    ci: bool | None,
     rerun_all: bool | None,
 ) -> int:
     """return exit code, after performing an mutation test run.
@@ -341,7 +346,7 @@ def do_run(
     assert isinstance(paths_to_exclude, str)
     assert isinstance(simple_output, (bool, NoneType)), simple_output
     assert isinstance(no_progress, (bool, NoneType)), no_progress
-    assert isinstance(ci, NoneType)
+    assert isinstance(ci, (bool, NoneType))
     assert isinstance(rerun_all, (bool, NoneType)), rerun_all
     # CHECK TYPES END
 
