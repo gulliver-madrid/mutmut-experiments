@@ -139,7 +139,7 @@ def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_
             results_queue.put(('end', None, None, None))
 
 
-def run_mutation(context: Context, callback) -> str:
+def run_mutation(context: Context, callback: Callable[[str], None]) -> str:
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
     """
@@ -443,7 +443,7 @@ def hammett_tests_pass(config: Config, callback) -> bool:
     # Run tests
     try:
         class StdOutRedirect(TextIOBase):
-            def write(self, s):
+            def write(self, s: str) -> int:
                 callback(s)
                 return len(s)
 
