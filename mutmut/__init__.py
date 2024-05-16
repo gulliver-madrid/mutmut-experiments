@@ -475,7 +475,7 @@ CYCLE_PROCESS_AFTER = 100
 def run_mutation_tests(
     config: Config,
     progress: Progress,
-    mutations_by_file: Dict[str, List[RelativeMutationID]],
+    mutations_by_file: Dict[str, List[RelativeMutationID]] | None,
 ) -> None:
     from mutmut.cache import update_mutant_status
 

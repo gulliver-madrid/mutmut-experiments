@@ -60,7 +60,7 @@ current_db_version = 4
 NO_TESTS_FOUND = 'NO TESTS FOUND'
 
 
-class MiscData(DbEntity):  # type: ignore [valid-type]
+class MiscData(DbEntity):
     key = PrimaryKey(str, auto=True)
     value = Optional(str, autostrip=False)
 
