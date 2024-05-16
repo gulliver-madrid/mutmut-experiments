@@ -10,7 +10,6 @@ from parso.tree import NodeOrLeaf, Node, BaseNode
 from parso.python.tree import ExprStmt
 
 from mutmut.context import ALL, Context, RelativeMutationID
-from mutmut.debugging import print_function_stack
 from mutmut.mutations import has_children, is_name_node, is_operator, mutations_by_type
 from mutmut.parse import parse
 from mutmut.setup_logging import configure_logger
@@ -155,14 +154,8 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         context.stack.pop()
 
 
-counter = 0
-
 
 def _mutate_list_of_nodes(node: BaseNode, context: Context) -> None:
-    global counter
-    print_function_stack()
-    counter += 1
-    logger.info(f"{counter=}")
     assert isinstance(node, BaseNode)
     return_annotation_started = False
 
