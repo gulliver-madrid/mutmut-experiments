@@ -17,7 +17,10 @@ from mutmut.mutate import mutate
 from mutmut.mutations import (
     partition_node_list,
     name_mutation)
+from mutmut.setup_logging import configure_logger
 from mutmut.status import OK_KILLED
+
+logger = configure_logger(__name__)
 
 
 def test_partition_node_list_no_nodes() -> None:
