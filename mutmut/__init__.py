@@ -75,7 +75,7 @@ def queue_mutants(
     config: Config,
     mutants_queue: MutantQueue,
     mutations_by_file: Dict[str, List[RelativeMutationID]],
-):
+) -> None:
     from mutmut.cache import get_cached_mutation_statuses
 
     try:
@@ -114,7 +114,7 @@ ResultQueue: TypeAlias = 'multiprocessing.Queue[ResultQueueItem]'
 def check_mutants(mutants_queue: MutantQueue, results_queue: ResultQueue, cycle_process_after: int) -> None:
     assert isinstance(cycle_process_after, int)
 
-    def feedback(line: str):
+    def feedback(line: str) -> None:
         results_queue.put(('progress', line, None, None))
 
     did_cycle = False
@@ -373,7 +373,7 @@ def popen_streaming_output(
         stdout = os.fdopen(master)
         os.close(slave)
 
-    def kill(process_):
+    def kill(process_) -> None:
         """Kill the specified process on Timer completion"""
         try:
             process_.kill()
@@ -430,7 +430,7 @@ def hammett_tests_pass(config: Config, callback) -> bool:
 
     timed_out = False
 
-    def timeout():
+    def timeout() -> None:
         _thread.interrupt_main()
         nonlocal timed_out
         timed_out = True
