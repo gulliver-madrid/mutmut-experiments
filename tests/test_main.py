@@ -35,6 +35,10 @@ from src.process import popen_streaming_output
 from src.status import MUTANT_STATUSES
 
 from helpers import FileSystemPath, open_utf8
+from fixtures import (
+    create_filesystem,
+    surviving_mutants_filesystem,  # pyright: ignore [reportUnusedImport]
+)
 
 
 builtins.open = open_utf8  # type: ignore [assignment]
@@ -88,47 +92,6 @@ def single_mutant_filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
     )
 
     yield tmpdir
-
-
-@pytest.fixture
-def surviving_mutants_filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
-    foo_py = """
-def foo(a, b):
-    result = a + b
-    return result
-"""
-
-    test_py = """
-def test_nothing(): assert True
-"""
-
-    create_filesystem(tmpdir, foo_py, test_py)
-
-    yield tmpdir
-
-
-def create_filesystem(
-    tmpdir: FileSystemPath, file_to_mutate_contents: str, test_file_contents: str
-) -> None:
-    test_dir = str(tmpdir)
-    os.chdir(test_dir)
-
-    # hammett is almost 5x faster than pytest. Let's use that instead.
-    with open(join(test_dir, "setup.cfg"), "w") as f:
-        f.write(
-            """
-[mutmut]
-runner=python -m hammett -x
-"""
-        )
-
-    with open(join(test_dir, "foo.py"), "w") as f:
-        f.write(file_to_mutate_contents)
-
-    os.mkdir(join(test_dir, "tests"))
-
-    with open(join(test_dir, "tests", "test_foo.py"), "w") as f:
-        f.write(test_file_contents)
 
 
 def test_print_version() -> None:
@@ -963,7 +926,6 @@ def test_html_output_not_slow(surviving_mutants_filesystem: Path) -> None:
     CliRunner().invoke(climain, ["html"])
     elapsed = time.time() - t
     assert elapsed < 0.2
-
 
 
 def test_html_custom_output(surviving_mutants_filesystem: Path) -> None:
