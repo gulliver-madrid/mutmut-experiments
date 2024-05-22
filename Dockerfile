@@ -19,7 +19,14 @@ COPY . .
 # Add the current path to PYTHONPATH
 ENV PYTHONPATH "${PYTHONPATH}:/app"
 
-# Install the Vim text editor
-RUN apt-get update && apt-get install -y vim
+# Alias to type checking
+RUN echo 'alias tc="echo Checking types && poetry run mypy"' >> ~/.bashrc
+# Alias to run tests
+RUN echo 'alias test="echo Running tests && poetry run pytest"' >> ~/.bashrc
+# Alias to type checking + tests
+RUN echo 'alias check="tc && test"' >> ~/.bashrc
+# Alias to install vim
+RUN echo 'alias ivim="apt-get update && apt-get install -y vim"' >> ~/.bashrc
 
-CMD echo "Checking types" && poetry run mypy && echo "Running tests" && poetry run pytest -x; /bin/bash
+
+ENTRYPOINT ["/bin/bash"]
