@@ -297,9 +297,7 @@ def result_ids(status: str, project: str | None) -> NoReturn:
 @click.option(
     "-p", "--project", help="base directory of the project", type=click.STRING
 )
-@config_from_file(
-    dict_synonyms="",
-)
+@config_from_file(dict_synonyms="")
 def apply(
     mutation_id: str, backup: bool, dict_synonyms: List[str], project: str | None
 ) -> NoReturn:
@@ -320,9 +318,7 @@ def apply(
 @click.option(
     "-p", "--project", help="base directory of the project", type=click.STRING
 )
-@config_from_file(
-    dict_synonyms="",
-)
+@config_from_file(dict_synonyms="")
 def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoReturn:
     """
     Show a mutation diff.
@@ -366,9 +362,7 @@ POLICIES: Final = ["ignore", "skipped", "error", "failure"]
 @click.option(
     "-p", "--project", help="base directory of the project", type=click.STRING
 )
-@config_from_file(
-    dict_synonyms="",
-)
+@config_from_file(dict_synonyms="")
 def junitxml(
     dict_synonyms: str,
     suspicious_policy: str,
