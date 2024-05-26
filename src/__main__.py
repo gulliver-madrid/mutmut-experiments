@@ -6,7 +6,7 @@ import sys
 from io import open
 from pathlib import Path
 from types import NoneType
-from typing import List, NoReturn, Tuple, cast
+from typing import Final, List, NoReturn, Tuple, cast
 
 import click
 
@@ -356,18 +356,13 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
     sys.exit(0)
 
 
+POLICIES: Final = ["ignore", "skipped", "error", "failure"]
+
+
 @climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
 @click.option("--dict-synonyms")
-@click.option(
-    "--suspicious-policy",
-    type=click.Choice(["ignore", "skipped", "error", "failure"]),
-    default="ignore",
-)
-@click.option(
-    "--untested-policy",
-    type=click.Choice(["ignore", "skipped", "error", "failure"]),
-    default="ignore",
-)
+@click.option("--suspicious-policy", type=click.Choice(POLICIES), default="ignore")
+@click.option("--untested-policy", type=click.Choice(POLICIES), default="ignore")
 @click.option(
     "-p", "--project", help="base directory of the project", type=click.STRING
 )
