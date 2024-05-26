@@ -162,6 +162,7 @@ def version() -> NoReturn:
     use_patch_file=None,
 )
 def run(
+    *,
     argument: str | None,
     paths_to_mutate: str | None,
     disable_mutation_types: str,
