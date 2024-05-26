@@ -53,10 +53,7 @@ def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
     :param backup: if :obj:`True` create a backup of the source file
         before applying the mutation
     """
-    tuple_: Tuple[str, RelativeMutationID] = filename_and_mutation_id_from_pk(
-        int(mutation_pk)
-    )
-    filename, mutation_id = tuple_
+    filename, mutation_id = filename_and_mutation_id_from_pk(mutation_pk)
 
     update_line_numbers(filename)
 
