@@ -42,6 +42,7 @@ logger = configure_logger(__name__)
 add_project_option = click.option(
     "-p", "--project", help="base directory of the project", type=click.STRING
 )
+context_settings = dict(help_option_names=["-h", "--help"])
 
 
 def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
@@ -73,7 +74,7 @@ def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
 null_out = open(os.devnull, "w")
 
 
-@click.group(context_settings=dict(help_option_names=["-h", "--help"]))
+@click.group(context_settings=context_settings)
 def climain() -> None:
     """
     -----------------------------\n
@@ -102,7 +103,7 @@ def version() -> NoReturn:
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @click.argument("argument", nargs=1, required=False)
 @click.option("--paths-to-mutate", type=click.STRING)
 @click.option(
@@ -252,7 +253,7 @@ def run(
     )
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @add_project_option
 def results(project: str | None) -> NoReturn:
     """
@@ -267,7 +268,7 @@ def results(project: str | None) -> NoReturn:
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @click.argument("status", nargs=1, required=True)
 @add_project_option
 def result_ids(status: str, project: str | None) -> NoReturn:
@@ -289,7 +290,7 @@ def result_ids(status: str, project: str | None) -> NoReturn:
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @click.argument("mutation-id", nargs=1, required=True)
 @click.option("--backup/--no-backup", default=False)
 @click.option("--dict-synonyms")
@@ -309,7 +310,7 @@ def apply(
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @click.argument("id-or-file", nargs=1, required=False)
 @click.option("--dict-synonyms")
 @add_project_option
@@ -350,7 +351,7 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
 POLICIES: Final = ["ignore", "skipped", "error", "failure"]
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @click.option("--dict-synonyms")
 @click.option("--suspicious-policy", type=click.Choice(POLICIES), default="ignore")
 @click.option("--untested-policy", type=click.Choice(POLICIES), default="ignore")
@@ -377,7 +378,7 @@ def junitxml(
     sys.exit(0)
 
 
-@climain.command(context_settings=dict(help_option_names=["-h", "--help"]))
+@climain.command(context_settings=context_settings)
 @click.option("--dict-synonyms")
 @click.option("-d", "--directory", help="Write the output files to DIR.")
 @add_project_option
