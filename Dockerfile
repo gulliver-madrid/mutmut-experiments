@@ -28,4 +28,7 @@ ENV PYTHONPATH "${PYTHONPATH}:/app"
 # Copy the rest of the source code to the container
 COPY . .
 
-ENTRYPOINT ["/bin/bash"]
+
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
