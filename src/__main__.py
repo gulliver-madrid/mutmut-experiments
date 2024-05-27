@@ -169,7 +169,7 @@ def run(
     disable_mutation_types: str,
     enable_mutation_types: str,
     runner: str | None,
-    tests_dir: str,
+    tests_dir: str,  # TODO: check no other type is allowed in config file
     test_time_multiplier: float | None,
     test_time_base: float | None,
     swallow_output: bool | None,
@@ -219,6 +219,7 @@ def run(
     assert isinstance(ci, (bool, NoneType)), type(ci)
     assert isinstance(rerun_all, (bool, NoneType)), type(rerun_all)
     assert isinstance(dict_synonyms, str)
+    assert isinstance(tests_dir, str)
     if test_time_base is None:  # click sets the default=0.0 to None
         test_time_base = 0.0
     if test_time_multiplier is None:  # click sets the default=0.0 to None
