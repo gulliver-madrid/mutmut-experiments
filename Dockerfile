@@ -24,7 +24,7 @@ RUN echo 'alias tc="echo Checking types && poetry run mypy"' >> ~/.bashrc
 # Alias to run tests
 RUN echo 'alias test="echo Running tests && poetry run pytest"' >> ~/.bashrc
 # Alias to type checking + tests
-RUN echo 'alias check="tc && test"' >> ~/.bashrc
+RUN echo 'alias check="tc --strict && test"' >> ~/.bashrc
 # Alias to install vim
 RUN echo 'alias ivim="apt-get update && apt-get install -y vim"' >> ~/.bashrc
 
