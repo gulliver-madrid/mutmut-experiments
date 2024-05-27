@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import shlex
 import subprocess
+import sys
 from threading import Timer
 from typing import Any, Callable, Optional
 
@@ -21,7 +22,7 @@ def popen_streaming_output(
         the timeout time
     :return: the return code of the executed subprocess
     """
-    if os.name == "nt":  # pragma: no cover
+    if sys.platform == "win32":  # pragma: no cover
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
@@ -30,11 +31,11 @@ def popen_streaming_output(
         )
         stdout = process.stdout
     else:
-        master, slave = os.openpty()  # type: ignore [attr-defined]
+        master, slave = os.openpty()
         process = subprocess.Popen(
             shlex.split(cmd, posix=True), stdout=slave, stderr=slave
         )
-        stdout = os.fdopen(master)  # type: ignore [assignment]
+        stdout = os.fdopen(master)
         os.close(slave)
 
     def kill(process_: Any) -> None:
@@ -49,15 +50,14 @@ def popen_streaming_output(
     timer.daemon = True
     timer.start()
 
-    line: bytes | str
     while process.returncode is None:
         try:
-            if os.name == "nt":  # pragma: no cover
+            if sys.platform == "win32":  # pragma: no cover
                 assert stdout is not None
-                line = stdout.readline()
+                line_as_bytes = stdout.readline()
                 # windows gives readline() raw stdout as a b''
                 # need to decode it
-                line = line.decode("utf-8")
+                line = line_as_bytes.decode("utf-8")
                 if line:  # ignore empty strings and None
                     callback(line)
             else:
@@ -66,7 +66,7 @@ def popen_streaming_output(
                     line = stdout.readline()
                     if not line:
                         break
-                    callback(line)  # type: ignore [arg-type]
+                    callback(line)
         except OSError:
             # This seems to happen on some platforms, including TravisCI.
             # It seems like it's ok to just let this pass here, you just
