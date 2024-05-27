@@ -182,7 +182,8 @@ def do_run(
         )
 
     tests_dirs = _get_tests_dirs(
-        paths_to_mutate=paths_to_mutate, tests_dir=tests_dir, test_paths=test_paths
+        paths_to_mutate=paths_to_mutate,
+        test_paths=test_paths,
     )
 
     current_hash_of_tests = hash_of_tests(tests_dirs)
@@ -384,9 +385,7 @@ def parse_run_argument(
         mutations_by_file[filename] = [mutation_id]
 
 
-def _get_tests_dirs(
-    *, paths_to_mutate: list[str], tests_dir: str, test_paths: list[str]
-) -> list[str]:
+def _get_tests_dirs(*, paths_to_mutate: list[str], test_paths: list[str]) -> list[str]:
     tests_dirs: list[str] = []
     original_cwd = os.getcwd()
     os.chdir(
@@ -396,11 +395,7 @@ def _get_tests_dirs(
         tests_dirs.extend(glob(p, recursive=True))
 
     for p in paths_to_mutate:
-        paths_splitted = split_paths(
-            tests_dir, project_path_storage.get_current_project_path()
-        )
-        assert paths_splitted is not None
-        for pt in paths_splitted:
+        for pt in test_paths:
             assert pt is not None
             tests_dirs.extend(glob(p + "/**/" + pt, recursive=True))
     os.chdir(original_cwd)
