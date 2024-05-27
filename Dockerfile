@@ -13,12 +13,6 @@ RUN pip install poetry
 # Install dependencies
 RUN poetry install --no-interaction --no-ansi
 
-# Copy the rest of the source code to the container
-COPY . .
-
-# Add the current path to PYTHONPATH
-ENV PYTHONPATH "${PYTHONPATH}:/app"
-
 # Alias to type checking
 RUN echo 'alias tc="echo Checking types && poetry run mypy"' >> ~/.bashrc
 # Alias to run tests
@@ -28,5 +22,10 @@ RUN echo 'alias check="tc --strict && test"' >> ~/.bashrc
 # Alias to install vim
 RUN echo 'alias ivim="apt-get update && apt-get install -y vim"' >> ~/.bashrc
 
+# Add the current path to PYTHONPATH
+ENV PYTHONPATH "${PYTHONPATH}:/app"
+
+# Copy the rest of the source code to the container
+COPY . .
 
 ENTRYPOINT ["/bin/bash"]
