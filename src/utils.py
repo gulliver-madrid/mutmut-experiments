@@ -36,15 +36,16 @@ def ranges(numbers: Sequence[int]) -> str:
     return ", ".join(result)
 
 
-def split_paths(paths: str, directory: Path) -> list[str] | None:
+def split_paths(paths: str, directory: Path) -> list[str]:
     # This method is used to split paths that are separated by commas or colons
     # filtering out those that do not exist
     separated: list[str] | None = None
     for sep in [",", ":"]:
-        separated = paths.split(sep)
-        if separated:
+        if sep in paths:
+            separated = paths.split(sep)
             break
-    assert separated is not None
+    else:
+        separated = [paths]
     return filter_not_existing(separated, directory)
 
 
