@@ -176,7 +176,7 @@ def do_run(
 
     assert tests_dir is not None
     test_paths = split_paths(tests_dir, project_path_storage.get_current_project_path())
-    if test_paths is None:
+    if not test_paths:
         raise FileNotFoundError(
             'No test folders found in current folder. Run this where there is a "tests" or "test" folder.'
         )
