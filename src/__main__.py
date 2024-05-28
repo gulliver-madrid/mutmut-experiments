@@ -132,6 +132,7 @@ def version() -> NoReturn:
 @click.option("-b", "--test-time-base", default=0.0, type=float)
 @add_project_option
 @click.option("-s", "--swallow-output", help="turn off output capture", is_flag=True)
+@click.option("--parallelize", help="use parallelization", is_flag=True, default=False)
 @click.option("--dict-synonyms")
 @click.option("--pre-mutation")
 @click.option("--post-mutation")
@@ -161,6 +162,7 @@ def version() -> NoReturn:
     pre_mutation=None,
     post_mutation=None,
     use_patch_file=None,
+    parallelize=False,
 )
 def run(
     *,
@@ -173,6 +175,7 @@ def run(
     test_time_multiplier: float | None,
     test_time_base: float | None,
     swallow_output: bool | None,
+    parallelize: bool,
     use_coverage: bool,
     dict_synonyms: str,
     pre_mutation: str | None,
@@ -219,7 +222,9 @@ def run(
     assert isinstance(ci, (bool, NoneType)), type(ci)
     assert isinstance(rerun_all, (bool, NoneType)), type(rerun_all)
     assert isinstance(dict_synonyms, str)
-    assert isinstance(tests_dir, str)
+    assert isinstance(tests_dir, str), tests_dir
+    assert isinstance(parallelize, bool), type(parallelize)
+
     if test_time_base is None:  # click sets the default=0.0 to None
         test_time_base = 0.0
     if test_time_multiplier is None:  # click sets the default=0.0 to None
