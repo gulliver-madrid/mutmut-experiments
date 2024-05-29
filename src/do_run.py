@@ -21,7 +21,6 @@ if str(base) not in sys.path:
     sys.path.insert(0, str(base))
 
 from src import (
-    MutationTestsRunner,
     __version__,
     guess_paths_to_mutate,
     add_mutations_by_file,
@@ -39,6 +38,7 @@ from src.cache.cache import (
 from src.config import Config
 from src.context import RelativeMutationID
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
+from src.mutation_test_runner import MutationTestsRunner
 from src.mutations import mutations_by_type
 from src.dynamic_config_storage import (
     DYNAMIC_CONFIG_NOT_DEFINED,

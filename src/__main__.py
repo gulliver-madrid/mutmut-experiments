@@ -6,7 +6,7 @@ import sys
 from io import open
 from pathlib import Path
 from types import NoneType
-from typing import Final, List, NoReturn, Tuple, cast
+from typing import Final, List, NoReturn, cast
 
 import click
 
@@ -17,7 +17,6 @@ if str(base) not in sys.path:
     sys.path.insert(0, str(base))
 
 from src import (
-    mutate_file,
     __version__,
     config_from_file,
 )
@@ -30,8 +29,9 @@ from src.cache.cache import (
 from src.cache.html import create_html_report
 from src.cache.junitxml import print_result_cache_junitxml
 from src.cache.print_results import print_result_cache, print_result_ids_cache
-from src.context import Context, RelativeMutationID
+from src.context import Context
 from src.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
+from src.mutation_test_runner import mutate_file
 from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.status import MUTANT_STATUSES, StatusStr
