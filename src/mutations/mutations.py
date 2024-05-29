@@ -223,7 +223,7 @@ def operator_mutation(*, value: str, node: Leaf) -> str | list[str] | None:
     data: Mapping[str, str | list[str]] = {
         "+": "-",
         "-": "+",
-        "*": "/",
+        "*": ["/", "//"],
         "/": "*",
         "//": "/",
         "%": "/",
