@@ -5,13 +5,13 @@ from typing import Any, Literal, cast
 from pytest import raises, fixture
 from unittest.mock import MagicMock, patch
 
-from src import (
-    MutationTestsRunner,
-    check_mutants,
-)
 from src.config import Config
 from src.context import Context
 from src.mutate import mutate_from_context
+from src.mutation_test_runner import (
+    MutationTestsRunner,
+    check_mutants,
+)
 from src.mutations import partition_node_list, name_mutation
 from src.patch import read_patch_data
 from src.setup_logging import configure_logger
@@ -43,7 +43,7 @@ def check_mutants_stub(**kwargs: Any) -> None:
         return OK_KILLED
 
     check_mutants_original = check_mutants
-    with patch("src.run_mutation", run_mutation_stub):
+    with patch("src.mutation_test_runner.run_mutation", run_mutation_stub):
         check_mutants_original(**kwargs)
 
 
@@ -64,16 +64,18 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
             kwargs["mutants_queue"].put(("mutant", Context(config=config_stub)))
         kwargs["mutants_queue"].put(("end", None))
 
-    monkeypatch.setattr("src.queue_mutants", queue_mutants_stub)
+    monkeypatch.setattr("src.mutation_test_runner.queue_mutants", queue_mutants_stub)
 
     def update_mutant_status_stub(**_: Any) -> None:
         sleep(0.1)
 
-    monkeypatch.setattr("src.check_mutants", check_mutants_stub)
+    monkeypatch.setattr("src.mutation_test_runner.check_mutants", check_mutants_stub)
     monkeypatch.setattr(
         "src.cache.cache.update_mutant_status", update_mutant_status_stub
     )
-    monkeypatch.setattr("src.CYCLE_PROCESS_AFTER", cycle_process_after)
+    monkeypatch.setattr(
+        "src.mutation_test_runner.CYCLE_PROCESS_AFTER", cycle_process_after
+    )
 
     progress_mock = MagicMock()
     progress_mock.registered_mutants = 0
