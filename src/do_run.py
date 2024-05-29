@@ -370,22 +370,18 @@ def parse_run_argument(
                     mutations_by_file, filename, dict_synonyms, config
                 )
             os.chdir(original)
-    else:
-        try:
-            int(argument)
-        except ValueError:
-            filename = argument
-            if not os.path.exists(filename):
-                raise click.BadArgumentUsage(
-                    "The run command takes either an integer that is the mutation id or a path to a file to mutate"
-                )
-            update_line_numbers(filename)
-            add_mutations_by_file(mutations_by_file, filename, dict_synonyms, config)
-            return
-
+    elif argument.isdigit():
         filename, mutation_id = filename_and_mutation_id_from_pk(int(argument))
         update_line_numbers(filename)
         mutations_by_file[filename] = [mutation_id]
+    else:
+        filename = argument
+        if not os.path.exists(filename):
+            raise click.BadArgumentUsage(
+                "The run command takes either an integer that is the mutation id or a path to a file to mutate"
+            )
+        update_line_numbers(filename)
+        add_mutations_by_file(mutations_by_file, filename, dict_synonyms, config)
 
 
 def _get_tests_dirs(*, paths_to_mutate: list[str], test_paths: list[str]) -> list[str]:
