@@ -244,6 +244,7 @@ Legend for output:
         current_hash_of_tests=current_hash_of_tests,
         no_progress=no_progress,
     )
+    # breakpoint()
     if project_path_customized:
         os.chdir(original_cwd)  # pyright: ignore [reportPossiblyUnboundVariable]
 
@@ -275,6 +276,8 @@ Legend for output:
         paths_to_exclude_as_list = []
 
     ci = bool(ci)
+
+    # breakpoint()
 
     config = Config(
         total=0,  # we'll fill this in later!
