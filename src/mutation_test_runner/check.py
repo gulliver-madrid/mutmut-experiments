@@ -22,6 +22,7 @@ from src.mutate import mutate_from_context
 from src.process import popen_streaming_output
 from src.project import ProjectPath, project_path_storage
 from src.mutations import SkipException
+from src.shared import FilenameStr
 from src.status import (
     BAD_SURVIVED,
     BAD_TIMEOUT,
@@ -41,7 +42,7 @@ MutantQueue: TypeAlias = "multiprocessing.Queue[MutantQueueItem]"
 
 
 ResultQueueItem: TypeAlias = (
-    tuple[Literal["status"], str, str | None, RelativeMutationID]
+    tuple[Literal["status"], StatusResultStr, FilenameStr | None, RelativeMutationID]
     | tuple[Literal["progress"], str, None, None]
     | tuple[Literal["end", "cycle"], None, None, None]
 )
