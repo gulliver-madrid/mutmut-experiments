@@ -7,6 +7,7 @@ import pytest
 
 from helpers import FileSystemPath
 from src.__main__ import climain
+from src.dir_context import DirContext
 from src.dynamic_config_storage import DYNAMIC_CONFIG_FILENAME
 
 
@@ -54,17 +55,15 @@ def set_working_dir_and_path(request: Any) -> Iterator[FileSystemPath]:
     else:
         basic_filesystem = get_default()
 
-    original_dir = os.path.abspath(os.getcwd())
     original_path = sys.path[:]
 
-    os.chdir(basic_filesystem)
-    if str(basic_filesystem) in sys.path:
-        sys.path.remove(str(basic_filesystem))
+    with DirContext(basic_filesystem):
+        if str(basic_filesystem) in sys.path:
+            sys.path.remove(str(basic_filesystem))
 
-    yield basic_filesystem
+        yield basic_filesystem
 
-    sys.path = original_path
-    os.chdir(original_dir)
+        sys.path = original_path
 
 
 @pytest.mark.usefixtures("set_working_dir_and_path")

@@ -7,6 +7,8 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Callable
 
+from src.dir_context import DirContext
+
 
 def ranges(numbers: Sequence[int]) -> str:
     if not numbers:
@@ -51,11 +53,8 @@ def split_paths(paths: str, directory: Path) -> list[str]:
 
 def filter_not_existing(paths: list[str], directory: Path) -> list[str]:
     # filter paths that do not exist
-    original = os.getcwd()
-    os.chdir(directory)
-    filtered = list(filter(lambda p: Path(p).exists(), paths))
-    os.chdir(original)
-    return filtered
+    with DirContext(directory):
+        return list(filter(lambda p: Path(p).exists(), paths))
 
 
 spinner = itertools.cycle("⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏")

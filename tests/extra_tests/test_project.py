@@ -6,6 +6,7 @@ import pytest
 from src.__main__ import climain
 
 from helpers import FileSystemPath
+from src.dir_context import DirContext
 
 
 @pytest.fixture
@@ -27,10 +28,8 @@ def test_add():
     assert add(1, 1) == 2
 """
     )
-    original = os.getcwd()
-    os.chdir(dir_a)
-    yield tmpdir
-    os.chdir(original)
+    with DirContext(dir_a):
+        yield tmpdir
 
 
 def test_project_path_run(filesystem_with_two_dirs: FileSystemPath) -> None:

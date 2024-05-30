@@ -24,6 +24,7 @@ import toml
 from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.context import Context, RelativeMutationID
+from src.dir_context import DirContext
 from src.mutate import list_mutations
 from src.progress import Progress
 from src.project import project_path_storage
@@ -63,33 +64,27 @@ def config_from_file(
                 break
 
     def config_from_pyproject_toml() -> dict[str, object]:
-        original = os.getcwd()
-        os.chdir(project)
-        try:
-            data = toml.load("pyproject.toml")["tool"]["mutmut"]
-            assert isinstance(data, dict)
-            return cast(dict[str, object], data)
-        except (FileNotFoundError, KeyError):
-            return {}
-        except Exception as err:
-            raise RuntimeError(
-                "Error trying to read mutation config from pyproject.toml"
-            ) from err
-        finally:
-            os.chdir(original)
+        with DirContext(project):
+            try:
+                data = toml.load("pyproject.toml")["tool"]["mutmut"]
+                assert isinstance(data, dict)
+                return cast(dict[str, object], data)
+            except (FileNotFoundError, KeyError):
+                return {}
+            except Exception as err:
+                raise RuntimeError(
+                    "Error trying to read mutation config from pyproject.toml"
+                ) from err
 
     def config_from_setup_cfg() -> dict[str, object]:
-        original = os.getcwd()
-        os.chdir(project)
-        config_parser = ConfigParser()
-        config_parser.read("setup.cfg")
+        with DirContext(project):
+            config_parser = ConfigParser()
+            config_parser.read("setup.cfg")
 
-        try:
-            return dict(config_parser["mutmut"])
-        except KeyError:
-            return {}
-        finally:
-            os.chdir(original)
+            try:
+                return dict(config_parser["mutmut"])
+            except KeyError:
+                return {}
 
     config = config_from_pyproject_toml() or config_from_setup_cfg()
 
@@ -110,24 +105,24 @@ def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
     project_dir = project_path_storage.get_current_project_path()
     project_dir_name = str(project_dir).split(os.sep)[-1]
-    original = os.getcwd()
-    os.chdir(project_dir_name)
-    result: str | None = None
-    if isdir("lib"):
-        result = "lib"
-    elif isdir("src"):
-        result = "src"
-    elif isdir(project_dir_name):
-        result = project_dir_name
-    elif isdir(project_dir_name.replace("-", "_")):
-        result = project_dir_name.replace("-", "_")
-    elif isdir(project_dir_name.replace(" ", "_")):
-        result = project_dir_name.replace(" ", "_")
-    elif isdir(project_dir_name.replace("-", "")):
-        result = project_dir_name.replace("-", "")
-    elif isdir(project_dir_name.replace(" ", "")):
-        result = project_dir_name.replace(" ", "")
-    os.chdir(original)
+
+    with DirContext(project_dir_name):
+        result: str | None = None
+        if isdir("lib"):
+            result = "lib"
+        elif isdir("src"):
+            result = "src"
+        elif isdir(project_dir_name):
+            result = project_dir_name
+        elif isdir(project_dir_name.replace("-", "_")):
+            result = project_dir_name.replace("-", "_")
+        elif isdir(project_dir_name.replace(" ", "_")):
+            result = project_dir_name.replace(" ", "_")
+        elif isdir(project_dir_name.replace("-", "")):
+            result = project_dir_name.replace("-", "")
+        elif isdir(project_dir_name.replace(" ", "")):
+            result = project_dir_name.replace(" ", "")
+
     if result is None:
         raise FileNotFoundError(
             "Could not figure out where the code to mutate is. "
@@ -205,22 +200,24 @@ def python_source_files(
     )
     # TODO: review if exclusion works with file paths
     paths_to_exclude = paths_to_exclude or []
-    original = os.getcwd()
-    os.chdir(project_path_storage.get_current_project_path())
-    if absolute_path.is_dir():
-        for root, dirs, files_ in os.walk(relative_path, topdown=True):
-            files = cast(list[FilenameStr], files_)
-            for exclude_pattern in paths_to_exclude:
-                dirs[:] = [d for d in dirs if not fnmatch.fnmatch(d, exclude_pattern)]
-                files[:] = [f for f in files if not fnmatch.fnmatch(f, exclude_pattern)]
+    with DirContext(project_path_storage.get_current_project_path()):
+        if absolute_path.is_dir():
+            for root, dirs, files_ in os.walk(relative_path, topdown=True):
+                files = cast(list[FilenameStr], files_)
+                for exclude_pattern in paths_to_exclude:
+                    dirs[:] = [
+                        d for d in dirs if not fnmatch.fnmatch(d, exclude_pattern)
+                    ]
+                    files[:] = [
+                        f for f in files if not fnmatch.fnmatch(f, exclude_pattern)
+                    ]
 
-            dirs[:] = [d for d in dirs if os.path.join(root, d) not in tests_dirs]
-            for filename in files:
-                if filename.endswith(".py"):
-                    yield FilenameStr(os.path.join(root, filename))
-    else:
-        yield FilenameStr(str(relative_path))
-    os.chdir(original)
+                dirs[:] = [d for d in dirs if os.path.join(root, d) not in tests_dirs]
+                for filename in files:
+                    if filename.endswith(".py"):
+                        yield FilenameStr(os.path.join(root, filename))
+        else:
+            yield FilenameStr(str(relative_path))
 
 
 def compute_exit_code(

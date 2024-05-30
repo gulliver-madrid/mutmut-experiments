@@ -12,6 +12,7 @@ from typing import Final
 import click
 from glob2 import glob  # type: ignore [import-untyped]
 
+from src.dir_context import DirContext
 from src.process import popen_streaming_output
 from src.progress import Progress
 from src.shared import FilenameStr
@@ -236,17 +237,18 @@ Legend for output:
 
     project_path_customized: Final = bool(project_path)
     if project_path_customized:
-        original_cwd = os.getcwd()
-        os.chdir(project_path_storage.get_current_project_path())
-    baseline_time_elapsed = time_test_suite(
-        swallow_output=not swallow_output,
-        test_command=runner,
-        using_testmon=using_testmon,
-        current_hash_of_tests=current_hash_of_tests,
-        no_progress=no_progress,
-    )
-    if project_path_customized:
-        os.chdir(original_cwd)  # pyright: ignore [reportPossiblyUnboundVariable]
+        directory: Path | str = project_path_storage.get_current_project_path()
+    else:
+        directory = os.getcwd()
+
+    with DirContext(directory):
+        baseline_time_elapsed = time_test_suite(
+            swallow_output=not swallow_output,
+            test_command=runner,
+            using_testmon=using_testmon,
+            current_hash_of_tests=current_hash_of_tests,
+            no_progress=no_progress,
+        )
 
     if using_testmon:
         copy(".testmondata", ".testmondata-initial")
@@ -356,18 +358,16 @@ def parse_run_argument(
             # paths to mutate should be relative here
             assert not Path(path).is_absolute()
             print("Analizando path", str(Path(path)))
-            original = os.getcwd()
-            os.chdir(project_path_storage.get_current_project_path())
-            for filename in python_source_files(
-                Path(path), tests_dirs, paths_to_exclude
-            ):
-                if filename.startswith("test_") or filename.endswith("__tests.py"):
-                    continue
-                update_line_numbers(filename)
-                add_mutations_by_file(
-                    mutations_by_file, filename, dict_synonyms, config
-                )
-            os.chdir(original)
+            with DirContext(project_path_storage.get_current_project_path()):
+                for filename in python_source_files(
+                    Path(path), tests_dirs, paths_to_exclude
+                ):
+                    if filename.startswith("test_") or filename.endswith("__tests.py"):
+                        continue
+                    update_line_numbers(filename)
+                    add_mutations_by_file(
+                        mutations_by_file, filename, dict_synonyms, config
+                    )
     elif argument.isdigit():
         filename, mutation_id = filename_and_mutation_id_from_pk(int(argument))
         update_line_numbers(filename)
@@ -385,19 +385,18 @@ def parse_run_argument(
 
 def _get_tests_dirs(*, paths_to_mutate: list[str], test_paths: list[str]) -> list[str]:
     tests_dirs: list[str] = []
-    original_cwd = os.getcwd()
-    os.chdir(
-        project_path_storage.get_current_project_path()
-    )  # parece que es irrelevante # TODO: review
-    for p in test_paths:
-        tests_dirs.extend(glob(p, recursive=True))
 
-    for p in paths_to_mutate:
-        for pt in test_paths:
-            assert pt is not None
-            tests_dirs.extend(glob(p + "/**/" + pt, recursive=True))
-    os.chdir(original_cwd)
-    del original_cwd
+    with DirContext(
+        project_path_storage.get_current_project_path()
+    ):  # parece que es irrelevante # TODO: review
+        for p in test_paths:
+            tests_dirs.extend(glob(p, recursive=True))
+
+        for p in paths_to_mutate:
+            for pt in test_paths:
+                assert pt is not None
+                tests_dirs.extend(glob(p + "/**/" + pt, recursive=True))
+
     return tests_dirs
 
 

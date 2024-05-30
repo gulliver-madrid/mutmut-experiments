@@ -17,6 +17,7 @@ from typing import (
 
 from src.config import Config
 from src.context import Context, RelativeMutationID
+from src.dir_context import DirContext
 from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutate import mutate_from_context
 from src.process import popen_streaming_output
@@ -206,6 +207,7 @@ def run_mutation(
     if project_path is not None:
         project_path_storage.set_project_path(project_path)
     os.chdir(project_path_storage.get_current_project_path())
+
     dynamic_config = user_dynamic_config_storage.get_dynamic_config()
     cached_status = cached_mutation_status(
         context.filename, context.mutation_id, context.config.hash_of_tests
@@ -262,10 +264,10 @@ def run_mutation(
 
     finally:
         assert isinstance(context.filename, str)
-        original = os.getcwd()
-        os.chdir(project_path_storage.get_current_project_path())
-        move(context.filename + ".bak", context.filename)
-        os.chdir(original)
+
+        with DirContext(project_path_storage.get_current_project_path()):
+            move(context.filename + ".bak", context.filename)
+
         config.test_command = (
             config.default_test_command
         )  # reset test command to its default in the case it was altered in a hook
