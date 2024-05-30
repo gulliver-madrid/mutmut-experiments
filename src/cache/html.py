@@ -15,6 +15,7 @@ from src.cache.cache import (
 )
 from src.cache.model import Mutant, get_mutants
 from src.context import RelativeMutationID
+from src.dir_context import DirContext
 from src.project import project_path_storage
 from src.status import (
     BAD_SURVIVED,
@@ -34,104 +35,102 @@ def create_html_report(dict_synonyms: list[str], directory: str) -> None:
     )
 
     project_path = project_path_storage.get_current_project_path()
-    original = os.getcwd()
-    os.chdir(project_path)
 
-    os.makedirs(directory, exist_ok=True)
+    with DirContext(project_path):
 
-    with open(join(directory, "index.html"), "w") as index_file:
-        index_file.write("<h1>Mutation testing report</h1>")
+        os.makedirs(directory, exist_ok=True)
 
-        index_file.write(
-            "Killed %s out of %s mutants"
-            % (len([x for x in mutants if x.status == OK_KILLED]), len(mutants))
-        )
+        with open(join(directory, "index.html"), "w") as index_file:
+            index_file.write("<h1>Mutation testing report</h1>")
 
-        index_file.write(
-            "<table><thead><tr><th>File</th><th>Total</th><th>Skipped</th><th>Killed</th><th>% killed</th><th>Survived</th></thead>"
-        )
+            index_file.write(
+                "Killed %s out of %s mutants"
+                % (len([x for x in mutants if x.status == OK_KILLED]), len(mutants))
+            )
 
-        for filename, mutants_it in groupby(
-            mutants, key=lambda x: x.line.sourcefile.filename
-        ):
-            report_filename = join(directory, filename)
+            index_file.write(
+                "<table><thead><tr><th>File</th><th>Total</th><th>Skipped</th><th>Killed</th><th>% killed</th><th>Survived</th></thead>"
+            )
 
-            mutants = list(mutants_it)
+            for filename, mutants_it in groupby(
+                mutants, key=lambda x: x.line.sourcefile.filename
+            ):
+                report_filename = join(directory, filename)
 
-            with open(filename) as f:
-                source = f.read()
+                mutants = list(mutants_it)
 
-            os.makedirs(dirname(report_filename), exist_ok=True)
-            with open(join(report_filename + ".html"), "w") as f:
-                mutants_by_status: dict[str, list[Mutant]] = defaultdict(list)
-                for mutant in mutants:
-                    mutants_by_status[mutant.status].append(mutant)
+                with open(filename) as f:
+                    source = f.read()
 
-                f.write("<html><body>")
+                os.makedirs(dirname(report_filename), exist_ok=True)
+                with open(join(report_filename + ".html"), "w") as f:
+                    mutants_by_status: dict[str, list[Mutant]] = defaultdict(list)
+                    for mutant in mutants:
+                        mutants_by_status[mutant.status].append(mutant)
 
-                f.write("<h1>%s</h1>" % filename)
+                    f.write("<html><body>")
 
-                killed = len(mutants_by_status[OK_KILLED])
-                f.write("Killed %s out of %s mutants" % (killed, len(mutants)))
+                    f.write("<h1>%s</h1>" % filename)
 
-                index_file.write(
-                    '<tr><td><a href="%s.html">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%.2f</td><td>%s</td>'
-                    % (
-                        filename,
-                        filename,
-                        len(mutants),
-                        len(mutants_by_status[SKIPPED]),
-                        killed,
-                        (killed / len(mutants) * 100),
-                        len(mutants_by_status[BAD_SURVIVED]),
-                    )
-                )
+                    killed = len(mutants_by_status[OK_KILLED])
+                    f.write("Killed %s out of %s mutants" % (killed, len(mutants)))
 
-                def print_diffs(status: StatusResultStr) -> None:
-                    mutants = mutants_by_status[status]
-                    for mutant in sorted(mutants, key=lambda m: m.id):
-                        assert mutant.line.line is not None  # guess
-                        mutation_id = RelativeMutationID(
-                            mutant.line.line, mutant.index, mutant.line.line_number
-                        )
-                        diff = get_unified_diff_from_filename_and_mutation_id(
-                            source,
+                    index_file.write(
+                        '<tr><td><a href="%s.html">%s</a></td><td>%s</td><td>%s</td><td>%s</td><td>%.2f</td><td>%s</td>'
+                        % (
                             filename,
-                            mutation_id,
-                            dict_synonyms,
-                            update_cache=False,
+                            filename,
+                            len(mutants),
+                            len(mutants_by_status[SKIPPED]),
+                            killed,
+                            (killed / len(mutants) * 100),
+                            len(mutants_by_status[BAD_SURVIVED]),
                         )
-                        f.write("<h3>Mutant %s</h3>" % mutant.id)
-                        f.write("<pre>%s</pre>" % diff)
-
-                if mutants_by_status[BAD_TIMEOUT]:
-                    f.write("<h2>Timeouts</h2>")
-                    f.write(
-                        "Mutants that made the test suite take a lot longer so the tests were killed."
                     )
-                    print_diffs(BAD_TIMEOUT)
 
-                if mutants_by_status[BAD_SURVIVED]:
-                    f.write("<h2>Survived</h2>")
-                    f.write(
-                        "Survived mutation testing. These mutants show holes in your test suite."
-                    )
-                    print_diffs(BAD_SURVIVED)
+                    def print_diffs(status: StatusResultStr) -> None:
+                        mutants = mutants_by_status[status]
+                        for mutant in sorted(mutants, key=lambda m: m.id):
+                            assert mutant.line.line is not None  # guess
+                            mutation_id = RelativeMutationID(
+                                mutant.line.line, mutant.index, mutant.line.line_number
+                            )
+                            diff = get_unified_diff_from_filename_and_mutation_id(
+                                source,
+                                filename,
+                                mutation_id,
+                                dict_synonyms,
+                                update_cache=False,
+                            )
+                            f.write("<h3>Mutant %s</h3>" % mutant.id)
+                            f.write("<pre>%s</pre>" % diff)
 
-                if mutants_by_status[OK_SUSPICIOUS]:
-                    f.write("<h2>Suspicious</h2>")
-                    f.write(
-                        "Mutants that made the test suite take longer, but otherwise seemed ok"
-                    )
-                    print_diffs(OK_SUSPICIOUS)
+                    if mutants_by_status[BAD_TIMEOUT]:
+                        f.write("<h2>Timeouts</h2>")
+                        f.write(
+                            "Mutants that made the test suite take a lot longer so the tests were killed."
+                        )
+                        print_diffs(BAD_TIMEOUT)
 
-                if mutants_by_status[SKIPPED]:
-                    f.write("<h2>Skipped</h2>")
-                    f.write("Mutants that were skipped")
-                    print_diffs(SKIPPED)
+                    if mutants_by_status[BAD_SURVIVED]:
+                        f.write("<h2>Survived</h2>")
+                        f.write(
+                            "Survived mutation testing. These mutants show holes in your test suite."
+                        )
+                        print_diffs(BAD_SURVIVED)
 
-                f.write("</body></html>")
+                    if mutants_by_status[OK_SUSPICIOUS]:
+                        f.write("<h2>Suspicious</h2>")
+                        f.write(
+                            "Mutants that made the test suite take longer, but otherwise seemed ok"
+                        )
+                        print_diffs(OK_SUSPICIOUS)
 
-        index_file.write("</table></body></html>")
+                    if mutants_by_status[SKIPPED]:
+                        f.write("<h2>Skipped</h2>")
+                        f.write("Mutants that were skipped")
+                        print_diffs(SKIPPED)
 
-        os.chdir(original)
+                    f.write("</body></html>")
+
+            index_file.write("</table></body></html>")
