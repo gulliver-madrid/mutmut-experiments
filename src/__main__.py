@@ -6,7 +6,7 @@ import sys
 from io import open
 from pathlib import Path
 from types import NoneType
-from typing import Final, List, NoReturn, cast
+from typing import Final, List, Literal, NoReturn, cast
 
 import click
 
@@ -352,6 +352,7 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
 
 
 POLICIES: Final = ["ignore", "skipped", "error", "failure"]
+PolicyStr = Literal["ignore", "skipped", "error", "failure"]
 
 
 @climain.command(context_settings=context_settings)
@@ -362,8 +363,8 @@ POLICIES: Final = ["ignore", "skipped", "error", "failure"]
 @config_from_file(dict_synonyms="")
 def junitxml(
     dict_synonyms: str,
-    suspicious_policy: str,
-    untested_policy: str,
+    suspicious_policy: PolicyStr,
+    untested_policy: PolicyStr,
     project: str | None,
 ) -> NoReturn:
     """
