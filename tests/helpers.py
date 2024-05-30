@@ -2,6 +2,8 @@ import builtins
 from pathlib import Path
 from typing import Any
 
+from src.shared import FilenameStr
+
 
 class FileSystemPath(Path):
     """Only for type checking"""
@@ -19,7 +21,11 @@ original_open = builtins.open
 
 
 def open_utf8(
-    filename: str, mode: str = "r", *, encoding: str | None = None, **kwargs: Any
+    filename: FilenameStr,
+    mode: str = "r",
+    *,
+    encoding: str | None = None,
+    **kwargs: Any
 ) -> Any:
     if "b" not in mode:
         encoding = encoding if encoding is not None else "utf-8"

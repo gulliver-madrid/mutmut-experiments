@@ -18,6 +18,7 @@ from src.mutations import (
 from src.mutations.mutations import LeafMutation, NodeWithChildrenMutation
 from src.parse import parse_source
 from src.setup_logging import configure_logger
+from src.shared import FilenameStr
 
 from .dunder import is_dunder_name
 
@@ -163,7 +164,7 @@ def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
         context.stack.pop()
 
 
-def _parse_checking_errors(source: str, filename: str | None) -> Any:
+def _parse_checking_errors(source: str, filename: FilenameStr | None) -> Any:
     try:
         result = parse_source(source, error_recovery=False)
     except Exception:
@@ -171,7 +172,6 @@ def _parse_checking_errors(source: str, filename: str | None) -> Any:
         print("----------------------------------")
         raise
     return result
-
 
 
 def _mutate_list_of_nodes(node: BaseNode, context: Context) -> None:

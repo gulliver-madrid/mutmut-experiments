@@ -383,7 +383,7 @@ def get_cached_mutation_statuses(
 @init_db
 @db_session
 def cached_mutation_status(
-    filename: str,
+    filename: FilenameStr,
     mutation_id: RelativeMutationID,
     hash_of_tests: HashStr | NoTestFoundSentinel,
 ) -> StatusResultStr:
