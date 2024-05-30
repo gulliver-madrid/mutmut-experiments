@@ -27,6 +27,7 @@ from typing_extensions import ParamSpec
 
 from src.cache.model import (
     NO_TESTS_FOUND,
+    FilenameStr,
     HashStr,
     Line,
     MiscData,
@@ -45,12 +46,14 @@ from src.setup_logging import configure_logger
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
 from src.utils import split_lines
 
-current_db_version = 4
+MutationsByFile = Dict[FilenameStr, List[RelativeMutationID]]
 
 if TYPE_CHECKING:
     from pony.orm import Query
 
 logger = configure_logger(__name__)
+
+current_db_version = 4
 
 
 # Used for db_session and init_db
@@ -123,7 +126,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
     return wrapper
 
 
-def hash_of(filename: str) -> HashStr:
+def hash_of(filename: FilenameStr) -> HashStr:
     with open(project_path_storage.get_current_project_path() / filename, "rb") as f:
         m = hashlib.sha256()
         m.update(f.read())
@@ -174,7 +177,7 @@ def get_unified_diff(
 
 def get_unified_diff_from_filename_and_mutation_id(
     source: str | None,
-    filename: str,
+    filename: FilenameStr,
     mutation_id: RelativeMutationID,
     dict_synonyms: list[str],
     update_cache: bool,
@@ -226,7 +229,7 @@ def sequence_ops(
 
 @init_db
 @db_session
-def update_line_numbers(filename: str) -> None:
+def update_line_numbers(filename: FilenameStr) -> None:
     hash = hash_of(filename)
     sourcefile = get_or_create(SourceFile, filename=filename)
     if hash == sourcefile.hash:
@@ -277,7 +280,7 @@ def update_line_numbers(filename: str) -> None:
 
 @init_db
 @db_session
-def register_mutants(mutations_by_file: Dict[str, List[RelativeMutationID]]) -> None:
+def register_mutants(mutations_by_file: MutationsByFile) -> None:
     for filename, mutation_ids in mutations_by_file.items():
         hash = hash_of(filename)
         sourcefile = get_or_create(SourceFile, filename=filename)
@@ -328,7 +331,7 @@ def update_mutant_status(
 @init_db
 @db_session
 def get_cached_mutation_statuses(
-    filename: str,
+    filename: FilenameStr,
     mutations: List[RelativeMutationID],
     hash_of_tests: HashStr | NoTestFoundSentinel,
 ) -> dict[RelativeMutationID, StatusResultStr]:
@@ -430,7 +433,9 @@ def mutation_id_from_pk(pk: int | str) -> RelativeMutationID:
 
 @init_db
 @db_session
-def filename_and_mutation_id_from_pk(pk: int | str) -> Tuple[str, RelativeMutationID]:
+def filename_and_mutation_id_from_pk(
+    pk: int | str,
+) -> Tuple[FilenameStr, RelativeMutationID]:
     if not isinstance(pk, (int, str)):  # pyright: ignore [reportUnnecessaryIsInstance]
         raise ValueError("filename_and_mutation_id_from_pk:", type(pk))
     mutant = get_mutant(id=pk)
