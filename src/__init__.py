@@ -22,13 +22,13 @@ from typing import (
 import toml
 
 from src.cache.cache import MutationsByFile
-from src.cache.model import FilenameStr
 from src.config import Config
 from src.context import Context, RelativeMutationID
 from src.mutate import list_mutations
 from src.progress import Progress
 from src.project import project_path_storage
 from src.setup_logging import configure_logger
+from src.shared import FilenameStr
 
 
 __version__ = "2.5.0"

@@ -18,6 +18,7 @@ from typing import (
 from pony.orm import Database, Required, Set, Optional, PrimaryKey
 from typing_extensions import Self
 
+from src.shared import FilenameStr
 from src.status import StatusResultStr
 
 HashStr = NewType("HashStr", str)
@@ -27,8 +28,6 @@ NO_TESTS_FOUND: Final = "NO TESTS FOUND"
 NoTestFoundSentinel = Literal["NO TESTS FOUND"]
 
 db = Database()
-
-FilenameStr = NewType("FilenameStr", str)
 
 
 if TYPE_CHECKING:
