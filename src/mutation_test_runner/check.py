@@ -54,19 +54,15 @@ hammett_prefix: Final = "python -m hammett "
 
 def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     assert isinstance(context.filename, str)
-    with open(project_path_storage.get_current_project_path() / context.filename) as f:
+    project_path = project_path_storage.get_current_project_path()
+    with open(project_path / context.filename) as f:
         original = f.read()
     if backup:
-        with open(
-            project_path_storage.get_current_project_path()
-            / (context.filename + ".bak"),
-            "w",
-        ) as f:
+        backup_path = project_path / (context.filename + ".bak")
+        with open(backup_path, "w") as f:
             f.write(original)
     mutated, _ = mutate_from_context(context)
-    with open(
-        project_path_storage.get_current_project_path() / context.filename, "w"
-    ) as f:
+    with open(project_path / context.filename, "w") as f:
         f.write(mutated)
     return original, mutated
 
