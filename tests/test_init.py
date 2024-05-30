@@ -8,10 +8,9 @@ from unittest.mock import MagicMock, patch
 from src.config import Config
 from src.context import Context
 from src.mutate import mutate_from_context
-from src.mutation_test_runner import (
-    MutationTestsRunner,
-    check_mutants,
-)
+
+# monkeypatch needs check_mutants to be imported from src.mutation_test_runner
+from src.mutation_test_runner import MutationTestsRunner, check_mutants  # type: ignore [attr-defined]
 from src.mutations import partition_node_list, name_mutation
 from src.patch import read_patch_data
 from src.setup_logging import configure_logger
@@ -43,7 +42,7 @@ def check_mutants_stub(**kwargs: Any) -> None:
         return OK_KILLED
 
     check_mutants_original = check_mutants
-    with patch("src.mutation_test_runner.run_mutation", run_mutation_stub):
+    with patch("src.mutation_test_runner.check.run_mutation", run_mutation_stub):
         check_mutants_original(**kwargs)
 
 
