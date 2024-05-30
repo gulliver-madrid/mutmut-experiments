@@ -11,6 +11,7 @@ from parso.tree import NodeOrLeaf
 from src.config import Config
 from src.project import project_path_storage
 from src.setup_logging import configure_logger
+from src.shared import FilenameStr
 from src.utils import split_lines
 
 logger = configure_logger(__name__)
@@ -35,7 +36,7 @@ class Context:
         source: Optional[str] = None,
         mutation_id: RelativeMutationID = ALL,
         dict_synonyms: list[str] | None = None,
-        filename: str | None = None,
+        filename: FilenameStr | None = None,
         config: Optional[Config] = None,
         index: int = 0,
     ):

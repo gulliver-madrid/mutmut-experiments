@@ -7,14 +7,14 @@ from pathlib import Path
 from shutil import copy
 from time import time
 from types import NoneType
-from typing import Final, cast
+from typing import Final
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
 
-from src.cache.model import FilenameStr
 from src.process import popen_streaming_output
 from src.progress import Progress
+from src.shared import FilenameStr
 
 # ensure mutmut modules are detected
 base = Path(__file__).parent.parent
@@ -374,7 +374,7 @@ def parse_run_argument(
         mutations_by_file[filename] = [mutation_id]
     else:
         assert isinstance(argument, str)
-        filename = cast(FilenameStr, argument)
+        filename = FilenameStr(argument)
         if not os.path.exists(filename):
             raise click.BadArgumentUsage(
                 "The run command takes either an integer that is the mutation id or a path to a file to mutate"
