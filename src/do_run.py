@@ -235,11 +235,11 @@ Legend for output:
     if hasattr(dynamic_config, "init"):
         dynamic_config.init()
 
-    project_path_customized: Final = bool(project_path)
-    if project_path_customized:
-        directory: Path | str = project_path_storage.get_current_project_path()
-    else:
-        directory = os.getcwd()
+    directory = (
+        project_path_storage.get_current_project_path()
+        if project_path
+        else Path(os.getcwd())
+    )
 
     with DirContext(directory):
         baseline_time_elapsed = time_test_suite(
