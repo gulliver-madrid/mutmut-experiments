@@ -1,38 +1,26 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
-from copy import copy as copy_obj
-from multiprocessing.context import SpawnProcess
-from threading import Thread
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Final,
-    List,
-    Literal,
-    Tuple,
-    TypeAlias,
-)
-
-import multiprocessing
 import os
 import shlex
 import subprocess
 import sys
-
+from copy import copy as copy_obj
 from io import open, TextIOBase
+from multiprocessing.context import SpawnProcess
 from shutil import move, copy
+from threading import Thread
 from time import time
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
+    Final,
     Literal,
     Tuple,
     TypeAlias,
 )
 
+
+from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.context import Context, RelativeMutationID
 from src.dynamic_config_storage import user_dynamic_config_storage
@@ -179,7 +167,7 @@ def queue_mutants(
     progress: Progress,
     config: Config,
     mutants_queue: MutantQueue,
-    mutations_by_file: Dict[str, List[RelativeMutationID]],
+    mutations_by_file: MutationsByFile,
     project: ProjectPath | None = None,
 ) -> None:
     from src.cache.cache import get_cached_mutation_statuses
@@ -349,7 +337,7 @@ class MutationTestsRunner:
         self,
         config: Config,
         progress: Progress,
-        mutations_by_file: Dict[str, List[RelativeMutationID]] | None,
+        mutations_by_file: MutationsByFile | None,
         *,
         project_path: ProjectPath | None = None,
     ) -> None:

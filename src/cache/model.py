@@ -28,6 +28,8 @@ NoTestFoundSentinel = Literal["NO TESTS FOUND"]
 
 db = Database()
 
+FilenameStr = NewType("FilenameStr", str)
+
 
 if TYPE_CHECKING:
 
@@ -47,7 +49,7 @@ class MiscData(DbEntity):
 if TYPE_CHECKING:
 
     class SourceFile(DbEntity):
-        filename: str
+        filename: FilenameStr
         hash: HashStr | None
         lines: Set["Line"]
 

@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterator,
     List,
     Optional,
@@ -22,6 +21,8 @@ from typing import (
 
 import toml
 
+from src.cache.cache import MutationsByFile
+from src.cache.model import FilenameStr
 from src.config import Config
 from src.context import Context, RelativeMutationID
 from src.mutate import list_mutations
@@ -148,8 +149,8 @@ def get_mutations_by_file_from_cache(
 
 
 def add_mutations_by_file(
-    mutations_by_file: Dict[str, List[RelativeMutationID]],
-    filename: str,
+    mutations_by_file: MutationsByFile,
+    filename: FilenameStr,
     dict_synonyms: List[str],
     config: Optional[Config],
 ) -> None:
@@ -178,7 +179,7 @@ def add_mutations_by_file(
 
 def python_source_files(
     path: Path, tests_dirs: List[str], paths_to_exclude: Optional[List[str]] = None
-) -> Iterator[str]:
+) -> Iterator[FilenameStr]:
     """Attempt to guess where the python source files to mutate are and yield
     their paths
 
@@ -207,7 +208,8 @@ def python_source_files(
     original = os.getcwd()
     os.chdir(project_path_storage.get_current_project_path())
     if absolute_path.is_dir():
-        for root, dirs, files in os.walk(relative_path, topdown=True):
+        for root, dirs, files_ in os.walk(relative_path, topdown=True):
+            files = cast(list[FilenameStr], files_)
             for exclude_pattern in paths_to_exclude:
                 dirs[:] = [d for d in dirs if not fnmatch.fnmatch(d, exclude_pattern)]
                 files[:] = [f for f in files if not fnmatch.fnmatch(f, exclude_pattern)]
@@ -215,9 +217,9 @@ def python_source_files(
             dirs[:] = [d for d in dirs if os.path.join(root, d) not in tests_dirs]
             for filename in files:
                 if filename.endswith(".py"):
-                    yield os.path.join(root, filename)
+                    yield FilenameStr(os.path.join(root, filename))
     else:
-        yield str(relative_path)
+        yield FilenameStr(str(relative_path))
     os.chdir(original)
 
 

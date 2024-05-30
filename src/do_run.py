@@ -7,11 +7,12 @@ from pathlib import Path
 from shutil import copy
 from time import time
 from types import NoneType
-from typing import Final
+from typing import Final, cast
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
 
+from src.cache.model import FilenameStr
 from src.process import popen_streaming_output
 from src.progress import Progress
 
@@ -28,6 +29,7 @@ from src import (
     compute_exit_code,
 )
 from src.cache.cache import (
+    MutationsByFile,
     cached_hash_of_tests,
     hash_of_tests,
     filename_and_mutation_id_from_pk,
@@ -36,7 +38,6 @@ from src.cache.cache import (
     update_line_numbers,
 )
 from src.config import Config
-from src.context import RelativeMutationID
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.mutation_test_runner import MutationTestsRunner
 from src.mutations import mutations_by_type
@@ -261,7 +262,7 @@ Legend for output:
     elif use_patch_file:
         covered_lines_by_filename = read_patch_data(use_patch_file)
 
-    mutations_by_file: dict[str, list[RelativeMutationID]] = {}
+    mutations_by_file: MutationsByFile = {}
 
     paths_to_exclude = paths_to_exclude or ""
     paths_to_exclude_as_list: list[str]
@@ -339,7 +340,7 @@ def parse_run_argument(
     argument: str | None,
     config: Config,
     dict_synonyms: list[str],
-    mutations_by_file: dict[str, list[RelativeMutationID]],
+    mutations_by_file: MutationsByFile,
     paths_to_exclude: list[str],
     paths_to_mutate: list[str],
     tests_dirs: list[str],
@@ -372,7 +373,8 @@ def parse_run_argument(
         update_line_numbers(filename)
         mutations_by_file[filename] = [mutation_id]
     else:
-        filename = argument
+        assert isinstance(argument, str)
+        filename = cast(FilenameStr, argument)
         if not os.path.exists(filename):
             raise click.BadArgumentUsage(
                 "The run command takes either an integer that is the mutation id or a path to a file to mutate"
