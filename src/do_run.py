@@ -74,6 +74,7 @@ def do_run(
     ci: bool | None,
     rerun_all: bool | None,
     project: str | None,
+    parallelize: bool,
 ) -> int:
     """return exit code, after performing an mutation test run.
 
