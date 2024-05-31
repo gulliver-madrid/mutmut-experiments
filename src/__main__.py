@@ -252,6 +252,7 @@ def run(
             ci,
             rerun_all,
             project,
+            parallelize,
         )
     )
 
