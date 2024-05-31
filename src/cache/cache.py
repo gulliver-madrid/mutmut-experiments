@@ -390,6 +390,11 @@ def cached_mutation_status(
     assert isinstance(filename, str)  # guess
     assert isinstance(hash_of_tests, str)  # guess
     sourcefile = SourceFile.get(filename=filename)
+    if not sourcefile:
+        print(f"{filename=}")
+        print(f"{sourcefile=}")
+        print(f"{os.getcwd()=}")
+
     assert sourcefile
     line = Line.get(
         sourcefile=sourcefile,

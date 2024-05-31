@@ -8,6 +8,10 @@ import sys
 from threading import Timer
 from typing import Any, Callable, Optional
 
+from src.setup_logging import configure_logger
+
+logger = configure_logger(__name__)
+
 
 def popen_streaming_output(
     cmd: str, callback: Callable[[str], None], timeout: Optional[float] = None
@@ -59,6 +63,8 @@ def popen_streaming_output(
                 # need to decode it
                 line = line_as_bytes.decode("utf-8")
                 if line:  # ignore empty strings and None
+                    logger.info(f"{cmd=}")
+                    logger.info(f"{line=}\n")
                     callback(line)
             else:
                 while True:
