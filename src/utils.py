@@ -90,7 +90,12 @@ print_status = status_printer()
 
 def copy_directory(src: str, dst: str) -> None:
     for item in os.listdir(src):
-        if item.startswith(".") or item in ["pyproject.toml", "poetry.lock"]:
+        if item.startswith(".") or item in [
+            "pyproject.toml",
+            "poetry.lock",
+            "html",
+            "__pycache__",
+        ]:
             continue
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
