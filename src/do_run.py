@@ -47,8 +47,8 @@ from src.dynamic_config_storage import (
     user_dynamic_config_storage,
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
-from src.project import project_path_storage
-from src.utils import split_lines, split_paths, print_status
+from src.project import project_path_storage, temp_dir_storage
+from src.utils import copy_directory, split_lines, split_paths, print_status
 
 DEFAULT_RUNNER = "python -m pytest -x --assert=plain"
 
@@ -102,6 +102,7 @@ def do_run(
     assert isinstance(ci, (bool, NoneType))
     assert isinstance(rerun_all, (bool, NoneType)), rerun_all
     assert isinstance(project, (str, NoneType))
+    assert isinstance(parallelize, bool)
     # CHECK TYPES END
 
     print(f"Paths to mutate: {paths_to_mutate}")
@@ -321,7 +322,14 @@ Legend for output:
         total=config.total, output_legend=output_legend, no_progress=no_progress
     )
 
+    if parallelize:
+        tmpdirname = str(Path(".temp_dir").resolve())
+        os.mkdir(tmpdirname)
+        temp_dir_storage.tmpdirname = tmpdirname
+        copy_directory(str(project_path_storage.get_current_project_path()), tmpdirname)
+
     mutation_tests_runner = MutationTestsRunner()
+
     try:
         mutation_tests_runner.run_mutation_tests(
             config=config,

@@ -39,5 +39,10 @@ class ProjectPathStorage:
             self._cached_project_path = project_path
 
 
-# global variable
+class TempDirectoryStorage:
+    tmpdirname: str | None = None
+
+
+# global variables
 project_path_storage: Final = ProjectPathStorage()
+temp_dir_storage: Final = TempDirectoryStorage()
