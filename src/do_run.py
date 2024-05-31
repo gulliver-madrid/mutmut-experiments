@@ -280,8 +280,6 @@ Legend for output:
 
     ci = bool(ci)
 
-    # breakpoint()
-
     config = Config(
         total=0,  # we'll fill this in later!
         swallow_output=not swallow_output,
@@ -302,6 +300,7 @@ Legend for output:
         no_progress=no_progress,
         ci=ci,
         rerun_all=bool(rerun_all),
+        parallelize=parallelize,
     )
 
     parse_run_argument(

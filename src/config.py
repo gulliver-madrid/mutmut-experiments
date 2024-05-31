@@ -26,6 +26,7 @@ class Config:
     no_progress: bool
     ci: bool
     rerun_all: bool
+    parallelize: bool
 
     def __post_init__(self) -> None:
         self._default_test_command = self.test_command
