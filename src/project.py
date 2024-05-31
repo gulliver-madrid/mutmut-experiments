@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 from typing import Final, NewType
 
-from src.setup_logging import configure_logger, inspect_stack
+from src.setup_logging import configure_logger
 
 logger = configure_logger(__name__)
 
@@ -26,7 +26,6 @@ class ProjectPathStorage:
             logger.info(
                 f"Estableciendo el directorio por defecto del proyecto: {self._default_project_path}"
             )
-            inspect_stack()
         current_project_path = self.get_project_path() or Path(
             self._default_project_path
         )
