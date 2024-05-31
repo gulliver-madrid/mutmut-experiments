@@ -300,6 +300,7 @@ Legend for output:
         no_progress=no_progress,
         ci=ci,
         rerun_all=bool(rerun_all),
+        parallelize=parallelize,
     )
 
     parse_run_argument(
