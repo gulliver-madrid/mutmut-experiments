@@ -137,7 +137,7 @@ def run_mutation(
     assert context.filename is not None
     if project_path is not None:
         project_path_storage.set_project_path(project_path)
-
+    # TODO: intentar pasar esta logica a check_mutants()
     mutation_project_path = (
         temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
     )

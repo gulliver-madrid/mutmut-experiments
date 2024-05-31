@@ -5,6 +5,9 @@ import os
 from pathlib import Path
 from typing import Final, NewType
 
+from src.setup_logging import configure_logger
+
+logger = configure_logger(__name__)
 
 ProjectPath = NewType("ProjectPath", Path)
 
@@ -20,6 +23,9 @@ class ProjectPathStorage:
         """
         if not self._default_project_path:
             self._default_project_path = os.getcwd()
+            logger.info(
+                f"Estableciendo el directorio por defecto del proyecto: {self._default_project_path}"
+            )
         current_project_path = self.get_project_path() or Path(
             self._default_project_path
         )

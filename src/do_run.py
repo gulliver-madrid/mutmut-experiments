@@ -15,6 +15,7 @@ from glob2 import glob  # type: ignore [import-untyped]
 from src.dir_context import DirContext
 from src.process import popen_streaming_output
 from src.progress import Progress
+from src.setup_logging import configure_logger
 from src.shared import FilenameStr
 
 # ensure mutmut modules are detected
@@ -49,6 +50,8 @@ from src.dynamic_config_storage import (
 from src.patch import CoveredLinesByFilename, read_patch_data
 from src.project import project_path_storage, temp_dir_storage
 from src.utils import copy_directory, split_lines, split_paths, print_status
+
+logger = configure_logger(__name__)
 
 DEFAULT_RUNNER = "python -m pytest -x --assert=plain"
 
@@ -109,6 +112,7 @@ def do_run(
     print(f"Tests directory: {tests_dir}")
     print(f"Runner: {runner}")
     print(f"Project: {project}")
+    print(f"{swallow_output=}")
 
     project_path_storage.set_project_path(project)
     project_path = project_path_storage.get_project_path()
@@ -451,6 +455,7 @@ def time_test_suite(
     if returncode == 0 or (using_testmon and returncode == 5):
         baseline_time_elapsed = time() - start_time
     else:
+        logger.info(f"{os.getcwd()=}")
         raise RuntimeError(
             "Tests don't run cleanly without mutations. Test command was: {}\n\nOutput:\n\n{}".format(
                 test_command, "\n".join(output)
