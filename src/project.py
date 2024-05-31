@@ -12,12 +12,17 @@ ProjectPath = NewType("ProjectPath", Path)
 class ProjectPathStorage:
     def __init__(self) -> None:
         self._cached_project_path: ProjectPath | None = None
+        self._default_project_path: str | None = None
 
     def get_current_project_path(self) -> Path:
         """
         Returns the path of the current project, where files such as .mutmut_cache, .coverage, or the dynamic config, are located.
         """
-        current_project_path = self.get_project_path() or Path(os.getcwd())
+        if not self._default_project_path:
+            self._default_project_path = os.getcwd()
+        current_project_path = self.get_project_path() or Path(
+            self._default_project_path
+        )
         assert current_project_path.exists()
         return current_project_path
 
@@ -27,6 +32,7 @@ class ProjectPathStorage:
 
     def reset(self) -> None:
         self._cached_project_path = None
+        self._default_project_path = None
 
     def set_project_path(self, project: str | Path | None) -> None:
         if isinstance(project, str):

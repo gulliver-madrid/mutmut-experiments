@@ -395,7 +395,7 @@ def cached_mutation_status(
         print(f"{sourcefile=}")
         print(f"{os.getcwd()=}")
 
-    assert sourcefile
+    assert sourcefile, sourcefile
     line = Line.get(
         sourcefile=sourcefile,
         line=mutation_id.line,
