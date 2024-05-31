@@ -47,7 +47,7 @@ from src.dynamic_config_storage import (
     user_dynamic_config_storage,
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
-from src.project import project_path_storage
+from src.project import project_path_storage, temp_dir_storage
 from src.utils import copy_directory, split_lines, split_paths, print_status
 
 DEFAULT_RUNNER = "python -m pytest -x --assert=plain"
@@ -325,9 +325,11 @@ Legend for output:
     if parallelize:
         tmpdirname = str(Path("temp_dir").resolve())
         os.mkdir(tmpdirname)
+        temp_dir_storage.tmpdirname = tmpdirname
         copy_directory(str(project_path_storage.get_current_project_path()), tmpdirname)
 
     mutation_tests_runner = MutationTestsRunner()
+
     try:
         mutation_tests_runner.run_mutation_tests(
             config=config,

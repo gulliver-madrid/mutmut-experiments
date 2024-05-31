@@ -11,7 +11,7 @@ from src.config import Config
 from src.context import Context
 from src.mutation_test_runner.check import MutantQueue, check_mutants
 from src.progress import Progress
-from src.project import ProjectPath, project_path_storage
+from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED
 
 
@@ -106,6 +106,7 @@ class MutationTestsRunner:
                     mutants_queue=mutants_queue,
                     results_queue=results_queue,
                     cycle_process_after=CYCLE_PROCESS_AFTER,
+                    tmpdirname=temp_dir_storage.tmpdirname,
                     project_path=project_path,
                 ),
             )
