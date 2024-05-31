@@ -72,13 +72,16 @@ def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
     return original, mutated
 
 
+# check_mutants() se llama en su propio contexto, por lo que hay que prestar atencion a la correcta inicializacion de las variables globales
 def check_mutants(
     mutants_queue: MutantQueue,
     results_queue: ResultQueue,
     cycle_process_after: int,
     *,
     tmpdirname: str | None = None,
-    project_path: ProjectPath | None = None,
+    # aqui project_path debe ser la que realmente se espera que sea
+    # aunque el usuario no lo haya indicado explicitamente
+    project_path: Path | None = None,
 ) -> None:
     assert isinstance(cycle_process_after, int)
 
@@ -126,7 +129,7 @@ def check_mutants(
 def run_mutation(
     context: Context,
     callback: StrConsumer,
-    project_path: ProjectPath | None = None,
+    project_path: Path | None = None,
 ) -> StatusResultStr:
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
