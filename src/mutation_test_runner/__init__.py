@@ -107,7 +107,8 @@ class MutationTestsRunner:
                     results_queue=results_queue,
                     cycle_process_after=CYCLE_PROCESS_AFTER,
                     tmpdirname=temp_dir_storage.tmpdirname,
-                    project_path=project_path,
+                    project_path=project_path
+                    or project_path_storage.get_current_project_path(),
                 ),
             )
             t.start()
