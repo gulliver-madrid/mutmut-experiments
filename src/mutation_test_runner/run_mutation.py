@@ -122,12 +122,16 @@ def run_mutation(
                     callback(result)
 
 
-def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
+def mutate_file(
+    backup: bool, context: Context, *, subdir: Path | None = None
+) -> Tuple[str, str]:
     assert isinstance(context.filename, str)
     # directory to apply mutations
     mutation_project_path = Path(
         temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
     )
+    if subdir:
+        mutation_project_path /= subdir
     with open(mutation_project_path / context.filename) as f:
         original = f.read()
     if backup:
