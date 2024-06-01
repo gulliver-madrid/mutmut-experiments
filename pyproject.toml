@@ -4,7 +4,7 @@ version = "0.0.1"
 description = "Experimentos con un fork del repositorio de mutmut."
 authors = ["gulliver-madrid <49131885+gulliver-madrid@users.noreply.github.com>"]
 license = "BSD-3-Clause license"
-readme = "README.md"
+readme = "README.rst"
 
 [tool.poetry.dependencies]
 python = "^3.10"
