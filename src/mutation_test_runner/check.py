@@ -1,28 +1,22 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
-import os
 from pathlib import Path
-import shlex
 import subprocess
-import sys
-from io import open, TextIOBase
-from shutil import move, copy
+from io import open
+from shutil import move
 from time import time
 from typing import (
-    Callable,
-    Final,
     Literal,
     Tuple,
     TypeAlias,
 )
 
-from src.config import Config
 from src.context import Context, RelativeMutationID
 from src.dir_context import DirContext
 from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutate import mutate_from_context
-from src.process import popen_streaming_output
-from src.project import ProjectPath, project_path_storage, temp_dir_storage
+from src.mutation_test_runner.test_runner import StrConsumer, TestRunner
+from src.project import project_path_storage, temp_dir_storage
 from src.mutations import SkipException
 from src.shared import FilenameStr
 from src.status import (
@@ -35,7 +29,6 @@ from src.status import (
     StatusResultStr,
 )
 
-StrConsumer = Callable[[str], None]
 
 MutantQueueItem: TypeAlias = (
     tuple[Literal["mutant"], Context] | tuple[Literal["end"], None]
@@ -49,8 +42,6 @@ ResultQueueItem: TypeAlias = (
     | tuple[Literal["end", "cycle"], None, None, None]
 )
 ResultQueue: TypeAlias = "multiprocessing.Queue[ResultQueueItem]"
-
-hammett_prefix: Final = "python -m hammett "
 
 
 def mutate_file(backup: bool, context: Context) -> Tuple[str, str]:
@@ -222,88 +213,3 @@ def run_mutation(
                 )
                 if result and not config.swallow_output:
                     callback(result)
-
-
-class TestRunner:
-    def tests_pass(self, config: Config, callback: StrConsumer) -> bool:
-        """
-        :return: :obj:`True` if the tests pass, otherwise :obj:`False`
-        """
-        if config.using_testmon:
-            copy(".testmondata-initial", ".testmondata")
-
-        use_special_case = True
-
-        # Special case for hammett! We can do in-process test running which is much faster
-        if use_special_case and config.test_command.startswith(hammett_prefix):
-            return self._hammett_tests_pass(config, callback)
-
-        returncode = popen_streaming_output(
-            config.test_command, callback, timeout=config.baseline_time_elapsed * 10
-        )
-        return returncode != 1
-
-    def _hammett_tests_pass(self, config: Config, callback: StrConsumer) -> bool:
-        # noinspection PyUnresolvedReferences
-        from hammett import main_cli  # type: ignore [import-untyped]
-
-        modules_before = set(sys.modules.keys())
-
-        # set up timeout
-        import _thread
-        from threading import (
-            Timer,
-            current_thread,
-            main_thread,
-        )
-
-        timed_out = False
-
-        def timeout() -> None:
-            _thread.interrupt_main()
-            nonlocal timed_out
-            timed_out = True
-
-        assert current_thread() is main_thread()
-        timer = Timer(config.baseline_time_elapsed * 10, timeout)
-        timer.daemon = True
-        timer.start()
-
-        # Run tests
-        try:
-
-            class StdOutRedirect(TextIOBase):
-                def write(self, s: str) -> int:
-                    callback(s)
-                    return len(s)
-
-            redirect = StdOutRedirect()
-            sys.stdout = redirect  # type: ignore [assignment]
-            sys.stderr = redirect  # type: ignore [assignment]
-            returncode = main_cli(
-                shlex.split(config.test_command[len(hammett_prefix) :])
-            )
-            sys.stdout = sys.__stdout__
-            sys.stderr = sys.__stderr__
-            timer.cancel()
-        except KeyboardInterrupt:
-            timer.cancel()
-            if timed_out:
-                raise TimeoutError("In process tests timed out")
-            raise
-
-        modules_to_force_unload = {
-            x.partition(os.sep)[0].replace(".py", "") for x in config.paths_to_mutate
-        }
-
-        for module_name in sorted(
-            set(sys.modules.keys()) - set(modules_before), reverse=True
-        ):
-            if (
-                any(module_name.startswith(x) for x in modules_to_force_unload)
-                or module_name.startswith("tests")
-                or module_name.startswith("django")
-            ):
-                del sys.modules[module_name]
-
-        return bool(returncode == 0)
