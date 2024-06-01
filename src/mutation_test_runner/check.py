@@ -15,6 +15,7 @@ from src.shared import FilenameStr
 from src.status import (
     StatusResultStr,
 )
+from src.utils import copy_directory
 
 logger = configure_logger(__name__)
 
@@ -43,6 +44,7 @@ def check_mutants(
     # aqui project_path debe ser la que realmente se espera que sea
     # aunque el usuario no lo haya indicado explicitamente
     project_path: Path,
+    parallelize: bool = False,
 ) -> None:
     assert isinstance(cycle_process_after, int)
     assert project_path is not None
@@ -60,12 +62,16 @@ def check_mutants(
     if tmpdirname and temp_dir_storage.tmpdirname is None:
         temp_dir_storage.tmpdirname = tmpdirname
 
-    if project_path is not None:
-        project_path_storage.set_project_path(project_path)
+    assert project_path is not None
+    project_path_storage.set_project_path(project_path)
 
-    mutation_project_path = Path(
-        temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
-    )
+    if parallelize:
+        mutation_project_path = Path(
+            temp_dir_storage.tmpdirname
+            or project_path_storage.get_current_project_path()
+        )
+    else:
+        mutation_project_path = project_path_storage.get_current_project_path()
 
     did_cycle = False
 
@@ -78,10 +84,26 @@ def check_mutants(
 
             assert context
 
+            if parallelize:
+                subdir = Path("01")
+
+                for rel_subdir_to_create in [subdir]:
+                    subdir_to_create = mutation_project_path / rel_subdir_to_create
+
+                    if not subdir_to_create.exists():  # por ahora puede ser el mismo
+                        subdir_to_create.mkdir()
+                        copy_directory(
+                            str(mutation_project_path), str(subdir_to_create)
+                        )
+                assert (mutation_project_path / subdir).exists()
+                mutation_project_path_this_time = mutation_project_path / subdir
+            else:
+                mutation_project_path_this_time = mutation_project_path
+
             status = run_mutation(
                 context,
                 feedback,
-                mutation_project_path=mutation_project_path,
+                mutation_project_path=mutation_project_path_this_time,
             )
             results_queue.put(("status", status, context.filename, context.mutation_id))
             count += 1

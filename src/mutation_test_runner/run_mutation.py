@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from pathlib import Path
 import subprocess
 from io import open
@@ -75,8 +76,9 @@ def run_mutation(
                 callback(result)
 
         test_runner = TestRunner()
+
         try:
-            mutate_file(backup=True, context=context)
+            mutate_file(backup=True, context=context, subdir=Path(os.getcwd()))
             start = time()
             try:
                 survived = test_runner.tests_pass(config=config, callback=callback)
@@ -130,13 +132,15 @@ def mutate_file(
     mutation_project_path = Path(
         temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
     )
+
     if subdir:
         mutation_project_path /= subdir
+
     with open(mutation_project_path / context.filename) as f:
         original = f.read()
     if backup:
         backup_path = mutation_project_path / (context.filename + ".bak")
-        # print(f"{backup_path=}")
+
         with open(backup_path, "w") as f:
             f.write(original)
     mutated, _ = mutate_from_context(context)

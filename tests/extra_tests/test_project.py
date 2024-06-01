@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Iterator
 from click.testing import CliRunner
 import pytest
@@ -33,13 +34,16 @@ def test_add():
 
 
 def test_project_path_run(filesystem_with_two_dirs: FileSystemPath) -> None:
+    dir_b = (Path(os.getcwd()) / ".." / "b").resolve()
+    assert dir_b.exists()
+    assert dir_b.is_absolute()
     result_run = CliRunner().invoke(
         climain,
-        ["run", "--paths-to-mutate=foo.py", "--project=../b"],
+        ["run", "--paths-to-mutate=foo.py", f"--project={str(dir_b)}"],
         catch_exceptions=False,
     )
     result_show = CliRunner().invoke(
-        climain, ["show", "1", "--project=../b"], catch_exceptions=False
+        climain, ["show", "1", f"--project={str(dir_b)}"], catch_exceptions=False
     )
     assert "1/1  🎉 1  ⏰ 0  🤔 0  🙁 0  🔇 0" in result_run.output
     assert result_run.exit_code == 0
