@@ -97,6 +97,9 @@ def copy_directory(src: str, dst: str) -> None:
             "__pycache__",
         ]:
             continue
+        if item.isdigit():
+            # mutation subdirectories
+            continue
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
         if os.path.isdir(s):
