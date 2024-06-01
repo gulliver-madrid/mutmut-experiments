@@ -98,6 +98,13 @@ def check_mutants(
     if tmpdirname and temp_dir_storage.tmpdirname is None:
         temp_dir_storage.tmpdirname = tmpdirname
 
+    if project_path is not None:
+        project_path_storage.set_project_path(project_path)
+
+    mutation_project_path = Path(
+        temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
+    )
+
     did_cycle = False
 
     try:
@@ -109,11 +116,10 @@ def check_mutants(
 
             assert context
 
-            # assert temp_dir_storage.tmpdirname  # TODO: remove! debug!
             status = run_mutation(
                 context,
                 feedback,
-                project_path=project_path,
+                mutation_project_path=mutation_project_path,
             )
             results_queue.put(("status", status, context.filename, context.mutation_id))
             count += 1
@@ -129,7 +135,8 @@ def check_mutants(
 def run_mutation(
     context: Context,
     callback: StrConsumer,
-    project_path: Path | None = None,
+    *,
+    mutation_project_path: Path,
 ) -> StatusResultStr:
     """
     :return: (computed or cached) status of the tested mutant, one of mutant_statuses
@@ -138,13 +145,6 @@ def run_mutation(
 
     assert context.config is not None
     assert context.filename is not None
-    if project_path is not None:
-        project_path_storage.set_project_path(project_path)
-    # TODO: intentar pasar esta logica a check_mutants()
-    mutation_project_path = (
-        temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
-    )
-    # print(f"{mutation_project_path=}")
 
     with DirContext(mutation_project_path):
 
