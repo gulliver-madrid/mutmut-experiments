@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
 from pathlib import Path
-from typing import (
-    Literal,
-    TypeAlias,
-)
+from typing import Any, Literal, TypeAlias
 
 from src.context import Context, RelativeMutationID
 from src.dynamic_config_storage import user_dynamic_config_storage
-from src.mutation_test_runner.run_mutation import run_mutation
 from src.project import project_path_storage, temp_dir_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
-from src.status import (
-    StatusResultStr,
-)
+from src.status import StatusResultStr
 from src.utils import copy_directory
+
+from .run_mutation import run_mutation
+from .test_runner import StrConsumer
 
 logger = configure_logger(__name__)
 
@@ -27,9 +24,12 @@ MutantQueue: TypeAlias = "multiprocessing.Queue[MutantQueueItem]"
 
 
 ResultQueueItem: TypeAlias = (
-    tuple[Literal["status"], StatusResultStr, FilenameStr | None, RelativeMutationID]
-    | tuple[Literal["progress"], str, None, None]
-    | tuple[Literal["end", "cycle"], None, None, None]
+    tuple[
+        Literal["status"], None, StatusResultStr, FilenameStr | None, RelativeMutationID
+    ]
+    | tuple[Literal["progress"], None, str, None, None]
+    | tuple[Literal["end"], None, None, None, None]
+    | tuple[Literal["cycle"], int, None, None, None]
 )
 ResultQueue: TypeAlias = "multiprocessing.Queue[ResultQueueItem]"
 
@@ -40,6 +40,7 @@ def check_mutants(
     results_queue: ResultQueue,
     cycle_process_after: int,
     *,
+    process_id: int = 0,
     tmpdirname: str | None = None,
     # aqui project_path debe ser la que realmente se espera que sea
     # aunque el usuario no lo haya indicado explicitamente
@@ -57,7 +58,7 @@ def check_mutants(
     user_dynamic_config_storage.clear_dynamic_config_cache()
 
     def feedback(line: str) -> None:
-        results_queue.put(("progress", line, None, None))
+        results_queue.put(("progress", None, line, None, None))
 
     if tmpdirname and temp_dir_storage.tmpdirname is None:
         temp_dir_storage.tmpdirname = tmpdirname
@@ -76,7 +77,10 @@ def check_mutants(
     did_cycle = False
 
     try:
+
         count = 0
+
+        cluster = 0
         while True:
             command, context = mutants_queue.get()
             if command == "end":
@@ -85,32 +89,49 @@ def check_mutants(
             assert context
 
             if parallelize:
-                subdir = Path("01")
+                cluster_module = cluster  # still not using modules
+                subdir = Path(str(cluster_module))
+                current_mutation_project_path = mutation_project_path / subdir
 
-                for rel_subdir_to_create in [subdir]:
-                    subdir_to_create = mutation_project_path / rel_subdir_to_create
+                if not current_mutation_project_path.exists():
+                    current_mutation_project_path.mkdir()
+                    copy_directory(
+                        str(mutation_project_path),
+                        str(current_mutation_project_path),
+                    )
 
-                    if not subdir_to_create.exists():  # por ahora puede ser el mismo
-                        subdir_to_create.mkdir()
-                        copy_directory(
-                            str(mutation_project_path), str(subdir_to_create)
-                        )
-                assert (mutation_project_path / subdir).exists()
-                mutation_project_path_this_time = mutation_project_path / subdir
             else:
-                mutation_project_path_this_time = mutation_project_path
+                current_mutation_project_path = mutation_project_path
 
             status = run_mutation(
                 context,
                 feedback,
-                mutation_project_path=mutation_project_path_this_time,
+                mutation_project_path=current_mutation_project_path,
             )
-            results_queue.put(("status", status, context.filename, context.mutation_id))
+            results_queue.put(
+                ("status", None, status, context.filename, context.mutation_id)
+            )
+
             count += 1
             if count == cycle_process_after:
-                results_queue.put(("cycle", None, None, None))
+                results_queue.put(("cycle", process_id, None, None, None))
                 did_cycle = True
                 break
+
+            cluster += 1
     finally:
+
         if not did_cycle:
-            results_queue.put(("end", None, None, None))
+            results_queue.put(("end", None, None, None, None))
+
+
+def process_mutant(
+    context: Context,
+    feedback: StrConsumer,
+    current_mutation_project_path: Path,
+    results_queue: Any,
+) -> None:
+    status = run_mutation(
+        context, feedback, mutation_project_path=current_mutation_project_path
+    )
+    results_queue.put(("status", status, context.filename, context.mutation_id))

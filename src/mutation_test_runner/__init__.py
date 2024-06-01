@@ -69,6 +69,7 @@ class MutationTestsRunner:
         progress: Progress,
         mutations_by_file: MutationsByFile | None,
         *,
+        parallelize: bool = False,
         project_path: ProjectPath | None = None,
     ) -> None:
         from src.cache.cache import update_mutant_status
@@ -98,7 +99,7 @@ class MutationTestsRunner:
 
         self.add_to_active_queues(results_queue)
 
-        def create_worker() -> SpawnProcess:
+        def create_worker(process_id: int = 0) -> SpawnProcess:
             t = mp_ctx.Process(
                 target=check_mutants,
                 name="check_mutants",
@@ -111,21 +112,27 @@ class MutationTestsRunner:
                     project_path=project_path
                     or project_path_storage.get_current_project_path(),
                     parallelize=config.parallelize,
+                    process_id=process_id,
                 ),
             )
             t.start()
             return t
 
-        t = create_worker()
+        number_of_processes: Final = 2 if parallelize else 1
+        check_mutant_processes = {
+            i: create_worker() for i in range(number_of_processes)
+        }
 
         while True:
-            command, status, filename, mutation_id = results_queue.get()
+            command, process_id, status, filename, mutation_id = results_queue.get()
             if command == "end":
-                t.join()
+                for process in check_mutant_processes.values():
+                    process.join()
                 break
 
             elif command == "cycle":
-                t = create_worker()
+                assert process_id is not None
+                check_mutant_processes[process_id] = create_worker()
 
             elif command == "progress":
                 if not config.swallow_output:

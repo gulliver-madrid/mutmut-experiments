@@ -341,6 +341,7 @@ Legend for output:
             progress=progress,
             mutations_by_file=mutations_by_file,
             project_path=project_path,
+            parallelize=parallelize,
         )
     except Exception as e:
         traceback.print_exc()

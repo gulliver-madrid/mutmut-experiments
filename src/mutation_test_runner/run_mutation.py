@@ -13,7 +13,6 @@ from src.context import Context
 from src.dir_context import DirContext
 from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutate import mutate_from_context
-from src.mutation_test_runner.test_runner import StrConsumer, TestRunner
 from src.project import project_path_storage, temp_dir_storage
 from src.mutations import SkipException
 from src.setup_logging import configure_logger
@@ -26,6 +25,8 @@ from src.status import (
     UNTESTED,
     StatusResultStr,
 )
+
+from .test_runner import StrConsumer, TestRunner
 
 logger = configure_logger(__name__)
 
