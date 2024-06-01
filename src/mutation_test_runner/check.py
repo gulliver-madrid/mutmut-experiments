@@ -78,6 +78,8 @@ def check_mutants(
 
     try:
         count = 0
+
+        cluster = 0
         while True:
             command, context = mutants_queue.get()
             if command == "end":
@@ -85,28 +87,26 @@ def check_mutants(
 
             assert context
 
-            logger.info(f"{os.getcwd()=}")
-
             if parallelize:
-                subdir = Path("01")
+                cluster_module = cluster % 10
+                subdir = Path(str(cluster_module))
+                current_mutation_project_path = mutation_project_path / subdir
 
-                for rel_subdir_to_create in [subdir]:
-                    subdir_to_create = mutation_project_path / rel_subdir_to_create
+                if (
+                    not current_mutation_project_path.exists()
+                ):  # por ahora puede ser el mismo
+                    current_mutation_project_path.mkdir()
+                    copy_directory(
+                        str(mutation_project_path), str(current_mutation_project_path)
+                    )
 
-                    if not subdir_to_create.exists():  # por ahora puede ser el mismo
-                        subdir_to_create.mkdir()
-                        copy_directory(
-                            str(mutation_project_path), str(subdir_to_create)
-                        )
-                assert (mutation_project_path / subdir).exists()
-                mutation_project_path_this_time = mutation_project_path / subdir
             else:
-                mutation_project_path_this_time = mutation_project_path
+                current_mutation_project_path = mutation_project_path
 
             status = run_mutation(
                 context,
                 feedback,
-                mutation_project_path=mutation_project_path_this_time,
+                mutation_project_path=current_mutation_project_path,
             )
             results_queue.put(("status", status, context.filename, context.mutation_id))
             count += 1
@@ -114,6 +114,8 @@ def check_mutants(
                 results_queue.put(("cycle", None, None, None))
                 did_cycle = True
                 break
+
+            cluster += 1
     finally:
         if not did_cycle:
             results_queue.put(("end", None, None, None))
