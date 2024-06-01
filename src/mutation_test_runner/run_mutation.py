@@ -135,15 +135,13 @@ def mutate_file(
 
     if subdir:
         mutation_project_path /= subdir
-
-    with open(mutation_project_path / context.filename) as f:
-        original = f.read()
-    if backup:
-        backup_path = mutation_project_path / (context.filename + ".bak")
-
-        with open(backup_path, "w") as f:
-            f.write(original)
-    mutated, _ = mutate_from_context(context)
-    with open(mutation_project_path / context.filename, "w") as f:
-        f.write(mutated)
-    return original, mutated
+    with DirContext(mutation_project_path):
+        with open(context.filename) as f:
+            original = f.read()
+        if backup:
+            with open(context.filename + ".bak", "w") as f:
+                f.write(original)
+        mutated, _ = mutate_from_context(context)
+        with open(context.filename, "w") as f:
+            f.write(mutated)
+        return original, mutated
