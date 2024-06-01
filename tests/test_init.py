@@ -48,6 +48,7 @@ def check_mutants_stub(**kwargs: Any) -> None:
 
 class ConfigStub:
     hash_of_tests = None
+    parallelize = False
 
 
 config_stub = cast(Config, ConfigStub())
