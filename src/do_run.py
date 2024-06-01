@@ -328,7 +328,8 @@ Legend for output:
 
     if parallelize:
         tmpdirname = str(Path(".temp_dir").resolve())
-        os.mkdir(tmpdirname)
+        if not Path(tmpdirname).exists():
+            os.mkdir(tmpdirname)
         temp_dir_storage.tmpdirname = tmpdirname
         copy_directory(str(project_path_storage.get_current_project_path()), tmpdirname)
 
