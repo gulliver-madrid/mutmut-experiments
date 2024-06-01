@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
-import os
+from multiprocessing.pool import AsyncResult
 from pathlib import Path
-from typing import (
-    Literal,
-    TypeAlias,
-)
+from typing import Any, Literal, TypeAlias
 
 from src.context import Context, RelativeMutationID
 from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutation_test_runner.run_mutation import run_mutation
+from src.mutation_test_runner.test_runner import StrConsumer
 from src.project import project_path_storage, temp_dir_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
-from src.status import (
-    StatusResultStr,
-)
+from src.status import StatusResultStr
 from src.utils import copy_directory
 
 logger = configure_logger(__name__)
@@ -76,46 +72,84 @@ def check_mutants(
 
     did_cycle = False
 
+    results: list[
+        AsyncResult[
+            tuple[
+                Literal["status"],
+                StatusResultStr,
+                FilenameStr | None,
+                RelativeMutationID,
+            ]
+        ]
+    ] = []
     try:
-        count = 0
 
-        cluster = 0
-        while True:
-            command, context = mutants_queue.get()
-            if command == "end":
-                break
+        with multiprocessing.Pool() as pool:
+            count = 0
 
-            assert context
+            cluster = 0
+            while True:
+                command, context = mutants_queue.get()
+                if command == "end":
+                    break
 
-            if parallelize:
-                cluster_module = cluster % 10
-                subdir = Path(str(cluster_module))
-                current_mutation_project_path = mutation_project_path / subdir
+                assert context
 
-                if (
-                    not current_mutation_project_path.exists()
-                ):  # por ahora puede ser el mismo
-                    current_mutation_project_path.mkdir()
-                    copy_directory(
-                        str(mutation_project_path), str(current_mutation_project_path)
+                if parallelize:
+                    cluster_module = cluster  # still not using modules
+                    subdir = Path(str(cluster_module))
+                    current_mutation_project_path = mutation_project_path / subdir
+
+                    if (
+                        not current_mutation_project_path.exists()
+                    ):  # por ahora puede ser el mismo
+                        current_mutation_project_path.mkdir()
+                        copy_directory(
+                            str(mutation_project_path),
+                            str(current_mutation_project_path),
+                        )
+
+                else:
+                    current_mutation_project_path = mutation_project_path
+
+                if parallelize:
+                    result = pool.apply_async(
+                        process_mutant,
+                        (context, feedback, current_mutation_project_path),
+                    )
+                    results.append(result)
+
+                else:
+                    status = run_mutation(
+                        context,
+                        feedback,
+                        mutation_project_path=current_mutation_project_path,
+                    )
+                    results_queue.put(
+                        ("status", status, context.filename, context.mutation_id)
                     )
 
-            else:
-                current_mutation_project_path = mutation_project_path
+                count += 1
+                if count == cycle_process_after:
+                    results_queue.put(("cycle", None, None, None))
+                    did_cycle = True
+                    break
 
-            status = run_mutation(
-                context,
-                feedback,
-                mutation_project_path=current_mutation_project_path,
-            )
-            results_queue.put(("status", status, context.filename, context.mutation_id))
-            count += 1
-            if count == cycle_process_after:
-                results_queue.put(("cycle", None, None, None))
-                did_cycle = True
-                break
-
-            cluster += 1
+                cluster += 1
     finally:
+        for result in results:
+            status_result = result.get()
+            if status_result:
+                results_queue.put(status_result)
+
         if not did_cycle:
             results_queue.put(("end", None, None, None))
+
+
+def process_mutant(
+    context: Context, feedback: StrConsumer, current_mutation_project_path: Path
+) -> tuple[Literal["status"], StatusResultStr, FilenameStr | None, RelativeMutationID]:
+    status = run_mutation(
+        context, feedback, mutation_project_path=current_mutation_project_path
+    )
+    return ("status", status, context.filename, context.mutation_id)
