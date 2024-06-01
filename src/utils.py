@@ -95,6 +95,7 @@ def copy_directory(src: str, dst: str) -> None:
             "poetry.lock",
             "html",
             "__pycache__",
+            "temp_dir",  # TODO: remove when switch to builtin temp dir
         ]:
             continue
         s = os.path.join(src, item)
