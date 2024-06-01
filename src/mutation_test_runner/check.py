@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
-from multiprocessing.pool import AsyncResult
 from pathlib import Path
 from typing import Any, Literal, TypeAlias
 
@@ -72,84 +71,74 @@ def check_mutants(
 
     did_cycle = False
 
-    results: list[
-        AsyncResult[
-            tuple[
-                Literal["status"],
-                StatusResultStr,
-                FilenameStr | None,
-                RelativeMutationID,
-            ]
-        ]
-    ] = []
+    processes: list[Any] = []
     try:
 
-        with multiprocessing.Pool() as pool:
-            count = 0
+        count = 0
 
-            cluster = 0
-            while True:
-                command, context = mutants_queue.get()
-                if command == "end":
-                    break
+        cluster = 0
+        while True:
+            command, context = mutants_queue.get()
+            if command == "end":
+                break
 
-                assert context
+            assert context
 
-                if parallelize:
-                    cluster_module = cluster  # still not using modules
-                    subdir = Path(str(cluster_module))
-                    current_mutation_project_path = mutation_project_path / subdir
+            if parallelize:
+                cluster_module = cluster  # still not using modules
+                subdir = Path(str(cluster_module))
+                current_mutation_project_path = mutation_project_path / subdir
 
-                    if (
-                        not current_mutation_project_path.exists()
-                    ):  # por ahora puede ser el mismo
-                        current_mutation_project_path.mkdir()
-                        copy_directory(
-                            str(mutation_project_path),
-                            str(current_mutation_project_path),
-                        )
-
-                else:
-                    current_mutation_project_path = mutation_project_path
-
-                if parallelize:
-                    result = pool.apply_async(
-                        process_mutant,
-                        (context, feedback, current_mutation_project_path),
-                    )
-                    results.append(result)
-
-                else:
-                    status = run_mutation(
-                        context,
-                        feedback,
-                        mutation_project_path=current_mutation_project_path,
-                    )
-                    results_queue.put(
-                        ("status", status, context.filename, context.mutation_id)
+                if not current_mutation_project_path.exists():
+                    current_mutation_project_path.mkdir()
+                    copy_directory(
+                        str(mutation_project_path),
+                        str(current_mutation_project_path),
                     )
 
-                count += 1
-                if count == cycle_process_after:
-                    results_queue.put(("cycle", None, None, None))
-                    did_cycle = True
-                    break
+            else:
+                current_mutation_project_path = mutation_project_path
 
-                cluster += 1
+            if parallelize:
+                p = multiprocessing.Process(
+                    target=process_mutant,
+                    args=(command, context, mutation_project_path, results_queue),
+                )
+                p.start()
+                processes.append(p)
+
+            else:
+                status = run_mutation(
+                    context,
+                    feedback,
+                    mutation_project_path=current_mutation_project_path,
+                )
+                results_queue.put(
+                    ("status", status, context.filename, context.mutation_id)
+                )
+
+            count += 1
+            if count == cycle_process_after:
+                results_queue.put(("cycle", None, None, None))
+                did_cycle = True
+                break
+
+            cluster += 1
     finally:
-        for result in results:
-            status_result = result.get()
-            if status_result:
-                results_queue.put(status_result)
+        for p in processes:
+            p.join()
 
         if not did_cycle:
             results_queue.put(("end", None, None, None))
 
 
 def process_mutant(
-    context: Context, feedback: StrConsumer, current_mutation_project_path: Path
-) -> tuple[Literal["status"], StatusResultStr, FilenameStr | None, RelativeMutationID]:
+    context: Context,
+    feedback: StrConsumer,
+    current_mutation_project_path: Path,
+    results_queue: Any,
+) -> None:
     status = run_mutation(
         context, feedback, mutation_project_path=current_mutation_project_path
     )
-    return ("status", status, context.filename, context.mutation_id)
+    results_queue.put(("status", status, context.filename, context.mutation_id))
