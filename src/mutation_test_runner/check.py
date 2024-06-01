@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
+import os
 from pathlib import Path
 from typing import (
     Literal,
@@ -77,6 +78,8 @@ def check_mutants(
                 break
 
             assert context
+
+            logger.info(f"{os.getcwd()=}")
 
             status = run_mutation(
                 context,
