@@ -116,16 +116,17 @@ class MutationTestsRunner:
             t.start()
             return t
 
-        t = create_worker()
+        number_of_processes: Final = 10
+        check_mutant_processes = {i: create_worker() for i in range(10)}
 
         while True:
             command, status, filename, mutation_id = results_queue.get()
             if command == "end":
-                t.join()
+                check_mutant_process.join()
                 break
 
             elif command == "cycle":
-                t = create_worker()
+                check_mutant_process = create_worker()
 
             elif command == "progress":
                 if not config.swallow_output:

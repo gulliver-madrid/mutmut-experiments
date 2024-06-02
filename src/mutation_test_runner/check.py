@@ -5,13 +5,14 @@ from typing import Any, Literal, TypeAlias
 
 from src.context import Context, RelativeMutationID
 from src.dynamic_config_storage import user_dynamic_config_storage
-from src.mutation_test_runner.run_mutation import run_mutation
-from src.mutation_test_runner.test_runner import StrConsumer
 from src.project import project_path_storage, temp_dir_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
 from src.status import StatusResultStr
 from src.utils import copy_directory
+
+from .run_mutation import run_mutation
+from .test_runner import StrConsumer
 
 logger = configure_logger(__name__)
 
