@@ -54,6 +54,9 @@ class ProjectPathStorage:
 class TempDirectoryStorage:
     tmpdirname: str | None = None
 
+    def reset(self) -> None:
+        self.tmpdirname = None
+
 
 # global variables
 project_path_storage: Final = ProjectPathStorage()

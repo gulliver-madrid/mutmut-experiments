@@ -18,6 +18,7 @@ builtins.open = open_utf8  # type: ignore [assignment]
 
 
 def test_simple_parallelize(filesystem: FileSystemPath) -> None:
+    print("inicio")
     result = CliRunner().invoke(
         climain,
         ["run", "-s", "--paths-to-mutate=foo.py", "--parallelize"],
@@ -25,3 +26,5 @@ def test_simple_parallelize(filesystem: FileSystemPath) -> None:
     )
     print(repr(result.output))
     assert result.exit_code == 0
+    print(f"{result.exit_code=}")
+    print("fin")
