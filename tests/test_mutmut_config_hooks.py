@@ -44,6 +44,10 @@ def pre_mutation_ast(context):
     yield tmpdir
 
 
+# aparentemente esta fixture esta disenada para poder ser parametrizada, pero
+# solo se usa sin parametros
+
+
 @pytest.fixture
 def set_working_dir_and_path(request: Any) -> Iterator[FileSystemPath]:
 
