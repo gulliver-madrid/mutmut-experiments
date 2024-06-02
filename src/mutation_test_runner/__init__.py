@@ -14,7 +14,7 @@ from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED, StatusResultStr
 
-NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 2
+NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 4
 CYCLE_PROCESS_AFTER: Final = 100
 
 
@@ -155,7 +155,6 @@ class MutationTestsRunner:
 
                 progress.register(status)
 
-                # assert filename is not None
                 assert mutation_id is not None
 
                 update_mutant_status(

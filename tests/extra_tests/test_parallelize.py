@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import builtins
+import os
 import sys
 import pytest
 
@@ -8,13 +9,15 @@ from typing import Any, Iterator
 
 from click.testing import CliRunner
 
-from src import (
-    __version__,
-)
+from src import __version__
 from src.__main__ import climain
+from src.dir_context import DirContext
 
 from helpers import FileSystemPath, open_utf8
-from src.dir_context import DirContext
+from fixtures_main import (
+    TEST_FILE_CONTENTS,
+    filesystem,  # pyright: ignore [reportUnusedImport]
+)
 
 
 builtins.open = open_utf8  # type: ignore [assignment]
@@ -78,4 +81,40 @@ def test_parallelization_run(set_working_dir_and_path_parallelize: Any) -> None:
 +def add(a, b): return a - b
 """.strip()
         in result_show.output
+    )
+
+
+def test_parallelization_full_run_one_surviving_mutant(
+    filesystem: FileSystemPath,
+) -> None:
+    with open(os.path.join(str(filesystem), "tests", "test_foo.py"), "w") as f:
+        f.write(TEST_FILE_CONTENTS.replace("assert foo(2, 2) is False", ""))
+
+    result = CliRunner().invoke(
+        climain,
+        ["run", "--paths-to-mutate=foo.py", "--test-time-base=15.0", "--parallelize"],
+        catch_exceptions=False,
+    )
+    print(repr(result.output))
+    assert result.exit_code == 2
+
+    result = CliRunner().invoke(climain, ["results"], catch_exceptions=False)
+    print(repr(result.output))
+    assert result.exit_code == 0
+    assert (
+        result.output.strip()
+        == """
+To apply a mutant on disk:
+    mutmut apply <id>
+
+To show a mutant:
+    mutmut show <id>
+
+
+Survived 🙁 (1)
+
+---- foo.py (1) ----
+
+1
+""".strip()
     )

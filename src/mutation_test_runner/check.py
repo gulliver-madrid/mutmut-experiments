@@ -67,10 +67,8 @@ def check_mutants(
     project_path_storage.set_project_path(project_path)
 
     if parallelize:
-        mutation_project_path = Path(
-            temp_dir_storage.tmpdirname
-            or project_path_storage.get_current_project_path()
-        )
+        assert temp_dir_storage.tmpdirname
+        mutation_project_path = Path(temp_dir_storage.tmpdirname)
     else:
         mutation_project_path = project_path_storage.get_current_project_path()
 
@@ -80,7 +78,6 @@ def check_mutants(
 
         count = 0
 
-        cluster = 0
         while True:
             command, context = mutants_queue.get()
             if command == "end":
@@ -89,7 +86,7 @@ def check_mutants(
             assert context
 
             if parallelize:
-                cluster_module = cluster  # still not using modules
+                cluster_module = process_id
                 subdir = Path(str(cluster_module))
                 current_mutation_project_path = mutation_project_path / subdir
 
@@ -102,6 +99,8 @@ def check_mutants(
 
             else:
                 current_mutation_project_path = mutation_project_path
+
+            print(f"{current_mutation_project_path=}")
 
             status = run_mutation(
                 context,
@@ -118,7 +117,6 @@ def check_mutants(
                 did_cycle = True
                 break
 
-            cluster += 1
     finally:
 
         if not did_cycle:
