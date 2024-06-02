@@ -5,19 +5,21 @@ from io import open
 from multiprocessing.context import SpawnProcess
 from pathlib import Path
 from threading import Thread
+
 from typing import Any, Final, cast
 
 from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.context import Context
 from src.mutation_test_runner.check import MutantQueue, ResultQueue, check_mutants
+from src.mutation_test_runner.constants import (
+    CYCLE_PROCESS_AFTER,
+    NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE,
+)
 from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED, StatusResultStr
 from src.utils import copy_directory
-
-NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 8
-CYCLE_PROCESS_AFTER: Final = 100
 
 
 def queue_mutants(
