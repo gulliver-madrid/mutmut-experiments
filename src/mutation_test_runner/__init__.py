@@ -3,6 +3,7 @@ import multiprocessing
 from copy import copy as copy_obj
 from io import open
 from multiprocessing.context import SpawnProcess
+from pathlib import Path
 from threading import Thread
 from typing import Any, Final, cast
 
@@ -13,6 +14,7 @@ from src.mutation_test_runner.check import MutantQueue, ResultQueue, check_mutan
 from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED, StatusResultStr
+from src.utils import copy_directory
 
 NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 8
 CYCLE_PROCESS_AFTER: Final = 100
@@ -74,6 +76,25 @@ class MutationTestsRunner:
         project_path: ProjectPath | None = None,
     ) -> None:
         from src.cache.cache import update_mutant_status
+
+        if parallelize:
+            assert temp_dir_storage.tmpdirname
+            mutation_project_path = Path(temp_dir_storage.tmpdirname)
+            copied = False
+            for process_id in range(NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE):
+                cluster_module = process_id
+                subdir = Path(str(cluster_module))
+                current_mutation_project_path = mutation_project_path / subdir
+
+                if not current_mutation_project_path.exists():
+                    current_mutation_project_path.mkdir()
+                    copy_directory(
+                        str(mutation_project_path),
+                        str(current_mutation_project_path),
+                    )
+                    copied = True
+            if copied:
+                print("Directorios copiados")
 
         # Need to explicitly use the spawn method for python < 3.8 on macOS
         mp_ctx = multiprocessing.get_context("spawn")

@@ -91,15 +91,7 @@ def check_mutants(
                 subdir = Path(str(cluster_module))
                 current_mutation_project_path = mutation_project_path / subdir
 
-                if not current_mutation_project_path.exists():
-                    current_mutation_project_path.mkdir()
-                    print(time())
-                    copy_directory(
-                        str(mutation_project_path),
-                        str(current_mutation_project_path),
-                    )
-                    print(time())
-                    print("Directorio copiado")
+                assert current_mutation_project_path.exists()
 
             else:
                 current_mutation_project_path = mutation_project_path
