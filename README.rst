@@ -35,9 +35,16 @@ or you can call the same script from another directory using the ``--project`` o
 
     mut run --project=<path to your project> --paths-to-mutate=src --tests-dir=tests
 
-.. note::
+Notes
+-----
 
-   The idea behind using a specific alias ``mut`` to execute this project is to preserve the name ``mutmut`` for the original project. The configuration (in a ``pyproject.toml`` file, ``setup.cfg``, and/or ``mutmut_config.py``) continues to use ``mutmut`` to avoid duplications, as the settings remain the same as those of the original project for now.
+1. The idea behind using a specific alias ``mut`` to execute this project is to preserve the name ``mutmut`` for the original project. The configuration (in a ``pyproject.toml`` file, ``setup.cfg``, and/or ``mutmut_config.py``) continues to use ``mutmut`` to avoid duplications, as the settings remain the same as those of the original project for now.
+
+2. This project in its current form is designed to be executed in a virtual environment (preferably using ``poetry``). If the target project needs also run into a virtual environment, you should add ``deactivate`` command in your custom test runner. Example:
+
+.. code-block:: console
+
+    mut run --runner="deactivate && poetry run pytest"
 
 What follows is the content of the original Mutmut README, which is likely all you need to effectively use this fork, in addition to this introduction.
 
