@@ -22,14 +22,14 @@ MutantQueueItem: TypeAlias = (
 )
 MutantQueue: TypeAlias = "multiprocessing.Queue[MutantQueueItem]"
 
-
+ProcessId = int
 ResultQueueItem: TypeAlias = (
     tuple[
         Literal["status"], None, StatusResultStr, FilenameStr | None, RelativeMutationID
     ]
     | tuple[Literal["progress"], None, str, None, None]
-    | tuple[Literal["end"], None, None, None, None]
-    | tuple[Literal["cycle"], int, None, None, None]
+    | tuple[Literal["end"], ProcessId, None, None, None]
+    | tuple[Literal["cycle"], ProcessId, None, None, None]
 )
 ResultQueue: TypeAlias = "multiprocessing.Queue[ResultQueueItem]"
 
@@ -122,7 +122,7 @@ def check_mutants(
     finally:
 
         if not did_cycle:
-            results_queue.put(("end", None, None, None, None))
+            results_queue.put(("end", process_id, None, None, None))
 
 
 def process_mutant(
