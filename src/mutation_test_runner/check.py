@@ -76,7 +76,6 @@ def check_mutants(
 
     did_cycle = False
 
-    processes: list[Any] = []
     try:
 
         count = 0
@@ -104,23 +103,14 @@ def check_mutants(
             else:
                 current_mutation_project_path = mutation_project_path
 
-            if parallelize:
-                p = multiprocessing.Process(
-                    target=process_mutant,
-                    args=(command, context, mutation_project_path, results_queue),
-                )
-                p.start()
-                processes.append(p)
-
-            else:
-                status = run_mutation(
-                    context,
-                    feedback,
-                    mutation_project_path=current_mutation_project_path,
-                )
-                results_queue.put(
-                    ("status", None, status, context.filename, context.mutation_id)
-                )
+            status = run_mutation(
+                context,
+                feedback,
+                mutation_project_path=current_mutation_project_path,
+            )
+            results_queue.put(
+                ("status", None, status, context.filename, context.mutation_id)
+            )
 
             count += 1
             if count == cycle_process_after:
@@ -130,8 +120,6 @@ def check_mutants(
 
             cluster += 1
     finally:
-        for p in processes:
-            p.join()
 
         if not did_cycle:
             results_queue.put(("end", None, None, None, None))
