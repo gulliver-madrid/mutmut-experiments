@@ -26,6 +26,7 @@ from src.status import (
     StatusResultStr,
 )
 
+from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
 from .test_runner import StrConsumer, TestRunner
 
 logger = configure_logger(__name__)
@@ -95,9 +96,12 @@ def run_mutation(
                 return BAD_TIMEOUT
 
             time_elapsed = time() - start
-            if not survived and time_elapsed > config.test_time_base + (
+            time_expected = config.test_time_base + (
                 config.baseline_time_elapsed * config.test_time_multiplier
-            ):
+            )
+            if context.config.parallelize:
+                time_expected *= NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
+            if not survived and time_elapsed > time_expected:
                 return OK_SUSPICIOUS
 
             if survived:
