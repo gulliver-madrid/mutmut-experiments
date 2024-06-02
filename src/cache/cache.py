@@ -310,7 +310,7 @@ def register_mutants(mutations_by_file: MutationsByFile) -> None:
 @init_db
 @db_session
 def update_mutant_status(
-    file_to_mutate: str,
+    file_to_mutate: FilenameStr,
     mutation_id: RelativeMutationID,
     status: StatusResultStr,
     tests_hash: HashStr | NoTestFoundSentinel,
