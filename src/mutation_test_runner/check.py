@@ -24,9 +24,12 @@ MutantQueue: TypeAlias = "multiprocessing.Queue[MutantQueueItem]"
 
 
 ResultQueueItem: TypeAlias = (
-    tuple[Literal["status"], StatusResultStr, FilenameStr | None, RelativeMutationID]
-    | tuple[Literal["progress"], str, None, None]
-    | tuple[Literal["end", "cycle"], None, None, None]
+    tuple[
+        Literal["status"], None, StatusResultStr, FilenameStr | None, RelativeMutationID
+    ]
+    | tuple[Literal["progress"], None, str, None, None]
+    | tuple[Literal["end"], None, None, None, None]
+    | tuple[Literal["cycle"], int, None, None, None]
 )
 ResultQueue: TypeAlias = "multiprocessing.Queue[ResultQueueItem]"
 
@@ -37,6 +40,7 @@ def check_mutants(
     results_queue: ResultQueue,
     cycle_process_after: int,
     *,
+    process_id: int = 0,
     tmpdirname: str | None = None,
     # aqui project_path debe ser la que realmente se espera que sea
     # aunque el usuario no lo haya indicado explicitamente
@@ -54,7 +58,7 @@ def check_mutants(
     user_dynamic_config_storage.clear_dynamic_config_cache()
 
     def feedback(line: str) -> None:
-        results_queue.put(("progress", line, None, None))
+        results_queue.put(("progress", None, line, None, None))
 
     if tmpdirname and temp_dir_storage.tmpdirname is None:
         temp_dir_storage.tmpdirname = tmpdirname
@@ -115,12 +119,12 @@ def check_mutants(
                     mutation_project_path=current_mutation_project_path,
                 )
                 results_queue.put(
-                    ("status", status, context.filename, context.mutation_id)
+                    ("status", None, status, context.filename, context.mutation_id)
                 )
 
             count += 1
             if count == cycle_process_after:
-                results_queue.put(("cycle", None, None, None))
+                results_queue.put(("cycle", process_id, None, None, None))
                 did_cycle = True
                 break
 
@@ -130,7 +134,7 @@ def check_mutants(
             p.join()
 
         if not did_cycle:
-            results_queue.put(("end", None, None, None))
+            results_queue.put(("end", None, None, None, None))
 
 
 def process_mutant(
