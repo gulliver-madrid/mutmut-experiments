@@ -109,10 +109,7 @@ def run_mutation(
 
         finally:
             assert isinstance(context.filename, str)
-            print(f"{context.filename=}")
-            print("before:", os.getcwd())
             move(context.filename + ".bak", context.filename)
-            print("after:", os.getcwd())
 
             config.test_command = (
                 config.default_test_command
@@ -141,11 +138,8 @@ def mutate_file(
     with DirContext(mutation_project_path):
         with open(context.filename) as f:
             original = f.read()
-        print("Mutando archivo")
-        print(f"{os.getcwd()=}")
         if backup:
             with open(context.filename + ".bak", "w") as f:
-                print(f"{(context.filename + '.bak')=}")
                 f.write(original)
         mutated, _ = mutate_from_context(context)
         with open(context.filename, "w") as f:
