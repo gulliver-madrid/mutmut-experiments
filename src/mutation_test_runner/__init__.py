@@ -4,15 +4,15 @@ from copy import copy as copy_obj
 from io import open
 from multiprocessing.context import SpawnProcess
 from threading import Thread
-from typing import Any, Final
+from typing import Any, Final, cast
 
 from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.context import Context
-from src.mutation_test_runner.check import MutantQueue, check_mutants
+from src.mutation_test_runner.check import MutantQueue, ResultQueue, check_mutants
 from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
-from src.status import UNTESTED
+from src.status import UNTESTED, StatusResultStr
 
 
 CYCLE_PROCESS_AFTER: Final = 100
@@ -94,7 +94,8 @@ class MutationTestsRunner:
 
         queue_mutants_thread.start()
 
-        results_queue = mp_ctx.Queue(maxsize=100)
+        results_queue: ResultQueue = mp_ctx.Queue(maxsize=100)
+
         self.add_to_active_queues(results_queue)
 
         def create_worker() -> SpawnProcess:
@@ -135,7 +136,11 @@ class MutationTestsRunner:
             else:
                 assert command == "status"
 
+                status = cast(StatusResultStr, status)
+
                 progress.register(status)
+
+                assert mutation_id is not None
 
                 update_mutant_status(
                     file_to_mutate=filename,
