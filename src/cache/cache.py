@@ -44,7 +44,7 @@ from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
-from src.utils import split_lines
+from src.utils import SequenceStr, split_lines
 
 MutationsByFile = Dict[FilenameStr, List[RelativeMutationID]]
 
@@ -133,8 +133,7 @@ def hash_of(filename: FilenameStr) -> HashStr:
         return HashStr(m.hexdigest())
 
 
-def hash_of_tests(tests_dirs: list[str]) -> HashStr | NoTestFoundSentinel:
-    assert isinstance(tests_dirs, list)
+def hash_of_tests(tests_dirs: SequenceStr) -> HashStr | NoTestFoundSentinel:
     m = hashlib.sha256()
     found_something = False
     for tests_dir in tests_dirs:
@@ -158,13 +157,12 @@ def hash_of_tests(tests_dirs: list[str]) -> HashStr | NoTestFoundSentinel:
 
 def get_unified_diff(
     pk: int | str,
-    dict_synonyms: list[str],
+    dict_synonyms: SequenceStr,
     update_cache: bool = True,
     source: str | None = None,
 ) -> str:
     assert isinstance(pk, (int, str))
     assert isinstance(update_cache, bool)
-    assert isinstance(dict_synonyms, list)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
         with open(project_path_storage.get_current_project_path() / filename) as f:
@@ -179,10 +177,9 @@ def get_unified_diff_from_filename_and_mutation_id(
     source: str | None,
     filename: FilenameStr,
     mutation_id: RelativeMutationID,
-    dict_synonyms: list[str],
+    dict_synonyms: SequenceStr,
     update_cache: bool,
 ) -> str:
-    assert isinstance(dict_synonyms, list)
     assert isinstance(source, (str, NoneType))
 
     if update_cache:

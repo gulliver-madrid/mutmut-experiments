@@ -6,9 +6,11 @@ import shutil
 import sys
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Callable
+from typing import Callable, List, Tuple, Union
 
 from src.dir_context import DirContext
+
+SequenceStr = Union[List[str], Tuple[str, ...]]
 
 
 def ranges(numbers: Sequence[int]) -> str:
@@ -42,7 +44,7 @@ def ranges(numbers: Sequence[int]) -> str:
 def split_paths(paths: str, directory: Path) -> list[str]:
     # This method is used to split paths that are separated by commas or colons
     # filtering out those that do not exist
-    separated: list[str] | None = None
+    separated: SequenceStr | None = None
     for sep in [",", ":"]:
         if sep in paths:
             separated = paths.split(sep)
@@ -52,7 +54,7 @@ def split_paths(paths: str, directory: Path) -> list[str]:
     return filter_not_existing(separated, directory)
 
 
-def filter_not_existing(paths: list[str], directory: Path) -> list[str]:
+def filter_not_existing(paths: SequenceStr, directory: Path) -> list[str]:
     # filter paths that do not exist
     with DirContext(directory):
         return list(filter(lambda p: Path(p).exists(), paths))

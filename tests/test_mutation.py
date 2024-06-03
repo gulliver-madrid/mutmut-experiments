@@ -11,7 +11,7 @@ from src.mutations import (
     ASTPattern,
 )
 from src.parse import parse_source
-from src.utils import split_lines
+from src.utils import SequenceStr, split_lines
 
 
 def test_matches_py3() -> None:
@@ -199,7 +199,7 @@ def test_fstring_mutation_fstring_is_mutated_separately_from_other_mutations() -
         ("x**=1", ["x=1", "x*=1"]),
     ],
 )
-def test_multiple_mutations(original: str, expected: list[str]) -> None:
+def test_multiple_mutations(original: str, expected: SequenceStr) -> None:
     mutations = list_mutations(Context(source=original))
     assert len(mutations) == 3
     assert mutate_from_context(Context(source=original, mutation_id=mutations[0])) == (

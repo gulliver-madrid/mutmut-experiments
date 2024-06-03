@@ -2,8 +2,10 @@
 
 from typing import Final
 
+from src.utils import SequenceStr
 
-dunder_whitelist: Final[list[str]] = [
+
+dunder_whitelist: Final[SequenceStr] = [
     "all",
     "version",
     "title",

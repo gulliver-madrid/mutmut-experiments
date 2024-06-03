@@ -25,11 +25,12 @@ from src.status import (
     SKIPPED,
     StatusResultStr,
 )
+from src.utils import SequenceStr
 
 
 @init_db
 @db_session
-def create_html_report(dict_synonyms: list[str], directory: str) -> None:
+def create_html_report(dict_synonyms: SequenceStr, directory: str) -> None:
     mutants = sorted(
         list(select(x for x in get_mutants())), key=lambda x: x.line.sourcefile.filename
     )

@@ -35,6 +35,7 @@ from src.mutation_test_runner.run_mutation import mutate_file
 from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.status import MUTANT_STATUSES, StatusStr
+from src.utils import SequenceStr
 
 logger = configure_logger(__name__)
 
@@ -45,11 +46,11 @@ add_project_option = click.option(
 context_settings = dict(help_option_names=["-h", "--help"])
 
 
-def do_apply(mutation_pk: str, dict_synonyms: List[str], backup: bool) -> None:
+def do_apply(mutation_pk: str, dict_synonyms: SequenceStr, backup: bool) -> None:
     """Apply a specified mutant to the source code
 
     :param mutation_pk: mutmut cache primary key of the mutant to apply
-    :param dict_synonyms: list of synonym keywords for a python dictionary
+    :param dict_synonyms: sequence of synonym keywords for a python dictionary
     :param backup: if :obj:`True` create a backup of the source file
         before applying the mutation
     """

@@ -7,7 +7,6 @@ from pathlib import Path
 from shutil import copy
 from time import time
 from types import NoneType
-from typing import Final
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
@@ -49,7 +48,13 @@ from src.dynamic_config_storage import (
 )
 from src.patch import CoveredLinesByFilename, read_patch_data
 from src.project import project_path_storage, temp_dir_storage
-from src.utils import copy_directory, split_lines, split_paths, print_status
+from src.utils import (
+    SequenceStr,
+    copy_directory,
+    split_lines,
+    split_paths,
+    print_status,
+)
 
 logger = configure_logger(__name__)
 
@@ -156,7 +161,7 @@ def do_run(
             f"The following are not valid mutation types: {', '.join(sorted(invalid_types))}. Valid mutation types are: {', '.join(mutations_by_type.keys())}"
         )
 
-    dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
+    dict_synonyms_as_sequence: SequenceStr = dict_synonyms_to_list(dict_synonyms)
 
     if (
         use_coverage
@@ -273,9 +278,8 @@ Legend for output:
     mutations_by_file: MutationsByFile = {}
 
     paths_to_exclude = paths_to_exclude or ""
-    paths_to_exclude_as_list: list[str]
+    paths_to_exclude_as_list: SequenceStr
     if paths_to_exclude:
-        # here paths_to_exclude_ becames a list[str]
         paths_to_exclude_as_list = [
             path.strip() for path in split_lines(paths_to_exclude.replace(",", "\n"))
         ]
@@ -292,7 +296,7 @@ Legend for output:
         covered_lines_by_filename=covered_lines_by_filename,
         coverage_data=coverage_data,
         baseline_time_elapsed=baseline_time_elapsed,
-        dict_synonyms=dict_synonyms_as_list,
+        dict_synonyms=dict_synonyms_as_sequence,
         using_testmon=using_testmon,
         tests_dirs=tests_dirs,
         hash_of_tests=current_hash_of_tests,
@@ -311,7 +315,7 @@ Legend for output:
     parse_run_argument(
         argument,
         config,
-        dict_synonyms_as_list,
+        dict_synonyms_as_sequence,
         mutations_by_file,
         paths_to_exclude_as_list,
         paths_to_mutate,
@@ -356,16 +360,13 @@ Legend for output:
 def parse_run_argument(
     argument: str | None,
     config: Config,
-    dict_synonyms: list[str],
+    dict_synonyms: SequenceStr,
     mutations_by_file: MutationsByFile,
-    paths_to_exclude: list[str],
-    paths_to_mutate: list[str],
-    tests_dirs: list[str],
+    paths_to_exclude: SequenceStr,
+    paths_to_mutate: SequenceStr,
+    tests_dirs: SequenceStr,
 ) -> None:
     assert isinstance(mutations_by_file, dict)
-    assert isinstance(dict_synonyms, (list))
-    assert isinstance(paths_to_exclude, list)
-    assert isinstance(paths_to_mutate, list)
     assert isinstance(tests_dirs, list)
     # argument is the mutation id or a path to a file to mutate
     if argument is None:
@@ -398,7 +399,9 @@ def parse_run_argument(
         add_mutations_by_file(mutations_by_file, filename, dict_synonyms, config)
 
 
-def _get_tests_dirs(*, paths_to_mutate: list[str], test_paths: list[str]) -> list[str]:
+def _get_tests_dirs(
+    *, paths_to_mutate: SequenceStr, test_paths: list[str]
+) -> list[str]:
     tests_dirs: list[str] = []
 
     with DirContext(

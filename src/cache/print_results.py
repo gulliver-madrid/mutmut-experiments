@@ -12,7 +12,7 @@ from src.cache.cache import (
     select_mutants_by_status,
 )
 from src.cache.model import Mutant
-from src.utils import ranges
+from src.utils import SequenceStr, ranges
 from src.status import (
     BAD_SURVIVED,
     BAD_TIMEOUT,
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 @db_session
 def print_result_cache(
     show_diffs: bool = False,
-    dict_synonyms: list[str] = [],
+    dict_synonyms: SequenceStr = [],
     only_this_file: str | None = None,
 ) -> None:
     print("To apply a mutant on disk:")

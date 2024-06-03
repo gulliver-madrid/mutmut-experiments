@@ -1,10 +1,9 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Mapping, Optional, Set, Tuple, Union
+from typing import Dict, Mapping, Optional, Set
 
 
 from src.cache.model import HashStr, NoTestFoundSentinel
-
-SequenceStr = Union[List[str], Tuple[str, ...]]
+from src.utils import SequenceStr
 
 
 @dataclass

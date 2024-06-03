@@ -44,6 +44,7 @@ from fixtures_main import (
     TEST_FILE_CONTENTS,
     filesystem,  # pyright: ignore [reportUnusedImport]
 )
+from src.utils import SequenceStr
 
 
 builtins.open = open_utf8  # type: ignore [assignment]
@@ -150,9 +151,9 @@ def test_read_coverage_data(filesystem: FileSystemPath) -> None:
     ],
 )
 def test_python_source_files(
-    expected: list[str],
+    expected: SequenceStr,
     source_path: str,
-    tests_dirs: list[str],
+    tests_dirs: SequenceStr,
     filesystem: FileSystemPath,
 ) -> None:
     assert list(python_source_files(Path(source_path), tests_dirs)) == expected

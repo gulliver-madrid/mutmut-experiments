@@ -13,7 +13,6 @@ from typing import (
     Any,
     Callable,
     Iterator,
-    List,
     Optional,
     ParamSpec,
     cast,
@@ -30,6 +29,7 @@ from src.progress import Progress
 from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
+from src.utils import SequenceStr
 
 
 __version__ = "2.5.0"
@@ -146,10 +146,9 @@ def get_mutations_by_file_from_cache(
 def add_mutations_by_file(
     mutations_by_file: MutationsByFile,
     filename: FilenameStr,
-    dict_synonyms: List[str],
+    dict_synonyms: SequenceStr,
     config: Optional[Config],
 ) -> None:
-    assert isinstance(dict_synonyms, list)
     with open(filename) as f:
         source = f.read()
     context = Context(
@@ -173,7 +172,7 @@ def add_mutations_by_file(
 
 
 def python_source_files(
-    path: Path, tests_dirs: List[str], paths_to_exclude: Optional[List[str]] = None
+    path: Path, tests_dirs: SequenceStr, paths_to_exclude: Optional[SequenceStr] = None
 ) -> Iterator[FilenameStr]:
     """Attempt to guess where the python source files to mutate are and yield
     their paths

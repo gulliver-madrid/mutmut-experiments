@@ -10,10 +10,11 @@ from pony.orm import select
 from src.cache.cache import db_session, get_unified_diff, init_db
 from src.cache.model import get_mutants
 from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_SUSPICIOUS, UNTESTED
+from src.utils import SequenceStr
 
 
 def print_result_cache_junitxml(
-    dict_synonyms: list[str], suspicious_policy: str, untested_policy: str
+    dict_synonyms: SequenceStr, suspicious_policy: str, untested_policy: str
 ) -> None:
     print(create_junitxml_report(dict_synonyms, suspicious_policy, untested_policy))
 
@@ -21,7 +22,7 @@ def print_result_cache_junitxml(
 @init_db
 @db_session
 def create_junitxml_report(
-    dict_synonyms: list[str], suspicious_policy: str, untested_policy: str
+    dict_synonyms: SequenceStr, suspicious_policy: str, untested_policy: str
 ) -> str:
     test_cases: list[TestCase] = []
     mutant_list = list(select(x for x in get_mutants()))
