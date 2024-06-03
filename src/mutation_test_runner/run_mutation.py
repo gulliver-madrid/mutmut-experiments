@@ -109,7 +109,6 @@ def run_mutation(
 
         finally:
             assert isinstance(context.filename, str)
-
             move(context.filename + ".bak", context.filename)
 
             config.test_command = (

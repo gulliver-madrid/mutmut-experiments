@@ -14,7 +14,7 @@ from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED, StatusResultStr
 
-
+NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 4
 CYCLE_PROCESS_AFTER: Final = 100
 
 
@@ -55,7 +55,8 @@ def queue_mutants(
                 mutants_queue.put(("mutant", context))
                 index += 1
     finally:
-        mutants_queue.put(("end", None))
+        for _ in range(NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE):
+            mutants_queue.put(("end", None))
 
 
 class MutationTestsRunner:
@@ -118,17 +119,24 @@ class MutationTestsRunner:
             t.start()
             return t
 
-        number_of_processes: Final = 2 if parallelize else 1
+        number_of_processes: Final = (
+            NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE if parallelize else 1
+        )
         check_mutant_processes = {
-            i: create_worker() for i in range(number_of_processes)
+            i: create_worker(i) for i in range(number_of_processes)
         }
+        finished: dict[int, SpawnProcess] = {}
 
         while True:
             command, process_id, status, filename, mutation_id = results_queue.get()
             if command == "end":
-                for process in check_mutant_processes.values():
-                    process.join()
-                break
+                assert process_id is not None
+                finished[process_id] = check_mutant_processes[process_id]
+                del check_mutant_processes[process_id]
+                if not check_mutant_processes:
+                    for process in finished.values():
+                        process.join()
+                    break
 
             elif command == "cycle":
                 assert process_id is not None
