@@ -1,7 +1,10 @@
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Mapping, Optional, Set, Tuple, Union
+
 
 from src.cache.model import HashStr, NoTestFoundSentinel
+
+SequenceStr = Union[List[str], Tuple[str, ...]]
 
 
 @dataclass
@@ -13,15 +16,15 @@ class Config:
     baseline_time_elapsed: float
     test_time_multiplier: float
     test_time_base: float
-    dict_synonyms: List[str]
+    dict_synonyms: SequenceStr
     total: int
     using_testmon: bool
-    tests_dirs: List[str]
+    tests_dirs: SequenceStr
     hash_of_tests: HashStr | NoTestFoundSentinel
     post_mutation: str | None
     pre_mutation: str | None
-    coverage_data: Dict[str, Dict[int, List[str]]] | None
-    paths_to_mutate: List[str]
+    coverage_data: Mapping[str, Mapping[int, SequenceStr]] | None
+    paths_to_mutate: SequenceStr
     mutation_types_to_apply: Set[str]
     no_progress: bool
     ci: bool

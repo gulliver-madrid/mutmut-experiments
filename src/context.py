@@ -4,11 +4,11 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass, field
 from io import open
-from typing import Optional
+from typing import Final, Optional, Sequence
 
 from parso.tree import NodeOrLeaf
 
-from src.config import Config
+from src.config import Config, SequenceStr
 from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
@@ -30,28 +30,28 @@ ALL = RelativeMutationID(filename="%all%", line="%all%", index=-1, line_number=-
 
 class Context:
     mutated_source: str
+    _source: str | None
 
     def __init__(
         self,
         source: Optional[str] = None,
         mutation_id: RelativeMutationID = ALL,
-        dict_synonyms: list[str] | None = None,
+        dict_synonyms: SequenceStr | None = None,
         filename: FilenameStr | None = None,
         config: Optional[Config] = None,
         index: int = 0,
     ):
         self.index = index
-        self.remove_newline_at_end: bool = False
-        self._source: str | None = None
+        self.remove_newline_at_end = False
         self._set_source(source)
         self.mutation_id = mutation_id
         self.performed_mutation_ids: list[RelativeMutationID] = []
         assert isinstance(mutation_id, RelativeMutationID)
         self.current_line_index = 0
-        self.filename = filename
+        self.filename: Final[FilenameStr | None] = filename
         self.stack: list[NodeOrLeaf] = []
-        self.dict_synonyms: list[str] = (dict_synonyms or []) + ["dict"]
-        self._source_by_line_number: list[str] | None = None
+        self.dict_synonyms: SequenceStr = list(dict_synonyms or []) + ["dict"]
+        self._source_by_line_number: SequenceStr | None = None
         self._pragma_no_mutate_lines: set[int] | None = None
         self.config = config
         self.skip: bool = False
@@ -68,7 +68,7 @@ class Context:
             return False
 
         assert self.filename is not None
-        covered_lines: list[int] | None = config.covered_lines_by_filename.get(
+        covered_lines: Sequence[int] | None = config.covered_lines_by_filename.get(
             self.filename
         )
 
@@ -108,7 +108,7 @@ class Context:
         self._source = source
 
     @property
-    def source_by_line_number(self) -> list[str]:
+    def source_by_line_number(self) -> SequenceStr:
         if self._source_by_line_number is None:
             assert self.source is not None
             self._source_by_line_number = split_lines(self.source)
