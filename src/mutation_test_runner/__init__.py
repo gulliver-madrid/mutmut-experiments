@@ -74,14 +74,13 @@ class MutationTestsRunner:
         progress: Progress,
         mutations_by_file: MutationsByFile | None,
         *,
-        parallelize: bool = False,
         project_path: ProjectPath | None = None,
     ) -> None:
         from src.cache.cache import update_mutant_status
 
         process_id: int | None = None
 
-        if parallelize:
+        if config.parallelize:
             assert temp_dir_storage.tmpdirname
             mutation_project_path = Path(temp_dir_storage.tmpdirname)
             copied = False
@@ -145,7 +144,7 @@ class MutationTestsRunner:
             return t
 
         number_of_processes: Final = (
-            NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE if parallelize else 1
+            NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE if config.parallelize else 1
         )
         check_mutant_processes = {
             i: create_worker(i) for i in range(number_of_processes)
