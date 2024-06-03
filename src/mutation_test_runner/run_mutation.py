@@ -5,9 +5,7 @@ import subprocess
 from io import open
 from shutil import move
 from time import time
-from typing import (
-    Tuple,
-)
+from typing import Tuple
 
 from src.context import Context
 from src.dir_context import DirContext

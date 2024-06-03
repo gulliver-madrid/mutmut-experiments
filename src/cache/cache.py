@@ -332,7 +332,7 @@ def update_mutant_status(
 @db_session
 def get_cached_mutation_statuses(
     filename: FilenameStr,
-    mutations: List[RelativeMutationID],
+    mutations: Sequence[RelativeMutationID],
     hash_of_tests: HashStr | NoTestFoundSentinel,
 ) -> dict[RelativeMutationID, StatusResultStr]:
     sourcefile = SourceFile.get(filename=filename)
