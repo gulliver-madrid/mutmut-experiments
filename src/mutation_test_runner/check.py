@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from src.context import Context
 from src.dynamic_config_storage import user_dynamic_config_storage
@@ -9,9 +9,19 @@ from src.setup_logging import configure_logger
 
 from .run_mutation import run_mutation
 from .test_runner import StrConsumer
-from .types import MutantQueue, ResultQueue
+from .types import MutantQueue, ProcessId, ResultQueue
 
 logger = configure_logger(__name__)
+
+
+class CheckMutantsKwargs(TypedDict):
+    mutants_queue: MutantQueue
+    results_queue: ResultQueue
+    cycle_process_after: int
+    process_id: ProcessId
+    tmpdirname: str | None
+    project_path: Path
+    parallelize: bool
 
 
 # check_mutants() se llama en su propio contexto, por lo que hay que prestar atencion a la correcta inicializacion de las variables globales
@@ -20,7 +30,7 @@ def check_mutants(
     results_queue: ResultQueue,
     cycle_process_after: int,
     *,
-    process_id: int = 0,
+    process_id: ProcessId = ProcessId(0),
     tmpdirname: str | None = None,
     # aqui project_path debe ser la que realmente se espera que sea
     # aunque el usuario no lo haya indicado explicitamente

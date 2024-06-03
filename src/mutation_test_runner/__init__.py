@@ -3,7 +3,6 @@ import multiprocessing
 from multiprocessing.context import SpawnProcess
 from pathlib import Path
 from threading import Thread
-
 from typing import Any, Final, cast
 
 from src.cache.cache import MutationsByFile
@@ -13,13 +12,13 @@ from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import StatusResultStr
 from src.utils import copy_directory
 
-from .check import check_mutants
+from .check import CheckMutantsKwargs, check_mutants
 from .constants import (
     CYCLE_PROCESS_AFTER,
     NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE,
 )
 from .queue_mutants import queue_mutants
-from .types import ResultQueue
+from .types import ProcessId, ResultQueue
 
 
 class MutationTestsRunner:
@@ -44,8 +43,7 @@ class MutationTestsRunner:
             mutation_project_path = Path(temp_dir_storage.tmpdirname)
             copied = False
             for process_id in range(NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE):
-                cluster_module = process_id
-                subdir = Path(str(cluster_module))
+                subdir = Path(str(process_id))
                 current_mutation_project_path = mutation_project_path / subdir
 
                 if not current_mutation_project_path.exists():
@@ -83,12 +81,12 @@ class MutationTestsRunner:
 
         self.add_to_active_queues(results_queue)
 
-        def create_worker(process_id: int = 0) -> SpawnProcess:
+        def create_worker(process_id: ProcessId = ProcessId(0)) -> SpawnProcess:
             t = mp_ctx.Process(
                 target=check_mutants,
                 name="check_mutants",
                 daemon=True,
-                kwargs=dict(
+                kwargs=CheckMutantsKwargs(
                     mutants_queue=mutants_queue,
                     results_queue=results_queue,
                     cycle_process_after=CYCLE_PROCESS_AFTER,
@@ -106,7 +104,7 @@ class MutationTestsRunner:
             NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE if config.parallelize else 1
         )
         check_mutant_processes = {
-            i: create_worker(i) for i in range(number_of_processes)
+            i: create_worker(ProcessId(i)) for i in range(number_of_processes)
         }
         finished: dict[int, SpawnProcess] = {}
 

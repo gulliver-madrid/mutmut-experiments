@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
-from typing import Literal, TypeAlias
+from typing import Literal, NewType, TypeAlias
 
 from src.context import Context, RelativeMutationID
 from src.shared import FilenameStr
 from src.status import StatusResultStr
 
-ProcessId = int
+ProcessId = NewType("ProcessId", int)
 
 _MutantQueueItem: TypeAlias = (
     tuple[Literal["mutant"], Context] | tuple[Literal["end"], None]
