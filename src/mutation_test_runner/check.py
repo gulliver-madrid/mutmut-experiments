@@ -16,13 +16,13 @@ from .test_runner import StrConsumer
 logger = configure_logger(__name__)
 
 
-MutantQueueItem: TypeAlias = (
+_MutantQueueItem: TypeAlias = (
     tuple[Literal["mutant"], Context] | tuple[Literal["end"], None]
 )
-MutantQueue: TypeAlias = "multiprocessing.Queue[MutantQueueItem]"
+MutantQueue: TypeAlias = "multiprocessing.Queue[_MutantQueueItem]"
 
 ProcessId = int
-ResultQueueItem: TypeAlias = (
+_ResultQueueItem: TypeAlias = (
     tuple[
         Literal["status"], None, StatusResultStr, FilenameStr | None, RelativeMutationID
     ]
@@ -30,7 +30,7 @@ ResultQueueItem: TypeAlias = (
     | tuple[Literal["end"], ProcessId, None, None, None]
     | tuple[Literal["cycle"], ProcessId, None, None, None]
 )
-ResultQueue: TypeAlias = "multiprocessing.Queue[ResultQueueItem]"
+ResultQueue: TypeAlias = "multiprocessing.Queue[_ResultQueueItem]"
 
 
 # check_mutants() se llama en su propio contexto, por lo que hay que prestar atencion a la correcta inicializacion de las variables globales
