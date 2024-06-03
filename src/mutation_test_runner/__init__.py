@@ -11,15 +11,17 @@ from typing import Any, Final, cast
 from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.context import Context
-from src.mutation_test_runner.check import MutantQueue, ResultQueue, check_mutants
-from src.mutation_test_runner.constants import (
-    CYCLE_PROCESS_AFTER,
-    NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE,
-)
 from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED, StatusResultStr
 from src.utils import copy_directory
+
+from .check import check_mutants
+from .constants import (
+    CYCLE_PROCESS_AFTER,
+    NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE,
+)
+from .types import MutantQueue, ResultQueue
 
 
 def queue_mutants(
