@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import multiprocessing
 from pathlib import Path
+from time import time
 from typing import Any, Literal, TypeAlias
 
 from src.context import Context, RelativeMutationID
@@ -92,15 +93,16 @@ def check_mutants(
 
                 if not current_mutation_project_path.exists():
                     current_mutation_project_path.mkdir()
+                    print(time())
                     copy_directory(
                         str(mutation_project_path),
                         str(current_mutation_project_path),
                     )
+                    print(time())
+                    print("Directorio copiado")
 
             else:
                 current_mutation_project_path = mutation_project_path
-
-            print(f"{current_mutation_project_path=}")
 
             status = run_mutation(
                 context,

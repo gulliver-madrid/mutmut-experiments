@@ -14,7 +14,7 @@ from src.progress import Progress
 from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import UNTESTED, StatusResultStr
 
-NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 4
+NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE = 8
 CYCLE_PROCESS_AFTER: Final = 100
 
 
