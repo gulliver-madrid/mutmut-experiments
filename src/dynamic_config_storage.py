@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Final
 
-from src.project import project_path_storage
+from src.project import project_path_storage, temp_dir_storage
 
 
 DYNAMIC_CONFIG_NOT_DEFINED: Final = "Dynamic Config Not Defined"
@@ -18,6 +18,7 @@ DYNAMIC_CONFIG_FILENAME: Final = DYNAMIC_CONFIG_NAME + ".py"
 def reset_global_vars() -> None:
     user_dynamic_config_storage.clear_dynamic_config_cache()
     project_path_storage.reset()
+    temp_dir_storage.reset()
 
 
 class UserDynamicConfigStorage:
