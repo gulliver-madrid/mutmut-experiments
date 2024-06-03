@@ -1,9 +1,14 @@
-mutmut-experiments - fork of mutmut
-===================================
+mutmut-experiments - faster mutation testing
+============================================
 
-This is a fork of `Mutmut <https://github.com/boxed/mutmut>`_. For most use cases the original project is probably what you are looking for.
-This fork is focused on improving code modularity and cohesion, with the intent of enhancing the speed and usability as well.
-It also adds two new options:
+This is a fork of `Mutmut <https://github.com/boxed/mutmut>`_.
+This project is focused on improving:
+
+- code modularity and cohesion
+- execution speed
+- usability
+
+It adds two new options:
 
 ``--project`` (for every command): the command will be executed from a different directory.
 
