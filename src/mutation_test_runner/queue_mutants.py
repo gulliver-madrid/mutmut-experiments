@@ -8,7 +8,7 @@ from src.config import Config
 from src.context import Context, RelativeMutationID
 from src.progress import Progress
 from src.shared import FilenameStr
-from src.status import UNTESTED
+from src.status import UNTESTED, StatusResultStr
 from src.storage import storage
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
@@ -47,7 +47,7 @@ def queue_mutants(
             for mutation_id in mutations:
                 cached_status = cached_mutation_statuses.get(mutation_id)
                 assert isinstance(cached_status, str)
-                if cached_status != UNTESTED:
+                if is_tested(cached_status):
                     progress.register(cached_status)
                     continue
                 context = Context(
@@ -69,3 +69,7 @@ def get_source(filename: FilenameStr) -> str:
     with open(storage.project_path.get_current_project_path() / filename) as f:
         source = f.read()
     return source
+
+
+def is_tested(status: StatusResultStr) -> bool:
+    return status != UNTESTED
