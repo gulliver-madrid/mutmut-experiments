@@ -49,13 +49,12 @@ def check_mutants(
     def feedback(line: str) -> None:
         results_queue.put(("progress", None, line, None, None))
 
-    if tmpdirname and storage.temp_dir.tmpdirname is None:
-        storage.temp_dir.tmpdirname = tmpdirname
-
     assert project_path is not None
     storage.project_path.set_project_path(project_path)
 
     if parallelize:
+        if tmpdirname and storage.temp_dir.tmpdirname is None:
+            storage.temp_dir.tmpdirname = tmpdirname
         assert storage.temp_dir.tmpdirname
         mutation_project_path = Path(storage.temp_dir.tmpdirname)
     else:
@@ -75,8 +74,7 @@ def check_mutants(
             assert context
 
             if parallelize:
-                cluster_module = process_id
-                subdir = Path(str(cluster_module))
+                subdir = Path(str(process_id))
                 current_mutation_project_path = mutation_project_path / subdir
 
                 assert current_mutation_project_path.exists()
