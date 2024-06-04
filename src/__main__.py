@@ -99,7 +99,7 @@ def climain() -> None:
 @climain.command()
 def version() -> NoReturn:
     """Show the version and exit."""
-    print("mutmut version {}".format(__version__))
+    print("mutmut-experiments (mutmut version {})".format(__version__))
     sys.exit(0)
 
 

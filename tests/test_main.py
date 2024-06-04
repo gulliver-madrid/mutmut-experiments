@@ -68,7 +68,7 @@ def single_mutant_filesystem(tmpdir: FileSystemPath) -> Iterator[Path]:
 def test_print_version() -> None:
     assert (
         CliRunner().invoke(climain, ["version"]).output.strip()
-        == f"mutmut version {__version__}"
+        == f"mutmut-experiments (mutmut version {__version__})"
     )
 
 
