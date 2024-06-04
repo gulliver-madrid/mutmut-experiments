@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Final, NewType
+from typing import NewType
 
 from src.setup_logging import configure_logger
 
@@ -56,8 +56,3 @@ class TempDirectoryStorage:
 
     def reset(self) -> None:
         self.tmpdirname = None
-
-
-# global variables
-project_path_storage: Final = ProjectPathStorage()
-temp_dir_storage: Final = TempDirectoryStorage()

@@ -4,11 +4,7 @@ from typing import Any, TypedDict
 
 from src.context import Context
 from src.setup_logging import configure_logger
-from src.storage import (
-    user_dynamic_config_storage,
-    project_path_storage,
-    temp_dir_storage,
-)
+from src.storage import storage
 
 from .run_mutation import run_mutation
 from .test_runner import StrConsumer
@@ -48,22 +44,22 @@ def check_mutants(
     # if directory has changed.
     # This is probably not really needed in the regular program flow (that uses spawn).
     # More info: https://stackoverflow.com/questions/64095876/multiprocessing-fork-vs-spawn
-    user_dynamic_config_storage.clear_dynamic_config_cache()
+    storage.dynamic_config.clear_cache()
 
     def feedback(line: str) -> None:
         results_queue.put(("progress", None, line, None, None))
 
-    if tmpdirname and temp_dir_storage.tmpdirname is None:
-        temp_dir_storage.tmpdirname = tmpdirname
+    if tmpdirname and storage.temp_dir.tmpdirname is None:
+        storage.temp_dir.tmpdirname = tmpdirname
 
     assert project_path is not None
-    project_path_storage.set_project_path(project_path)
+    storage.project_path.set_project_path(project_path)
 
     if parallelize:
-        assert temp_dir_storage.tmpdirname
-        mutation_project_path = Path(temp_dir_storage.tmpdirname)
+        assert storage.temp_dir.tmpdirname
+        mutation_project_path = Path(storage.temp_dir.tmpdirname)
     else:
-        mutation_project_path = project_path_storage.get_current_project_path()
+        mutation_project_path = storage.project_path.get_current_project_path()
 
     did_cycle = False
 

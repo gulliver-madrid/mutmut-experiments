@@ -24,7 +24,7 @@ from src.status import (
     SKIPPED,
     StatusResultStr,
 )
-from src.storage import project_path_storage
+from src.storage import storage
 from src.utils import SequenceStr
 
 
@@ -35,7 +35,7 @@ def create_html_report(dict_synonyms: SequenceStr, directory: str) -> None:
         list(select(x for x in get_mutants())), key=lambda x: x.line.sourcefile.filename
     )
 
-    project_path = project_path_storage.get_current_project_path()
+    project_path = storage.project_path.get_current_project_path()
 
     with DirContext(project_path):
 

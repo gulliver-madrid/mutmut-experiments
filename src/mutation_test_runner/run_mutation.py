@@ -21,11 +21,7 @@ from src.status import (
     UNTESTED,
     StatusResultStr,
 )
-from src.storage import (
-    user_dynamic_config_storage,
-    project_path_storage,
-    temp_dir_storage,
-)
+from src.storage import storage
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
 from .test_runner import StrConsumer, TestRunner
@@ -51,7 +47,7 @@ def run_mutation(
 
     with DirContext(mutation_project_path):
 
-        dynamic_config = user_dynamic_config_storage.get_dynamic_config()
+        dynamic_config = storage.dynamic_config.get_dynamic_config()
         cached_status = cached_mutation_status(
             context.filename, context.mutation_id, context.config.hash_of_tests
         )
@@ -135,7 +131,7 @@ def mutate_file(
     assert isinstance(context.filename, str)
     # directory to apply mutations
     mutation_project_path = Path(
-        temp_dir_storage.tmpdirname or project_path_storage.get_current_project_path()
+        storage.temp_dir.tmpdirname or storage.project_path.get_current_project_path()
     )
 
     if subdir:

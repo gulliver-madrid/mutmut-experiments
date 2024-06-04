@@ -31,7 +31,7 @@ from src.mutations import mutations_by_type
 from src.progress import Progress
 from src.process import popen_streaming_output
 from src.status import MUTANT_STATUSES
-from src.storage import DYNAMIC_CONFIG_FILENAME, project_path_storage
+from src.storage import DYNAMIC_CONFIG_FILENAME, storage
 
 from helpers import FileSystemPath, open_utf8
 from fixtures import (
@@ -182,7 +182,7 @@ def test_python_source_files__with_paths_to_exclude(tmpdir: FileSystemPath) -> N
     with open(join(entities_dir, "user.py"), "w"):
         pass
 
-    project_path_storage.set_project_path(tmpdir_str)
+    storage.project_path.set_project_path(tmpdir_str)
     # act, assert
     assert set(python_source_files(Path(project_dir), [], paths_to_exclude)) == {
         os.path.join("project", "services", "main.py"),

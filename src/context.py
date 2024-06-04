@@ -11,7 +11,7 @@ from parso.tree import NodeOrLeaf
 from src.config import Config
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
-from src.storage import project_path_storage
+from src.storage import storage
 from src.utils import SequenceStr, split_lines
 
 logger = configure_logger(__name__)
@@ -95,7 +95,7 @@ class Context:
         if self._source is None:
             assert self.filename
             with open(
-                project_path_storage.get_current_project_path() / self.filename
+                storage.project_path.get_current_project_path() / self.filename
             ) as f:
                 self._set_source(f.read())
         assert self._source is not None

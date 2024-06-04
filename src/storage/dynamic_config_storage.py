@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Final
 
-from .project import project_path_storage, temp_dir_storage
+from .project import ProjectPathStorage
 
 
 DYNAMIC_CONFIG_NOT_DEFINED: Final = "Dynamic Config Not Defined"
@@ -15,20 +15,14 @@ DYNAMIC_CONFIG_NAME: Final = "mutmut_config"
 DYNAMIC_CONFIG_FILENAME: Final = DYNAMIC_CONFIG_NAME + ".py"
 
 
-def reset_global_vars() -> None:
-    user_dynamic_config_storage.clear_dynamic_config_cache()
-    project_path_storage.reset()
-    temp_dir_storage.reset()
-
-
 class UserDynamicConfigStorage:
     """Dynamic configuration is the configuration in the form of a Python file that is defined by the user."""
 
-    def __init__(self) -> None:
+    def __init__(self, project_path_storage: ProjectPathStorage) -> None:
         self._cached_dynamic_config: Any = DYNAMIC_CONFIG_NOT_DEFINED
         self._project_path_storage = project_path_storage
 
-    def clear_dynamic_config_cache(self) -> None:
+    def clear_cache(self) -> None:
         self._cached_dynamic_config = DYNAMIC_CONFIG_NOT_DEFINED
 
     def get_dynamic_config(self) -> Any:
@@ -66,7 +60,3 @@ class UserDynamicConfigStorage:
 
         sys.path = original_path
         return dynamic_config
-
-
-# global variable
-user_dynamic_config_storage: Final = UserDynamicConfigStorage()

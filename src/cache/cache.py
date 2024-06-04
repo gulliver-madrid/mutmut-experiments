@@ -43,7 +43,7 @@ from src.mutate import mutate_from_context
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
-from src.storage import project_path_storage
+from src.storage import storage
 from src.utils import SequenceStr, split_lines
 
 MutationsByFile = Dict[FilenameStr, List[RelativeMutationID]]
@@ -78,7 +78,7 @@ def get_cache_path() -> Path:
 
 
 def _get_cache_path() -> Path:
-    return project_path_storage.get_current_project_path() / ".mutmut-cache"
+    return storage.project_path.get_current_project_path() / ".mutmut-cache"
 
 
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
@@ -87,7 +87,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
         if db.provider is None:
             cache_path = get_cache_path()
             logger.info(
-                f"El directorio donde se guarda la .mutmut-cache es {project_path_storage.get_current_project_path()}"
+                f"El directorio donde se guarda la .mutmut-cache es {storage.project_path.get_current_project_path()}"
             )
             db.bind(provider="sqlite", filename=str(cache_path), create_db=True)
 
@@ -127,7 +127,7 @@ def init_db(f: Callable[P, T]) -> Callable[P, T]:
 
 
 def hash_of(filename: FilenameStr) -> HashStr:
-    with open(project_path_storage.get_current_project_path() / filename, "rb") as f:
+    with open(storage.project_path.get_current_project_path() / filename, "rb") as f:
         m = hashlib.sha256()
         m.update(f.read())
         return HashStr(m.hexdigest())
@@ -165,7 +165,7 @@ def get_unified_diff(
     assert isinstance(update_cache, bool)
     filename, mutation_id = filename_and_mutation_id_from_pk(pk)
     if source is None:
-        with open(project_path_storage.get_current_project_path() / filename) as f:
+        with open(storage.project_path.get_current_project_path() / filename) as f:
             source = f.read()
 
     return get_unified_diff_from_filename_and_mutation_id(

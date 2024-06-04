@@ -28,7 +28,7 @@ from src.mutate import list_mutations
 from src.progress import Progress
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
-from src.storage import project_path_storage
+from src.storage import storage
 from src.utils import SequenceStr
 
 
@@ -103,7 +103,7 @@ def config_from_file(
 
 def guess_paths_to_mutate() -> str:
     """Guess the path to source code to mutate"""
-    project_dir = project_path_storage.get_current_project_path()
+    project_dir = storage.project_path.get_current_project_path()
     project_dir_name = str(project_dir).split(os.sep)[-1]
 
     with DirContext(project_dir_name):
@@ -185,21 +185,21 @@ def python_source_files(
     :return: generator listing the paths to the python source files to mutate (absolute paths!)
     """
     if path.is_absolute():
-        parent = project_path_storage.get_current_project_path().resolve()
+        parent = storage.project_path.get_current_project_path().resolve()
         child = path.resolve()
         assert child == parent or parent in child.parents, (child, parent)
         absolute_path = path
     else:
         absolute_path = (
-            project_path_storage.get_current_project_path() / path
+            storage.project_path.get_current_project_path() / path
         ).resolve()
     assert absolute_path.exists(), absolute_path
     relative_path = absolute_path.relative_to(
-        project_path_storage.get_current_project_path()
+        storage.project_path.get_current_project_path()
     )
     # TODO: review if exclusion works with file paths
     paths_to_exclude = paths_to_exclude or []
-    with DirContext(project_path_storage.get_current_project_path()):
+    with DirContext(storage.project_path.get_current_project_path()):
         if absolute_path.is_dir():
             for root, dirs, files_ in os.walk(relative_path, topdown=True):
                 files = cast(list[FilenameStr], files_)

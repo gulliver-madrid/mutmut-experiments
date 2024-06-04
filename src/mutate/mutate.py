@@ -18,7 +18,7 @@ from src.mutations.mutations import LeafMutation, NodeWithChildrenMutation
 from src.parse import parse_source
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
-from src.storage import user_dynamic_config_storage
+from src.storage import storage
 
 from .dunder import is_dunder_name
 
@@ -56,7 +56,7 @@ def mutate_from_context(context: Context) -> Tuple[str, int]:
 
 def _mutate_node(node: NodeOrLeaf, context: Context) -> None:
     assert isinstance(node, NodeOrLeaf)
-    dynamic_config = user_dynamic_config_storage.get_dynamic_config()
+    dynamic_config = storage.dynamic_config.get_dynamic_config()
     context.stack.append(node)
     try:
         if node.type in ("tfpdef", "import_from", "import_name"):

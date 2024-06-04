@@ -9,7 +9,7 @@ from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.progress import Progress
 from src.status import StatusResultStr
-from src.storage import ProjectPath, project_path_storage, temp_dir_storage
+from src.storage import ProjectPath, storage
 from src.utils import copy_directory
 
 from .check import CheckMutantsKwargs, check_mutants
@@ -39,8 +39,8 @@ class MutationTestsRunner:
         process_id: int | None = None
 
         if config.parallelize:
-            assert temp_dir_storage.tmpdirname
-            mutation_project_path = Path(temp_dir_storage.tmpdirname)
+            assert storage.temp_dir.tmpdirname
+            mutation_project_path = Path(storage.temp_dir.tmpdirname)
             copied = False
             for process_id in range(NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE):
                 subdir = Path(str(process_id))
@@ -71,7 +71,7 @@ class MutationTestsRunner:
                 config=config,
                 mutants_queue=mutants_queue,
                 mutations_by_file=mutations_by_file,
-                project=project_path_storage.get_current_project_path(),
+                project=storage.project_path.get_current_project_path(),
             ),
         )
 
@@ -90,9 +90,9 @@ class MutationTestsRunner:
                     mutants_queue=mutants_queue,
                     results_queue=results_queue,
                     cycle_process_after=CYCLE_PROCESS_AFTER,
-                    tmpdirname=temp_dir_storage.tmpdirname,
+                    tmpdirname=storage.temp_dir.tmpdirname,
                     project_path=project_path
-                    or project_path_storage.get_current_project_path(),
+                    or storage.project_path.get_current_project_path(),
                     parallelize=config.parallelize,
                     process_id=process_id,
                 ),

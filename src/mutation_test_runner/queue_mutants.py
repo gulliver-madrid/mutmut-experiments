@@ -8,7 +8,7 @@ from src.context import Context, RelativeMutationID
 from src.progress import Progress
 from src.shared import FilenameStr
 from src.status import UNTESTED
-from src.storage import ProjectPath, project_path_storage
+from src.storage import ProjectPath, storage
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
 from .types import MutantQueue
@@ -26,7 +26,7 @@ def queue_mutants(
 ) -> None:
     from src.cache.cache import get_cached_mutation_statuses
 
-    project_path_storage.set_project_path(project)
+    storage.project_path.set_project_path(project)
 
     try:
         index = 0
@@ -34,7 +34,7 @@ def queue_mutants(
             cached_mutation_statuses = get_cached_mutation_statuses(
                 filename, mutations, config.hash_of_tests
             )
-            with open(project_path_storage.get_current_project_path() / filename) as f:
+            with open(storage.project_path.get_current_project_path() / filename) as f:
                 source = f.read()
             for mutation_id in mutations:
                 cached_status = cached_mutation_statuses.get(mutation_id)

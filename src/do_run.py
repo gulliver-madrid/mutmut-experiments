@@ -43,12 +43,7 @@ from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.mutation_test_runner import MutationTestsRunner
 from src.mutations import mutations_by_type
 from src.patch import CoveredLinesByFilename, read_patch_data
-from src.storage import (
-    DYNAMIC_CONFIG_NOT_DEFINED,
-    user_dynamic_config_storage,
-    project_path_storage,
-    temp_dir_storage,
-)
+from src.storage import DYNAMIC_CONFIG_NOT_DEFINED, storage
 from src.utils import (
     SequenceStr,
     copy_directory,
@@ -120,10 +115,10 @@ def do_run(
     print(f"Project: {project}")
     print(f"{swallow_output=}")
 
-    project_path_storage.set_project_path(project)
-    project_path = project_path_storage.get_project_path()
-    user_dynamic_config_storage.clear_dynamic_config_cache()
-    dynamic_config = user_dynamic_config_storage.get_dynamic_config()
+    storage.project_path.set_project_path(project)
+    project_path = storage.project_path.get_project_path()
+    storage.dynamic_config.clear_cache()
+    dynamic_config = storage.dynamic_config.get_dynamic_config()
 
     print(
         f"Dynamic config config found: {dynamic_config not in (None,DYNAMIC_CONFIG_NOT_DEFINED)}"
@@ -166,7 +161,7 @@ def do_run(
 
     if (
         use_coverage
-        and not (project_path_storage.get_current_project_path() / ".coverage").exists()
+        and not (storage.project_path.get_current_project_path() / ".coverage").exists()
     ):
         raise FileNotFoundError(
             "No .coverage file found. You must generate a coverage file to use this feature."
@@ -177,7 +172,7 @@ def do_run(
     assert isinstance(paths_to_mutate, str)
 
     paths_to_mutate = split_paths(
-        paths_to_mutate, project_path_storage.get_current_project_path()
+        paths_to_mutate, storage.project_path.get_current_project_path()
     )
 
     if not paths_to_mutate:
@@ -189,7 +184,7 @@ def do_run(
         )
 
     assert tests_dir is not None
-    test_paths = split_paths(tests_dir, project_path_storage.get_current_project_path())
+    test_paths = split_paths(tests_dir, storage.project_path.get_current_project_path())
     if not test_paths:
         raise FileNotFoundError(
             'No test folders found in current folder. Run this where there is a "tests" or "test" folder.'
@@ -248,7 +243,7 @@ Legend for output:
         dynamic_config.init()
 
     directory = (
-        project_path_storage.get_current_project_path()
+        storage.project_path.get_current_project_path()
         if project_path
         else Path(os.getcwd())
     )
@@ -335,8 +330,8 @@ Legend for output:
         tmpdirname = str(Path(".temp_dir").resolve())
         if not Path(tmpdirname).exists():
             os.mkdir(tmpdirname)
-        temp_dir_storage.tmpdirname = tmpdirname
-        copy_directory(str(project_path_storage.get_current_project_path()), tmpdirname)
+        storage.temp_dir.tmpdirname = tmpdirname
+        copy_directory(str(storage.project_path.get_current_project_path()), tmpdirname)
 
     mutation_tests_runner = MutationTestsRunner()
 
@@ -375,7 +370,7 @@ def parse_run_argument(
             # paths to mutate should be relative here
             assert not Path(path).is_absolute()
             print("Analizando path", str(Path(path)))
-            with DirContext(project_path_storage.get_current_project_path()):
+            with DirContext(storage.project_path.get_current_project_path()):
                 for filename in python_source_files(
                     Path(path), tests_dirs, paths_to_exclude
                 ):
@@ -406,7 +401,7 @@ def _get_tests_dirs(
     tests_dirs: list[str] = []
 
     with DirContext(
-        project_path_storage.get_current_project_path()
+        storage.project_path.get_current_project_path()
     ):  # parece que es irrelevante # TODO: review
         for p in test_paths:
             tests_dirs.extend(glob(p, recursive=True))
