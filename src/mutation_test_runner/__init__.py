@@ -17,7 +17,7 @@ from .constants import (
     CYCLE_PROCESS_AFTER,
     NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE,
 )
-from .queue_mutants import queue_mutants
+from .queue_mutants import QueueMutants, queue_mutants
 from .types import ProcessId, ResultQueue
 
 
@@ -30,9 +30,11 @@ class MutationTestsRunner:
         self,
         config: Config,
         progress: Progress,
-        mutations_by_file: MutationsByFile | None,
+        mutations_by_file: MutationsByFile,
     ) -> None:
         from src.cache.cache import update_mutant_status
+
+        assert mutations_by_file is not None
 
         process_id: int | None = None
 
@@ -64,7 +66,7 @@ class MutationTestsRunner:
             target=queue_mutants,
             name="queue_mutants",
             daemon=True,
-            kwargs=dict(
+            kwargs=QueueMutants(
                 progress=progress,
                 config=config,
                 mutants_queue=mutants_queue,

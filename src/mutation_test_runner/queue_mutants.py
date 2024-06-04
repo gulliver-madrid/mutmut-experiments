@@ -2,7 +2,7 @@
 from copy import copy as copy_obj
 from io import open
 from pathlib import Path
-from typing import Mapping, Sequence
+from typing import Mapping, Sequence, TypedDict
 
 from src.config import Config
 from src.context import Context, RelativeMutationID
@@ -15,6 +15,14 @@ from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
 from .types import MutantQueue
 
 MutationsByFileReadOnly = Mapping[FilenameStr, Sequence[RelativeMutationID]]
+
+
+class QueueMutants(TypedDict):
+    progress: Progress
+    config: Config
+    mutants_queue: MutantQueue
+    mutations_by_file: MutationsByFileReadOnly
+    project: Path | None
 
 
 def queue_mutants(

@@ -87,7 +87,7 @@ def test_run_mutation_tests_thread_synchronization(monkeypatch: Any) -> None:
 
     # act
     mutation_tests_runner = MutationTestsRunner()
-    mutation_tests_runner.run_mutation_tests(config_stub, progress_mock, None)
+    mutation_tests_runner.run_mutation_tests(config_stub, progress_mock, {})
 
     # assert
     assert progress_mock.registered_mutants == total_mutants
