@@ -53,7 +53,7 @@ def run_mutation(
         )
 
         if cached_status != UNTESTED and context.config.total != 1:
-            return cached_status
+            return cached_status  # pyright: ignore
 
         config = context.config
         if dynamic_config is not None and hasattr(dynamic_config, "pre_mutation"):
