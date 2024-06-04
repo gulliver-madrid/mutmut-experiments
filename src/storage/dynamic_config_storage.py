@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 from typing import Any, Final
 
-from src.project import project_path_storage, temp_dir_storage
+from .project import project_path_storage, temp_dir_storage
 
 
 DYNAMIC_CONFIG_NOT_DEFINED: Final = "Dynamic Config Not Defined"

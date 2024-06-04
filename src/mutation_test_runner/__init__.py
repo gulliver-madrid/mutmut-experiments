@@ -8,8 +8,8 @@ from typing import Any, Final, cast
 from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.progress import Progress
-from src.project import ProjectPath, project_path_storage, temp_dir_storage
 from src.status import StatusResultStr
+from src.storage import ProjectPath, project_path_storage, temp_dir_storage
 from src.utils import copy_directory
 
 from .check import CheckMutantsKwargs, check_mutants

@@ -26,9 +26,9 @@ from src.context import Context, RelativeMutationID
 from src.dir_context import DirContext
 from src.mutate import list_mutations
 from src.progress import Progress
-from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
+from src.storage import project_path_storage
 from src.utils import SequenceStr
 
 

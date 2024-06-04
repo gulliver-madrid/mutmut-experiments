@@ -1,7 +1,7 @@
 import os
 from typing import Dict, List, Mapping, TypeAlias
 
-from src.project import project_path_storage
+from src.storage import project_path_storage
 
 
 FilePathStr: TypeAlias = str

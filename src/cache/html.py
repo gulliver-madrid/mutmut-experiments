@@ -16,7 +16,6 @@ from src.cache.cache import (
 from src.cache.model import Mutant, get_mutants
 from src.context import RelativeMutationID
 from src.dir_context import DirContext
-from src.project import project_path_storage
 from src.status import (
     BAD_SURVIVED,
     BAD_TIMEOUT,
@@ -25,6 +24,7 @@ from src.status import (
     SKIPPED,
     StatusResultStr,
 )
+from src.storage import project_path_storage
 from src.utils import SequenceStr
 
 

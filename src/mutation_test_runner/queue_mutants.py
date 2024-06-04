@@ -6,9 +6,9 @@ from typing import Mapping, Sequence
 from src.config import Config
 from src.context import Context, RelativeMutationID
 from src.progress import Progress
-from src.project import ProjectPath, project_path_storage
 from src.shared import FilenameStr
 from src.status import UNTESTED
+from src.storage import ProjectPath, project_path_storage
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
 from .types import MutantQueue

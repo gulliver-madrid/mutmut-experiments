@@ -8,7 +8,6 @@ from parso.tree import NodeOrLeaf, Node, BaseNode, Leaf
 from parso.python.tree import ExprStmt
 
 from src.context import ALL, Context, RelativeMutationID
-from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutations import (
     has_children,
     is_name_node,
@@ -19,6 +18,7 @@ from src.mutations.mutations import LeafMutation, NodeWithChildrenMutation
 from src.parse import parse_source
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
+from src.storage import user_dynamic_config_storage
 
 from .dunder import is_dunder_name
 

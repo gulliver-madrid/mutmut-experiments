@@ -3,9 +3,12 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from src.context import Context
-from src.dynamic_config_storage import user_dynamic_config_storage
-from src.project import project_path_storage, temp_dir_storage
 from src.setup_logging import configure_logger
+from src.storage import (
+    user_dynamic_config_storage,
+    project_path_storage,
+    temp_dir_storage,
+)
 
 from .run_mutation import run_mutation
 from .test_runner import StrConsumer

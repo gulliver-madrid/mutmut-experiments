@@ -27,12 +27,11 @@ from src import (
 )
 from src.__main__ import climain
 from src.coverage import read_coverage_data
-from src.dynamic_config_storage import DYNAMIC_CONFIG_FILENAME
 from src.mutations import mutations_by_type
 from src.progress import Progress
-from src.project import project_path_storage
 from src.process import popen_streaming_output
 from src.status import MUTANT_STATUSES
+from src.storage import DYNAMIC_CONFIG_FILENAME, project_path_storage
 
 from helpers import FileSystemPath, open_utf8
 from fixtures import (

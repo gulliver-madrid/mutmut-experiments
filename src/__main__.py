@@ -32,9 +32,9 @@ from src.cache.print_results import print_result_cache, print_result_ids_cache
 from src.context import Context
 from src.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
 from src.mutation_test_runner.run_mutation import mutate_file
-from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.status import MUTANT_STATUSES, StatusStr
+from src.storage import project_path_storage
 from src.utils import SequenceStr
 
 logger = configure_logger(__name__)

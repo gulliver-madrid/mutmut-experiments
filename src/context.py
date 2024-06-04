@@ -9,9 +9,9 @@ from typing import Final, Optional, Sequence
 from parso.tree import NodeOrLeaf
 
 from src.config import Config
-from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
+from src.storage import project_path_storage
 from src.utils import SequenceStr, split_lines
 
 logger = configure_logger(__name__)

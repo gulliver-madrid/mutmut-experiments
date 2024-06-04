@@ -9,9 +9,7 @@ from typing import Tuple
 
 from src.context import Context
 from src.dir_context import DirContext
-from src.dynamic_config_storage import user_dynamic_config_storage
 from src.mutate import mutate_from_context
-from src.project import project_path_storage, temp_dir_storage
 from src.mutations import SkipException
 from src.setup_logging import configure_logger
 from src.status import (
@@ -22,6 +20,11 @@ from src.status import (
     SKIPPED,
     UNTESTED,
     StatusResultStr,
+)
+from src.storage import (
+    user_dynamic_config_storage,
+    project_path_storage,
+    temp_dir_storage,
 )
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE

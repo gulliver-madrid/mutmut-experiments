@@ -40,10 +40,10 @@ from src.cache.model import (
 )
 from src.context import Context, RelativeMutationID
 from src.mutate import mutate_from_context
-from src.project import project_path_storage
 from src.setup_logging import configure_logger
 from src.shared import FilenameStr
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
+from src.storage import project_path_storage
 from src.utils import SequenceStr, split_lines
 
 MutationsByFile = Dict[FilenameStr, List[RelativeMutationID]]

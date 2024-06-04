@@ -42,12 +42,13 @@ from src.config import Config
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.mutation_test_runner import MutationTestsRunner
 from src.mutations import mutations_by_type
-from src.dynamic_config_storage import (
+from src.patch import CoveredLinesByFilename, read_patch_data
+from src.storage import (
     DYNAMIC_CONFIG_NOT_DEFINED,
     user_dynamic_config_storage,
+    project_path_storage,
+    temp_dir_storage,
 )
-from src.patch import CoveredLinesByFilename, read_patch_data
-from src.project import project_path_storage, temp_dir_storage
 from src.utils import (
     SequenceStr,
     copy_directory,

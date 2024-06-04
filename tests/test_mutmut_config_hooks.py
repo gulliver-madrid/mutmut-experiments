@@ -8,7 +8,7 @@ import pytest
 from helpers import FileSystemPath
 from src.__main__ import climain
 from src.dir_context import DirContext
-from src.dynamic_config_storage import DYNAMIC_CONFIG_FILENAME
+from src.storage import DYNAMIC_CONFIG_FILENAME
 
 
 @pytest.fixture
