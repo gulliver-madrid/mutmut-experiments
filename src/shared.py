@@ -1,3 +1,6 @@
-from typing import NewType
+from typing import Final, Literal, NewType
 
 FilenameStr = NewType("FilenameStr", str)
+
+POLICIES: Final = ["ignore", "skipped", "error", "failure"]
+PolicyStr = Literal["ignore", "skipped", "error", "failure"]

@@ -6,7 +6,7 @@ import sys
 from io import open
 from pathlib import Path
 from types import NoneType
-from typing import Final, List, Literal, NoReturn, cast
+from typing import List, NoReturn, cast
 
 import click
 
@@ -33,9 +33,11 @@ from src.context import Context
 from src.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
 from src.mutation_test_runner.run_mutation import mutate_file
 from src.setup_logging import configure_logger
+from src.shared import POLICIES, PolicyStr
 from src.status import MUTANT_STATUSES, StatusStr
 from src.utils import SequenceStr
 from src.storage import storage
+
 
 logger = configure_logger(__name__)
 
@@ -351,10 +353,6 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
     assert isinstance(id_or_file, str)
     print(get_unified_diff(id_or_file, dict_synonyms_as_list))
     sys.exit(0)
-
-
-POLICIES: Final = ["ignore", "skipped", "error", "failure"]
-PolicyStr = Literal["ignore", "skipped", "error", "failure"]
 
 
 @climain.command(context_settings=context_settings)
