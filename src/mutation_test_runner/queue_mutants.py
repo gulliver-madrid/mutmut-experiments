@@ -43,8 +43,7 @@ def queue_mutants(
             cached_mutation_statuses = get_cached_mutation_statuses(
                 filename, mutations, config.hash_of_tests
             )
-            with open(storage.project_path.get_current_project_path() / filename) as f:
-                source = f.read()
+            source = get_source(filename)
             for mutation_id in mutations:
                 cached_status = cached_mutation_statuses.get(mutation_id)
                 assert isinstance(cached_status, str)
@@ -64,3 +63,9 @@ def queue_mutants(
     finally:
         for _ in range(NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE):
             mutants_queue.put(("end", None))
+
+
+def get_source(filename: FilenameStr) -> str:
+    with open(storage.project_path.get_current_project_path() / filename) as f:
+        source = f.read()
+    return source
