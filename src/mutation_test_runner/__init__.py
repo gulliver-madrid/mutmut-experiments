@@ -9,7 +9,7 @@ from src.cache.cache import MutationsByFile
 from src.config import Config
 from src.progress import Progress
 from src.status import StatusResultStr
-from src.storage import ProjectPath, storage
+from src.storage import storage
 from src.utils import copy_directory
 
 from .check import CheckMutantsKwargs, check_mutants

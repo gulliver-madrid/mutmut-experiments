@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from copy import copy as copy_obj
 from io import open
+from pathlib import Path
 from typing import Mapping, Sequence
 
 from src.config import Config
@@ -8,7 +9,7 @@ from src.context import Context, RelativeMutationID
 from src.progress import Progress
 from src.shared import FilenameStr
 from src.status import UNTESTED
-from src.storage import ProjectPath, storage
+from src.storage import storage
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
 from .types import MutantQueue
@@ -22,7 +23,7 @@ def queue_mutants(
     config: Config,
     mutants_queue: MutantQueue,
     mutations_by_file: MutationsByFileReadOnly,
-    project: ProjectPath | None = None,
+    project: Path | None = None,
 ) -> None:
     from src.cache.cache import get_cached_mutation_statuses
 
