@@ -116,7 +116,6 @@ def do_run(
     print(f"{swallow_output=}")
 
     storage.project_path.set_project_path(project)
-    project_path = storage.project_path.get_project_path()
     storage.dynamic_config.clear_cache()
     dynamic_config = storage.dynamic_config.get_dynamic_config()
 
@@ -242,13 +241,7 @@ Legend for output:
     if hasattr(dynamic_config, "init"):
         dynamic_config.init()
 
-    directory = (
-        storage.project_path.get_current_project_path()
-        if project_path
-        else Path(os.getcwd())
-    )
-
-    with DirContext(directory):
+    with DirContext(storage.project_path.get_current_project_path()):
         baseline_time_elapsed = time_test_suite(
             swallow_output=not swallow_output,
             test_command=runner,
@@ -340,7 +333,6 @@ Legend for output:
             config=config,
             progress=progress,
             mutations_by_file=mutations_by_file,
-            project_path=project_path,
         )
     except Exception as e:
         traceback.print_exc()

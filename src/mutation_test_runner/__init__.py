@@ -31,8 +31,6 @@ class MutationTestsRunner:
         config: Config,
         progress: Progress,
         mutations_by_file: MutationsByFile | None,
-        *,
-        project_path: ProjectPath | None = None,
     ) -> None:
         from src.cache.cache import update_mutant_status
 
@@ -91,8 +89,7 @@ class MutationTestsRunner:
                     results_queue=results_queue,
                     cycle_process_after=CYCLE_PROCESS_AFTER,
                     tmpdirname=storage.temp_dir.tmpdirname,
-                    project_path=project_path
-                    or storage.project_path.get_current_project_path(),
+                    project_path=storage.project_path.get_current_project_path(),
                     parallelize=config.parallelize,
                     process_id=process_id,
                 ),

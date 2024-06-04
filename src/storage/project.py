@@ -26,15 +26,11 @@ class ProjectPathStorage:
             logger.info(
                 f"Estableciendo el directorio por defecto del proyecto: {self._default_project_path}"
             )
-        current_project_path = self.get_project_path() or Path(
+        current_project_path = self._cached_project_path or Path(
             self._default_project_path
         )
         assert current_project_path.exists()
         return current_project_path
-
-    def get_project_path(self) -> ProjectPath | None:
-        """It could to be None. In that case, calling code probably should use os.getcwd()."""
-        return self._cached_project_path
 
     def reset(self) -> None:
         self._cached_project_path = None
@@ -47,7 +43,7 @@ class ProjectPathStorage:
             self._cached_project_path = None
         else:
             project_path = ProjectPath(project.resolve())
-            assert project_path.exists(), (f"{project=}", f"{project_path=}")
+            assert project_path.exists()
             self._cached_project_path = project_path
 
 
