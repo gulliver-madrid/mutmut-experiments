@@ -31,7 +31,7 @@ def create_junitxml_report(
         mutant_list, key=lambda x: x.line.sourcefile.filename
     ):
         for mutant in mutants:
-            tc = TestCase(
+            tc: Any = TestCase(
                 "Mutant #{}".format(mutant.id),
                 file=filename,
                 line=mutant.line.line_number + 1,
