@@ -7,6 +7,7 @@ from shutil import move
 from time import time
 from typing import Tuple
 
+from src.config import Config
 from src.context import Context
 from src.dir_context import DirContext
 from src.mutate import mutate_from_context
@@ -66,13 +67,7 @@ def run_mutation(
                 return SKIPPED
 
         if config.pre_mutation:
-            result = (
-                subprocess.check_output(config.pre_mutation, shell=True)
-                .decode()
-                .strip()
-            )
-            if result and not config.swallow_output:
-                callback(result)
+            _execute_dynamic_function(config.pre_mutation, config, callback)
 
         test_runner = TestRunner()
 
@@ -116,13 +111,7 @@ def run_mutation(
                 config.default_test_command
             )  # reset test command to its default in the case it was altered in a hook
             if config.post_mutation:
-                result = (
-                    subprocess.check_output(config.post_mutation, shell=True)
-                    .decode()
-                    .strip()
-                )
-                if result and not config.swallow_output:
-                    callback(result)
+                _execute_dynamic_function(config.post_mutation, config, callback)
 
 
 def mutate_file(
@@ -146,3 +135,11 @@ def mutate_file(
         with open(context.filename, "w") as f:
             f.write(mutated)
         return original, mutated
+
+
+def _execute_dynamic_function(
+    function_name: str, config: Config, callback: StrConsumer
+) -> None:
+    result = subprocess.check_output(function_name, shell=True).decode().strip()
+    if result and not config.swallow_output:
+        callback(result)
