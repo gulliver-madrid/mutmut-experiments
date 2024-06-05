@@ -366,7 +366,7 @@ def _parse_run_argument(
 
 
 def _get_tests_dirs(
-    *, paths_to_mutate: SequenceStr, test_paths: list[str]
+    *, paths_to_mutate: SequenceStr, test_paths: SequenceStr
 ) -> list[str]:
     tests_dirs: list[str] = []
 
