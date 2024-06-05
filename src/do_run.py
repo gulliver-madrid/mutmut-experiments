@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-import sys
+
 import traceback
 from pathlib import Path
 from shutil import copy
@@ -10,17 +10,6 @@ from types import NoneType
 
 import click
 from glob2 import glob  # type: ignore [import-untyped]
-
-from src.dir_context import DirContext
-from src.process import popen_streaming_output
-from src.progress import Progress
-from src.setup_logging import configure_logger
-from src.shared import FilenameStr
-
-# ensure mutmut modules are detected
-base = Path(__file__).parent.parent
-if str(base) not in sys.path:
-    sys.path.insert(0, str(base))
 
 from src import (
     __version__,
@@ -40,9 +29,14 @@ from src.cache.cache import (
 )
 from src.config import Config
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
+from src.dir_context import DirContext
 from src.mutation_test_runner import MutationTestsRunner
 from src.mutations import mutations_by_type
 from src.patch import CoveredLinesByFilename, read_patch_data
+from src.process import popen_streaming_output
+from src.progress import Progress
+from src.setup_logging import configure_logger
+from src.shared import FilenameStr
 from src.storage import DYNAMIC_CONFIG_NOT_DEFINED, storage
 from src.utils import (
     SequenceStr,
