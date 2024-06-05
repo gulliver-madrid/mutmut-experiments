@@ -198,7 +198,7 @@ def get_unified_diff_from_filename_and_mutation_id(
 
 
 def sequence_ops(
-    a: list[str], b: list[str]
+    a: SequenceStr, b: SequenceStr
 ) -> Iterator[tuple[str, str, int | None, str | None, int | None]]:
     sequence_matcher = SequenceMatcher(a=a, b=b)
 
