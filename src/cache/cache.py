@@ -383,13 +383,13 @@ def _get_mutant_result(
         # suite will mean it's still killed
         return OK_KILLED
 
-    if mutant_not_currently_tested(mutant, hash_of_tests):
+    if _mutant_not_currently_tested(mutant, hash_of_tests):
         return UNTESTED
 
     return mutant.status
 
 
-def mutant_not_currently_tested(
+def _mutant_not_currently_tested(
     mutant: Mutant, hash_of_tests: HashStr | NoTestFoundSentinel
 ) -> bool:
     return (
