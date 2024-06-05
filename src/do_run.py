@@ -234,7 +234,7 @@ Legend for output:
     )
     if runner is DEFAULT_RUNNER:
         try:
-            import pytest  # noqa
+            import pytest  # pyright: ignore [reportUnusedImport] # noqa
         except ImportError:
             runner = "python -m unittest"
 
@@ -396,12 +396,18 @@ def _get_tests_dirs(
         storage.project_path.get_current_project_path()
     ):  # parece que es irrelevante # TODO: review
         for p in test_paths:
-            tests_dirs.extend(glob(p, recursive=True))
+            tests_dirs.extend(
+                glob(p, recursive=True)  # pyright: ignore [reportUnknownArgumentType]
+            )
 
         for p in paths_to_mutate:
             for pt in test_paths:
                 assert pt is not None
-                tests_dirs.extend(glob(p + "/**/" + pt, recursive=True))
+                tests_dirs.extend(
+                    glob(
+                        p + "/**/" + pt, recursive=True
+                    )  # pyright: ignore [reportUnknownArgumentType]
+                )
 
     return tests_dirs
 
