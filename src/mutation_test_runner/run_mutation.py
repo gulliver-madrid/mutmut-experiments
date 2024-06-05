@@ -88,12 +88,7 @@ def run_mutation(
                 return BAD_TIMEOUT
 
             time_elapsed = time() - start
-            time_expected = config.test_time.test_time_base + (
-                config.test_time.baseline_time_elapsed
-                * config.test_time.test_time_multiplier
-            )
-            if context.config.flags.parallelize:
-                time_expected *= NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
+            time_expected = _get_time_expected(config)
             if not survived and time_elapsed > time_expected:
                 return OK_SUSPICIOUS
 
@@ -138,6 +133,16 @@ def mutate_file(
         with open(context.filename, "w") as f:
             f.write(mutated)
         return original, mutated
+
+
+def _get_time_expected(config: Config) -> float:
+    cfg = config.test_time
+    time_expected = cfg.test_time_base + (
+        cfg.baseline_time_elapsed * cfg.test_time_multiplier
+    )
+    if config.flags.parallelize:
+        time_expected *= NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
+    return time_expected
 
 
 def _execute_dynamic_function(
