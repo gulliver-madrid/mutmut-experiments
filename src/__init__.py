@@ -22,7 +22,7 @@ import toml
 
 from src.cache.cache import MutationsByFile
 from src.config import Config
-from src.context import Context, RelativeMutationID
+from src.context import Context
 from src.dir_context import DirContext
 from src.mutate import list_mutations
 from src.progress import Progress
@@ -131,16 +131,6 @@ def guess_paths_to_mutate() -> str:
             "section."
         )
     return result
-
-
-def get_mutations_by_file_from_cache(
-    mutation_pk: Any,
-) -> dict[str, list[RelativeMutationID]]:
-    """No code uses this function"""
-    from src.cache.cache import filename_and_mutation_id_from_pk
-
-    filename, mutation_id = filename_and_mutation_id_from_pk(int(mutation_pk))
-    return {filename: [mutation_id]}
 
 
 def add_mutations_by_file(
