@@ -25,7 +25,15 @@ from typing import (
 from pony.orm import select, RowNotFound, ERDiagramError, OperationalError
 from typing_extensions import ParamSpec
 
-from src.cache.model import (
+from src.context import Context, RelativeMutationID
+from src.mutate import mutate_from_context
+from src.setup_logging import configure_logger
+from src.shared import FilenameStr
+from src.status import OK_KILLED, UNTESTED, StatusResultStr
+from src.storage import storage
+from src.utils import SequenceStr, split_lines
+
+from .model import (
     NO_TESTS_FOUND,
     HashStr,
     Line,
@@ -38,13 +46,6 @@ from src.cache.model import (
     get_mutants,
     get_or_create,
 )
-from src.context import Context, RelativeMutationID
-from src.mutate import mutate_from_context
-from src.setup_logging import configure_logger
-from src.shared import FilenameStr
-from src.status import OK_KILLED, UNTESTED, StatusResultStr
-from src.storage import storage
-from src.utils import SequenceStr, split_lines
 
 MutationsByFile = Dict[FilenameStr, List[RelativeMutationID]]
 

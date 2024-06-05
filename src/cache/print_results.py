@@ -5,13 +5,6 @@ from io import open
 from itertools import groupby
 from typing import TYPE_CHECKING
 
-from src.cache.cache import (
-    db_session,
-    get_unified_diff,
-    init_db,
-    select_mutants_by_status,
-)
-from src.cache.model import Mutant
 from src.utils import SequenceStr, ranges
 from src.status import (
     BAD_SURVIVED,
@@ -22,6 +15,14 @@ from src.status import (
     UNTESTED,
     StatusStr,
 )
+
+from .cache import (
+    db_session,
+    get_unified_diff,
+    init_db,
+    select_mutants_by_status,
+)
+from .model import Mutant
 
 if TYPE_CHECKING:
     from pony.orm import Query
