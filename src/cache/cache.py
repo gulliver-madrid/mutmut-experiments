@@ -352,11 +352,7 @@ def get_cached_mutation_statuses(
             # suite will mean it's still killed
             result[mutation_id] = mutant.status
         else:
-            if (
-                mutant.tested_against_hash != hash_of_tests
-                or mutant.tested_against_hash == NO_TESTS_FOUND
-                or hash_of_tests == NO_TESTS_FOUND
-            ):
+            if mutant_not_currently_tested(mutant, hash_of_tests):
                 result[mutation_id] = UNTESTED
             else:
                 result[mutation_id] = mutant.status
@@ -397,14 +393,20 @@ def cached_mutation_status(
         # suite will mean it's still killed
         return OK_KILLED
 
-    if (
-        mutant.tested_against_hash != hash_of_tests
-        or mutant.tested_against_hash == NO_TESTS_FOUND
-        or hash_of_tests == NO_TESTS_FOUND
-    ):
+    if mutant_not_currently_tested(mutant, hash_of_tests):
         return UNTESTED
 
     return mutant.status
+
+
+def mutant_not_currently_tested(
+    mutant: Mutant, hash_of_tests: HashStr | NoTestFoundSentinel
+) -> bool:
+    return (
+        mutant.tested_against_hash != hash_of_tests
+        or mutant.tested_against_hash == NO_TESTS_FOUND
+        or hash_of_tests == NO_TESTS_FOUND
+    )
 
 
 @init_db
