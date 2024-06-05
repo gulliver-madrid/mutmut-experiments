@@ -28,18 +28,15 @@ from typing_extensions import ParamSpec
 from src.context import Context, RelativeMutationID
 from src.mutate import mutate_from_context
 from src.setup_logging import configure_logger
-from src.shared import FilenameStr
+from src.shared import NO_TESTS_FOUND, FilenameStr, HashStr, NoTestFoundSentinel
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
 from src.storage import storage
 from src.utils import SequenceStr, split_lines
 
 from .model import (
-    NO_TESTS_FOUND,
-    HashStr,
     Line,
     MiscData,
     Mutant,
-    NoTestFoundSentinel,
     SourceFile,
     db,
     get_mutant,

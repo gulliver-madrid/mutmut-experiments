@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from typing import Dict, Mapping, Optional, Set
 
 
-from src.cache.model import HashStr, NoTestFoundSentinel
+from src.shared import HashStr, NoTestFoundSentinel
 from src.utils import SequenceStr
 
 

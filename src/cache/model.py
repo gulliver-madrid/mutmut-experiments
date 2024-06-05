@@ -5,11 +5,8 @@ from dataclasses import field
 from typing import (
     TYPE_CHECKING,
     Any,
-    Final,
     Iterable,
-    Literal,
     Mapping,
-    NewType,
     Type,
     overload,
     TypeVar,
@@ -18,14 +15,9 @@ from typing import (
 from pony.orm import Database, Required, Set, Optional, PrimaryKey
 from typing_extensions import Self
 
-from src.shared import FilenameStr
+from src.shared import FilenameStr, HashStr
 from src.status import StatusResultStr
 
-HashStr = NewType("HashStr", str)
-
-NO_TESTS_FOUND: Final = "NO TESTS FOUND"
-
-NoTestFoundSentinel = Literal["NO TESTS FOUND"]
 
 db = Database()
 
