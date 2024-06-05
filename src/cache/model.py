@@ -94,7 +94,8 @@ else:
 
 
 def get_mutants() -> Iterable[Mutant]:
-    return Mutant  # type: ignore [return-value]
+    for mutant in Mutant:  # type: ignore [attr-defined]
+        yield mutant
 
 
 @overload
