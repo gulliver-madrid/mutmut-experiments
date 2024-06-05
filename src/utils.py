@@ -108,3 +108,7 @@ def copy_directory(src: str, dst: str) -> None:
             shutil.copytree(s, d, dirs_exist_ok=True)
         else:
             shutil.copy2(s, d)
+
+
+def dict_synonyms_to_list(dict_synonyms: str) -> list[str]:
+    return [x.strip() for x in dict_synonyms.split(",")]

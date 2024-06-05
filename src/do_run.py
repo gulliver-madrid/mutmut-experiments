@@ -47,6 +47,7 @@ from src.storage import DYNAMIC_CONFIG_NOT_DEFINED, storage
 from src.utils import (
     SequenceStr,
     copy_directory,
+    dict_synonyms_to_list,
     split_lines,
     split_paths,
     print_status,
@@ -275,7 +276,7 @@ Legend for output:
         parallelize=parallelize,
     )
 
-    parse_run_argument(
+    _parse_run_argument(
         argument,
         config,
         dict_synonyms_as_sequence,
@@ -319,7 +320,7 @@ Legend for output:
         mutation_tests_runner.close_active_queues()
 
 
-def parse_run_argument(
+def _parse_run_argument(
     argument: str | None,
     config: Config,
     dict_synonyms: SequenceStr,
@@ -473,7 +474,3 @@ def _get_mutation_types_to_apply(
             f"The following are not valid mutation types: {', '.join(sorted(invalid_types))}. Valid mutation types are: {', '.join(mutations_by_type.keys())}"
         )
     return mutation_types_to_apply
-
-
-def dict_synonyms_to_list(dict_synonyms: str) -> list[str]:
-    return [x.strip() for x in dict_synonyms.split(",")]
