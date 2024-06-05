@@ -7,7 +7,6 @@ from difflib import SequenceMatcher, unified_diff
 from functools import wraps
 from io import open
 from itertools import zip_longest
-from pathlib import Path
 from types import NoneType
 from typing import (
     TYPE_CHECKING,
@@ -69,21 +68,11 @@ else:
     db_session_ctx_manager = db_session
 
 
-def get_cache_path() -> Path:
-    cache_path = _get_cache_path()
-    # print(f"{cache_path=}")
-    return cache_path
-
-
-def _get_cache_path() -> Path:
-    return storage.project_path.get_current_project_path() / ".mutmut-cache"
-
-
 def init_db(f: Callable[P, T]) -> Callable[P, T]:
     @wraps(f)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         if db.provider is None:
-            cache_path = get_cache_path()
+            cache_path = storage.get_cache_path()
             logger.info(
                 f"El directorio donde se guarda la .mutmut-cache es {storage.project_path.get_current_project_path()}"
             )

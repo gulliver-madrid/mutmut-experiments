@@ -21,7 +21,6 @@ from src import (
     config_from_file,
 )
 from src.cache.cache import (
-    get_cache_path,
     filename_and_mutation_id_from_pk,
     update_line_numbers,
     get_unified_diff,
@@ -271,7 +270,7 @@ def results(project: str | None) -> NoReturn:
     """
     assert isinstance(project, (str, NoneType))
     storage.project_path.set_project_path(project)
-    if not get_cache_path().exists():
+    if not storage.get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
     print_result_cache()
@@ -292,7 +291,7 @@ def result_ids(status: str, project: str | None) -> NoReturn:
             f"(one of : {set(MUTANT_STATUSES.keys())}) but was {status}"
         )
     storage.project_path.set_project_path(project)
-    if not get_cache_path().exists():
+    if not storage.get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
     status = cast(StatusStr, status)
@@ -313,7 +312,7 @@ def apply(
     Apply a mutation on disk.
     """
     storage.project_path.set_project_path(project)
-    if not get_cache_path().exists():
+    if not storage.get_cache_path().exists():
         print("There is no mutants to apply yet. Please run `mutmut run` first.\n")
         sys.exit(1)
     do_apply(mutation_id, dict_synonyms, backup)
@@ -331,7 +330,7 @@ def show(id_or_file: str | None, dict_synonyms: str, project: str | None) -> NoR
     """
     assert isinstance(id_or_file, (str, NoneType)), id_or_file  # guess
     storage.project_path.set_project_path(project)
-    if not get_cache_path().exists():
+    if not storage.get_cache_path().exists():
         print("There is no results to show yet. Please run `mutmut run` first.\n")
         sys.exit(1)
 
@@ -375,7 +374,7 @@ def junitxml(
     """
     assert isinstance(dict_synonyms, str)
     storage.project_path.set_project_path(project)
-    if not get_cache_path().exists():
+    if not storage.get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
@@ -398,7 +397,7 @@ def html(dict_synonyms: str, directory: str, project: str | None) -> NoReturn:
     Generate a HTML report of surviving mutants.
     """
     storage.project_path.set_project_path(project)
-    if not get_cache_path().exists():
+    if not storage.get_cache_path().exists():
         print("There is no results yet. Please run `mutmut run` first.\n")
         sys.exit(1)
     dict_synonyms_as_list = dict_synonyms_to_list(dict_synonyms)
