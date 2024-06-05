@@ -329,7 +329,7 @@ def parse_run_argument(
     tests_dirs: SequenceStr,
 ) -> None:
     assert isinstance(mutations_by_file, dict)
-    assert isinstance(tests_dirs, list)
+    assert not isinstance(tests_dirs, str)
     # argument is the mutation id or a path to a file to mutate
     if argument is None:
         for path in paths_to_mutate:
