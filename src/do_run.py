@@ -258,12 +258,12 @@ Legend for output:
         hash_of_tests=current_hash_of_tests,
         test_time_multiplier=test_time_multiplier,
         test_time_base=test_time_base,
+        paths_to_mutate=paths_to_mutate,
+        mutation_types_to_apply=mutation_types_to_apply,
         dynamic=DynamicCallbacks(
             pre_mutation=pre_mutation,
             post_mutation=post_mutation,
         ),
-        paths_to_mutate=paths_to_mutate,
-        mutation_types_to_apply=mutation_types_to_apply,
         flags=ConfigFlags(
             swallow_output=not swallow_output,
             using_testmon=using_testmon,

@@ -34,10 +34,10 @@ class Config:
     total: int
     tests_dirs: SequenceStr
     hash_of_tests: HashStr | NoTestFoundSentinel
-    dynamic: DynamicCallbacks
     coverage_data: Mapping[str, Mapping[int, SequenceStr]] | None
     paths_to_mutate: SequenceStr
     mutation_types_to_apply: Set[str]
+    dynamic: DynamicCallbacks
     flags: ConfigFlags
 
     def __post_init__(self) -> None:
