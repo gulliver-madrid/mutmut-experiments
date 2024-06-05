@@ -120,7 +120,7 @@ def hash_of(filename: FilenameStr) -> HashStr:
         return HashStr(m.hexdigest())
 
 
-def hash_of_tests(tests_dirs: SequenceStr) -> HashStr | NoTestFoundSentinel:
+def get_hash_of_tests(tests_dirs: SequenceStr) -> HashStr | NoTestFoundSentinel:
     m = hashlib.sha256()
     found_something = False
     for tests_dir in tests_dirs:

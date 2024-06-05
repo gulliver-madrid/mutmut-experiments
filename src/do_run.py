@@ -20,7 +20,7 @@ from src import (
 from src.cache.cache import (
     MutationsByFile,
     cached_hash_of_tests,
-    hash_of_tests,
+    get_hash_of_tests,
     filename_and_mutation_id_from_pk,
     cached_test_time,
     set_cached_test_time,
@@ -162,7 +162,7 @@ def do_run(
         test_paths=test_paths,
     )
 
-    current_hash_of_tests = hash_of_tests(tests_dirs)
+    current_hash_of_tests = get_hash_of_tests(tests_dirs)
 
     os.environ["PYTHONDONTWRITEBYTECODE"] = "1"  # stop python from creating .pyc files
 
