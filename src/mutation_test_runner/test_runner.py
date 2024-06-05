@@ -22,7 +22,7 @@ class TestRunner:
         """
         :return: :obj:`True` if the tests pass, otherwise :obj:`False`
         """
-        if config.using_testmon:
+        if config.flags.using_testmon:
             copy(".testmondata-initial", ".testmondata")
 
         use_special_case = True

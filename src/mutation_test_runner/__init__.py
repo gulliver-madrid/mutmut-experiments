@@ -38,7 +38,7 @@ class MutationTestsRunner:
 
         process_id: int | None = None
 
-        if config.parallelize:
+        if config.flags.parallelize:
             assert storage.temp_dir.tmpdirname
             mutation_project_path = Path(storage.temp_dir.tmpdirname)
             copied = False
@@ -92,7 +92,7 @@ class MutationTestsRunner:
                     cycle_process_after=CYCLE_PROCESS_AFTER,
                     tmpdirname=storage.temp_dir.tmpdirname,
                     project_path=storage.project_path.get_current_project_path(),
-                    parallelize=config.parallelize,
+                    parallelize=config.flags.parallelize,
                     process_id=process_id,
                 ),
             )
@@ -100,7 +100,9 @@ class MutationTestsRunner:
             return t
 
         number_of_processes: Final = (
-            NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE if config.parallelize else 1
+            NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
+            if config.flags.parallelize
+            else 1
         )
         check_mutant_processes = {
             i: create_worker(ProcessId(i)) for i in range(number_of_processes)
@@ -123,9 +125,9 @@ class MutationTestsRunner:
                 check_mutant_processes[process_id] = create_worker()
 
             elif command == "progress":
-                if not config.swallow_output:
+                if not config.flags.swallow_output:
                     print(status, end="", flush=True)
-                elif not config.no_progress:
+                elif not config.flags.no_progress:
                     progress.print()
 
             else:

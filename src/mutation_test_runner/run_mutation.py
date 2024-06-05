@@ -79,7 +79,7 @@ def run_mutation(
                 if (
                     survived
                     and config.test_command != config.default_test_command
-                    and config.rerun_all
+                    and config.flags.rerun_all
                 ):
                     # rerun the whole test suite to be sure the mutant can not be killed by other tests
                     config.test_command = config.default_test_command
@@ -91,7 +91,7 @@ def run_mutation(
             time_expected = config.test_time_base + (
                 config.baseline_time_elapsed * config.test_time_multiplier
             )
-            if context.config.parallelize:
+            if context.config.flags.parallelize:
                 time_expected *= NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
             if not survived and time_elapsed > time_expected:
                 return OK_SUSPICIOUS
@@ -141,5 +141,5 @@ def _execute_dynamic_function(
     function_name: str, config: Config, callback: StrConsumer
 ) -> None:
     result = subprocess.check_output(function_name, shell=True).decode().strip()
-    if result and not config.swallow_output:
+    if result and not config.flags.swallow_output:
         callback(result)

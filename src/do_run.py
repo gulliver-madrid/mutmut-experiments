@@ -27,7 +27,7 @@ from src.cache.cache import (
     set_cached_test_time,
     update_line_numbers,
 )
-from src.config import Config
+from src.config import Config, ConfigFlags
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.dir_context import DirContext
 from src.mutation_test_runner import MutationTestsRunner
@@ -249,13 +249,11 @@ Legend for output:
 
     config = Config(
         total=0,  # we'll fill this in later!
-        swallow_output=not swallow_output,
         test_command=runner,
         covered_lines_by_filename=covered_lines_by_filename,
         coverage_data=coverage_data,
         baseline_time_elapsed=baseline_time_elapsed,
         dict_synonyms=dict_synonyms_as_sequence,
-        using_testmon=using_testmon,
         tests_dirs=tests_dirs,
         hash_of_tests=current_hash_of_tests,
         test_time_multiplier=test_time_multiplier,
@@ -264,10 +262,14 @@ Legend for output:
         post_mutation=post_mutation,
         paths_to_mutate=paths_to_mutate,
         mutation_types_to_apply=mutation_types_to_apply,
-        no_progress=no_progress,
-        ci=ci,
-        rerun_all=bool(rerun_all),
-        parallelize=parallelize,
+        flags=ConfigFlags(
+            swallow_output=not swallow_output,
+            using_testmon=using_testmon,
+            no_progress=no_progress,
+            ci=ci,
+            rerun_all=bool(rerun_all),
+            parallelize=parallelize,
+        ),
     )
 
     _parse_run_argument(
