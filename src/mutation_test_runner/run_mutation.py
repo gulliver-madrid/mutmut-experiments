@@ -76,11 +76,7 @@ def run_mutation(
             start = time()
             try:
                 survived = test_runner.tests_pass(config=config, callback=callback)
-                if (
-                    survived
-                    and config.test_command != config.default_test_command
-                    and config.flags.rerun_all
-                ):
+                if _should_rerun(survived, config):
                     # rerun the whole test suite to be sure the mutant can not be killed by other tests
                     config.test_command = config.default_test_command
                     survived = test_runner.tests_pass(config=config, callback=callback)
@@ -133,6 +129,14 @@ def mutate_file(
         with open(context.filename, "w") as f:
             f.write(mutated)
         return original, mutated
+
+
+def _should_rerun(survived: bool, config: Config) -> bool:
+    return (
+        survived
+        and config.test_command != config.default_test_command
+        and config.flags.rerun_all
+    )
 
 
 def _get_time_expected(config: Config) -> float:
