@@ -128,33 +128,10 @@ def do_run(
     if use_coverage and use_patch_file:
         raise click.BadArgumentUsage("You can't combine --use-coverage and --use-patch")
 
-    if disable_mutation_types and enable_mutation_types:
-        raise click.BadArgumentUsage(
-            "You can't combine --disable-mutation-types and --enable-mutation-types"
-        )
-    if enable_mutation_types:
-        mutation_types_to_apply = set(
-            mtype.strip() for mtype in enable_mutation_types.split(",")
-        )
-        invalid_types = [
-            mtype for mtype in mutation_types_to_apply if mtype not in mutations_by_type
-        ]
-    elif disable_mutation_types:
-        mutation_types_to_apply = set(mutations_by_type.keys()) - set(
-            mtype.strip() for mtype in disable_mutation_types.split(",")
-        )
-        invalid_types = [
-            mtype
-            for mtype in disable_mutation_types.split(",")
-            if mtype not in mutations_by_type
-        ]
-    else:
-        mutation_types_to_apply = set(mutations_by_type.keys())
-        invalid_types = None
-    if invalid_types:
-        raise click.BadArgumentUsage(
-            f"The following are not valid mutation types: {', '.join(sorted(invalid_types))}. Valid mutation types are: {', '.join(mutations_by_type.keys())}"
-        )
+    mutation_types_to_apply = _get_mutation_types_to_apply(
+        enable_mutation_types=enable_mutation_types,
+        disable_mutation_types=disable_mutation_types,
+    )
 
     dict_synonyms_as_sequence: SequenceStr = dict_synonyms_to_list(dict_synonyms)
 
@@ -465,6 +442,40 @@ def time_test_suite(
     set_cached_test_time(baseline_time_elapsed, current_hash_of_tests)
 
     return baseline_time_elapsed
+
+
+def _get_mutation_types_to_apply(
+    *, enable_mutation_types: str | None, disable_mutation_types: str | None
+) -> set[str]:
+
+    if disable_mutation_types and enable_mutation_types:
+        raise click.BadArgumentUsage(
+            "You can't combine --disable-mutation-types and --enable-mutation-types"
+        )
+    if enable_mutation_types:
+        mutation_types_to_apply = set(
+            mtype.strip() for mtype in enable_mutation_types.split(",")
+        )
+        invalid_types = [
+            mtype for mtype in mutation_types_to_apply if mtype not in mutations_by_type
+        ]
+    elif disable_mutation_types:
+        mutation_types_to_apply = set(mutations_by_type.keys()) - set(
+            mtype.strip() for mtype in disable_mutation_types.split(",")
+        )
+        invalid_types = [
+            mtype
+            for mtype in disable_mutation_types.split(",")
+            if mtype not in mutations_by_type
+        ]
+    else:
+        mutation_types_to_apply = set(mutations_by_type.keys())
+        invalid_types = None
+    if invalid_types:
+        raise click.BadArgumentUsage(
+            f"The following are not valid mutation types: {', '.join(sorted(invalid_types))}. Valid mutation types are: {', '.join(mutations_by_type.keys())}"
+        )
+    return mutation_types_to_apply
 
 
 def dict_synonyms_to_list(dict_synonyms: str) -> list[str]:
