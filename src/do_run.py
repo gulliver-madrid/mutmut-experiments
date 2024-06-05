@@ -234,15 +234,7 @@ Legend for output:
 
     mutations_by_file: MutationsByFile = {}
 
-    paths_to_exclude = paths_to_exclude or ""
-    paths_to_exclude_as_list: SequenceStr
-    if paths_to_exclude:
-        paths_to_exclude_as_list = [
-            path.strip() for path in split_lines(paths_to_exclude.replace(",", "\n"))
-        ]
-        paths_to_exclude_as_list = [x for x in paths_to_exclude_as_list if x]
-    else:
-        paths_to_exclude_as_list = []
+    paths_to_exclude_as_list = _get_paths_to_exclude_as_list(paths_to_exclude)
 
     ci = bool(ci)
 
@@ -317,6 +309,18 @@ Legend for output:
         print()  # make sure we end the output with a newline
         # Close all active multiprocessing queues to avoid hanging up the main process
         mutation_tests_runner.close_active_queues()
+
+
+def _get_paths_to_exclude_as_list(paths_to_exclude: str) -> list[str]:
+    paths_to_exclude_as_list: SequenceStr
+    if paths_to_exclude:
+        paths_to_exclude_as_list = [
+            path.strip() for path in split_lines(paths_to_exclude.replace(",", "\n"))
+        ]
+        paths_to_exclude_as_list = [x for x in paths_to_exclude_as_list if x]
+    else:
+        paths_to_exclude_as_list = []
+    return paths_to_exclude_as_list
 
 
 def _parse_run_argument(
