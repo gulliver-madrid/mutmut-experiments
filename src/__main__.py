@@ -26,9 +26,12 @@ from src.cache.cache import (
     update_line_numbers,
     get_unified_diff,
 )
-from src.reporters.html import create_html_report
-from src.reporters.junitxml import print_result_cache_junitxml
-from src.reporters.print_results import print_result_cache, print_result_ids_cache
+from src.reporters import (
+    create_html_report,
+    print_result_cache,
+    print_result_cache_junitxml,
+    print_result_ids_cache,
+)
 from src.context import Context
 from src.do_run import DEFAULT_RUNNER, dict_synonyms_to_list, do_run
 from src.mutation_test_runner.run_mutation import mutate_file
