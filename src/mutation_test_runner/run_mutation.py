@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
 from pathlib import Path
 import subprocess
 from io import open
-from shutil import move
 from time import time
 from typing import Tuple
 
@@ -97,7 +97,7 @@ def run_mutation(
 
         finally:
             assert isinstance(context.filename, str)
-            move(context.filename + ".bak", context.filename)
+            shutil.move(context.filename + ".bak", context.filename)
 
             config.test_command = (
                 config.default_test_command

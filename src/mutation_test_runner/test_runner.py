@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 import shlex
+import shutil
 import sys
 from io import TextIOBase
-from shutil import copy
 from typing import (
     Callable,
     Final,
@@ -23,7 +23,7 @@ class TestRunner:
         :return: :obj:`True` if the tests pass, otherwise :obj:`False`
         """
         if config.flags.using_testmon:
-            copy(".testmondata-initial", ".testmondata")
+            shutil.copy(".testmondata-initial", ".testmondata")
 
         use_special_case = True
 

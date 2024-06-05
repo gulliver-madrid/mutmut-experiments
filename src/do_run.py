@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-
+import shutil
 import traceback
 from pathlib import Path
-from shutil import copy
 from time import time
 from types import NoneType
 
@@ -220,7 +219,7 @@ Legend for output:
         )
 
     if using_testmon:
-        copy(".testmondata", ".testmondata-initial")
+        shutil.copy(".testmondata", ".testmondata-initial")
 
     # if we're running in a mode with externally whitelisted lines
     covered_lines_by_filename: CoveredLinesByFilename | None = None
