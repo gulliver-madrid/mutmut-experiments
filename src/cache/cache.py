@@ -351,11 +351,10 @@ def get_cached_mutation_statuses(
             # We assume that if a mutant was killed, a change to the test
             # suite will mean it's still killed
             result[mutation_id] = mutant.status
+        elif mutant_not_currently_tested(mutant, hash_of_tests):
+            result[mutation_id] = UNTESTED
         else:
-            if mutant_not_currently_tested(mutant, hash_of_tests):
-                result[mutation_id] = UNTESTED
-            else:
-                result[mutation_id] = mutant.status
+            result[mutation_id] = mutant.status
 
     return result
 
