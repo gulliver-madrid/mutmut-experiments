@@ -346,15 +346,7 @@ def get_cached_mutation_statuses(
                 defaults=dict(status=UNTESTED),
             )
 
-        result[mutation_id] = mutant.status
-        if mutant.status == OK_KILLED:
-            # We assume that if a mutant was killed, a change to the test
-            # suite will mean it's still killed
-            result[mutation_id] = mutant.status
-        elif mutant_not_currently_tested(mutant, hash_of_tests):
-            result[mutation_id] = UNTESTED
-        else:
-            result[mutation_id] = mutant.status
+        result[mutation_id] = _get_mutant_result(mutant, hash_of_tests)
 
     return result
 
@@ -386,7 +378,12 @@ def cached_mutation_status(
         mutant = get_or_create(
             Mutant, line=line, index=mutation_id.index, defaults=dict(status=UNTESTED)
         )
+    return _get_mutant_result(mutant, hash_of_tests)
 
+
+def _get_mutant_result(
+    mutant: Mutant, hash_of_tests: HashStr | NoTestFoundSentinel
+) -> StatusResultStr:
     if mutant.status == OK_KILLED:
         # We assume that if a mutant was killed, a change to the test
         # suite will mean it's still killed
