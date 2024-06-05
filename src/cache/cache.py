@@ -272,11 +272,7 @@ def register_mutants(mutations_by_file: MutationsByFile) -> None:
             continue
 
         for mutation_id in mutation_ids:
-            line = Line.get(
-                sourcefile=sourcefile,
-                line=mutation_id.line,
-                line_number=mutation_id.line_number,
-            )
+            line = _get_line(sourcefile, mutation_id)
             if line is None:
                 raise ValueError(
                     "Obtained null line for mutation_id: {}".format(mutation_id)
@@ -300,11 +296,7 @@ def update_mutant_status(
     tests_hash: HashStr | NoTestFoundSentinel,
 ) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
-    line = Line.get(
-        sourcefile=sourcefile,
-        line=mutation_id.line,
-        line_number=mutation_id.line_number,
-    )
+    line = _get_line(sourcefile, mutation_id)
     assert line
     mutant = get_mutant(line=line, index=mutation_id.index)
     assert mutant
@@ -328,11 +320,7 @@ def get_cached_mutation_statuses(
 
     for mutation_id in mutations:
         if mutation_id.line not in line_obj_by_line:
-            line_from_db = Line.get(
-                sourcefile=sourcefile,
-                line=mutation_id.line,
-                line_number=mutation_id.line_number,
-            )
+            line_from_db = _get_line(sourcefile, mutation_id)
             assert line_from_db is not None
             line_obj_by_line[mutation_id.line] = line_from_db
         line = line_obj_by_line[mutation_id.line]
@@ -367,11 +355,7 @@ def cached_mutation_status(
         print(f"{os.getcwd()=}")
 
     assert sourcefile
-    line = Line.get(
-        sourcefile=sourcefile,
-        line=mutation_id.line,
-        line_number=mutation_id.line_number,
-    )
+    line = _get_line(sourcefile, mutation_id)
     assert line
     mutant = get_mutant(line=line, index=mutation_id.index)
     if mutant is None:
@@ -379,6 +363,16 @@ def cached_mutation_status(
             Mutant, line=line, index=mutation_id.index, defaults=dict(status=UNTESTED)
         )
     return _get_mutant_result(mutant, hash_of_tests)
+
+
+def _get_line(
+    sourcefile: SourceFile | None, mutation_id: RelativeMutationID
+) -> Line | None:
+    return Line.get(
+        sourcefile=sourcefile,
+        line=mutation_id.line,
+        line_number=mutation_id.line_number,
+    )
 
 
 def _get_mutant_result(
