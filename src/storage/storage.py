@@ -16,6 +16,9 @@ class Storage:
         # print(f"{cache_path=}")
         return cache_path
 
+    def get_coverage_data_path(self) -> Path:
+        return self.project_path.get_current_project_path() / ".coverage"
+
     def _get_cache_path(self) -> Path:
         return self.project_path.get_current_project_path() / ".mutmut-cache"
 

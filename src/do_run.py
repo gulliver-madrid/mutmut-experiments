@@ -135,10 +135,7 @@ def do_run(
 
     dict_synonyms_as_sequence: SequenceStr = dict_synonyms_to_list(dict_synonyms)
 
-    if (
-        use_coverage
-        and not (storage.project_path.get_current_project_path() / ".coverage").exists()
-    ):
+    if use_coverage and not (storage.get_coverage_data_path()).exists():
         raise FileNotFoundError(
             "No .coverage file found. You must generate a coverage file to use this feature."
         )
