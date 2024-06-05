@@ -17,6 +17,12 @@ class ConfigFlags:
 
 
 @dataclass
+class DynamicCallbacks:
+    post_mutation: str | None
+    pre_mutation: str | None
+
+
+@dataclass
 class Config:
     test_command: str
     _default_test_command: str = field(init=False)
@@ -28,8 +34,7 @@ class Config:
     total: int
     tests_dirs: SequenceStr
     hash_of_tests: HashStr | NoTestFoundSentinel
-    post_mutation: str | None
-    pre_mutation: str | None
+    dynamic: DynamicCallbacks
     coverage_data: Mapping[str, Mapping[int, SequenceStr]] | None
     paths_to_mutate: SequenceStr
     mutation_types_to_apply: Set[str]

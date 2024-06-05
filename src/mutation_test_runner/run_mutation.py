@@ -66,8 +66,8 @@ def run_mutation(
             if context.skip:
                 return SKIPPED
 
-        if config.pre_mutation:
-            _execute_dynamic_function(config.pre_mutation, config, callback)
+        if config.dynamic.pre_mutation:
+            _execute_dynamic_function(config.dynamic.pre_mutation, config, callback)
 
         test_runner = TestRunner()
 
@@ -110,8 +110,10 @@ def run_mutation(
             config.test_command = (
                 config.default_test_command
             )  # reset test command to its default in the case it was altered in a hook
-            if config.post_mutation:
-                _execute_dynamic_function(config.post_mutation, config, callback)
+            if config.dynamic.post_mutation:
+                _execute_dynamic_function(
+                    config.dynamic.post_mutation, config, callback
+                )
 
 
 def mutate_file(
