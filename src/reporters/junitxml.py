@@ -7,12 +7,11 @@ from typing import Any
 from junit_xml import TestSuite, TestCase, to_xml_report_string  # type: ignore [import-untyped]
 from pony.orm import select
 
+from src.cache.cache import db_session, get_unified_diff, init_db
+from src.cache.model import get_mutants
 from src.shared import PolicyStr
 from src.status import BAD_SURVIVED, BAD_TIMEOUT, OK_SUSPICIOUS, UNTESTED
 from src.utils import SequenceStr
-
-from .cache import db_session, get_unified_diff, init_db
-from .model import get_mutants
 
 
 def print_result_cache_junitxml(

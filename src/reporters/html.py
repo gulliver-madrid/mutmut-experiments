@@ -8,6 +8,12 @@ from os.path import join, dirname
 
 from pony.orm import select
 
+from src.cache.cache import (
+    get_unified_diff_from_filename_and_mutation_id,
+    db_session,
+    init_db,
+)
+from src.cache.model import Mutant, get_mutants
 from src.context import RelativeMutationID
 from src.dir_context import DirContext
 from src.status import (
@@ -20,13 +26,6 @@ from src.status import (
 )
 from src.storage import storage
 from src.utils import SequenceStr
-
-from .cache import (
-    get_unified_diff_from_filename_and_mutation_id,
-    db_session,
-    init_db,
-)
-from .model import Mutant, get_mutants
 
 
 @init_db
