@@ -27,7 +27,7 @@ from src.cache.cache import (
     set_cached_test_time,
     update_line_numbers,
 )
-from src.config import Config, ConfigFlags, DynamicCallbacks
+from src.config import Config, ConfigFlags, DynamicCallbacks, TestTimeConfig
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.dir_context import DirContext
 from src.mutation_test_runner import MutationTestsRunner
@@ -252,14 +252,16 @@ Legend for output:
         test_command=runner,
         covered_lines_by_filename=covered_lines_by_filename,
         coverage_data=coverage_data,
-        baseline_time_elapsed=baseline_time_elapsed,
         dict_synonyms=dict_synonyms_as_sequence,
         tests_dirs=tests_dirs,
         hash_of_tests=current_hash_of_tests,
-        test_time_multiplier=test_time_multiplier,
-        test_time_base=test_time_base,
         paths_to_mutate=paths_to_mutate,
         mutation_types_to_apply=mutation_types_to_apply,
+        test_time=TestTimeConfig(
+            baseline_time_elapsed=baseline_time_elapsed,
+            test_time_multiplier=test_time_multiplier,
+            test_time_base=test_time_base,
+        ),
         dynamic=DynamicCallbacks(
             pre_mutation=pre_mutation,
             post_mutation=post_mutation,

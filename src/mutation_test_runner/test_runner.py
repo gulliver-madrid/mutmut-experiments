@@ -32,7 +32,9 @@ class TestRunner:
             return self._hammett_tests_pass(config, callback)
 
         returncode = popen_streaming_output(
-            config.test_command, callback, timeout=config.baseline_time_elapsed * 10
+            config.test_command,
+            callback,
+            timeout=config.test_time.baseline_time_elapsed * 10,
         )
         return returncode != 1
 
@@ -58,7 +60,7 @@ class TestRunner:
             timed_out = True
 
         assert current_thread() is main_thread()
-        timer = Timer(config.baseline_time_elapsed * 10, timeout)
+        timer = Timer(config.test_time.baseline_time_elapsed * 10, timeout)
         timer.daemon = True
         timer.start()
 

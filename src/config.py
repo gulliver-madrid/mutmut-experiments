@@ -23,13 +23,17 @@ class DynamicCallbacks:
 
 
 @dataclass
+class TestTimeConfig:
+    baseline_time_elapsed: float
+    test_time_multiplier: float
+    test_time_base: float
+
+
+@dataclass
 class Config:
     test_command: str
     _default_test_command: str = field(init=False)
     covered_lines_by_filename: Optional[Dict[str, list[int]]]
-    baseline_time_elapsed: float
-    test_time_multiplier: float
-    test_time_base: float
     dict_synonyms: SequenceStr
     total: int
     tests_dirs: SequenceStr
@@ -37,6 +41,7 @@ class Config:
     coverage_data: Mapping[str, Mapping[int, SequenceStr]] | None
     paths_to_mutate: SequenceStr
     mutation_types_to_apply: Set[str]
+    test_time: TestTimeConfig
     dynamic: DynamicCallbacks
     flags: ConfigFlags
 

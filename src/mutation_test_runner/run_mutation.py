@@ -88,8 +88,9 @@ def run_mutation(
                 return BAD_TIMEOUT
 
             time_elapsed = time() - start
-            time_expected = config.test_time_base + (
-                config.baseline_time_elapsed * config.test_time_multiplier
+            time_expected = config.test_time.test_time_base + (
+                config.test_time.baseline_time_elapsed
+                * config.test_time.test_time_multiplier
             )
             if context.config.flags.parallelize:
                 time_expected *= NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
