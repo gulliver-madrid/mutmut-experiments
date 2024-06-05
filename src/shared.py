@@ -10,3 +10,4 @@ HashStr = NewType("HashStr", str)
 NO_TESTS_FOUND: Final = "NO TESTS FOUND"
 
 NoTestFoundSentinel = Literal["NO TESTS FOUND"]
+HashResult = HashStr | NoTestFoundSentinel

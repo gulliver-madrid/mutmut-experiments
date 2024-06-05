@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Dict, Mapping, Optional, Set
 
-
-from src.shared import HashStr, NoTestFoundSentinel
+from src.shared import HashResult
 from src.utils import SequenceStr
 
 
@@ -37,7 +36,7 @@ class Config:
     dict_synonyms: SequenceStr
     total: int
     tests_dirs: SequenceStr
-    hash_of_tests: HashStr | NoTestFoundSentinel
+    hash_of_tests: HashResult
     coverage_data: Mapping[str, Mapping[int, SequenceStr]] | None
     paths_to_mutate: SequenceStr
     mutation_types_to_apply: Set[str]

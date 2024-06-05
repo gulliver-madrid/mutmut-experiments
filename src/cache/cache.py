@@ -27,7 +27,7 @@ from typing_extensions import ParamSpec
 from src.context import Context, RelativeMutationID
 from src.mutate import mutate_from_context
 from src.setup_logging import configure_logger
-from src.shared import NO_TESTS_FOUND, FilenameStr, HashStr, NoTestFoundSentinel
+from src.shared import NO_TESTS_FOUND, FilenameStr, HashStr, HashResult
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
 from src.storage import storage
 from src.utils import SequenceStr, split_lines
@@ -120,7 +120,7 @@ def hash_of(filename: FilenameStr) -> HashStr:
         return HashStr(m.hexdigest())
 
 
-def get_hash_of_tests(tests_dirs: SequenceStr) -> HashStr | NoTestFoundSentinel:
+def get_hash_of_tests(tests_dirs: SequenceStr) -> HashResult:
     m = hashlib.sha256()
     found_something = False
     for tests_dir in tests_dirs:
@@ -293,7 +293,7 @@ def update_mutant_status(
     file_to_mutate: FilenameStr | None,
     mutation_id: RelativeMutationID,
     status: StatusResultStr,
-    tests_hash: HashStr | NoTestFoundSentinel,
+    tests_hash: HashResult,
 ) -> None:
     sourcefile = SourceFile.get(filename=file_to_mutate)
     line = _get_line(sourcefile, mutation_id)
@@ -309,7 +309,7 @@ def update_mutant_status(
 def get_cached_mutation_statuses(
     filename: FilenameStr,
     mutations: Sequence[RelativeMutationID],
-    hash_of_tests: HashStr | NoTestFoundSentinel,
+    hash_of_tests: HashResult,
 ) -> dict[RelativeMutationID, StatusResultStr]:
     sourcefile = SourceFile.get(filename=filename)
     assert sourcefile
@@ -344,7 +344,7 @@ def get_cached_mutation_statuses(
 def cached_mutation_status(
     filename: FilenameStr,
     mutation_id: RelativeMutationID,
-    hash_of_tests: HashStr | NoTestFoundSentinel,
+    hash_of_tests: HashResult,
 ) -> StatusResultStr:
     assert isinstance(filename, str)  # guess
     assert isinstance(hash_of_tests, str)  # guess
@@ -375,9 +375,7 @@ def _get_line(
     )
 
 
-def _get_mutant_result(
-    mutant: Mutant, hash_of_tests: HashStr | NoTestFoundSentinel
-) -> StatusResultStr:
+def _get_mutant_result(mutant: Mutant, hash_of_tests: HashResult) -> StatusResultStr:
     if mutant.status == OK_KILLED:
         # We assume that if a mutant was killed, a change to the test
         # suite will mean it's still killed
@@ -389,9 +387,7 @@ def _get_mutant_result(
     return mutant.status
 
 
-def _mutant_not_currently_tested(
-    mutant: Mutant, hash_of_tests: HashStr | NoTestFoundSentinel
-) -> bool:
+def _mutant_not_currently_tested(mutant: Mutant, hash_of_tests: HashResult) -> bool:
     return (
         mutant.tested_against_hash != hash_of_tests
         or mutant.tested_against_hash == NO_TESTS_FOUND
