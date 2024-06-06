@@ -13,7 +13,7 @@ from src.mutate import mutate_from_context
 from src.mutation_test_runner import MutationTestsRunner, check_mutants  # type: ignore [attr-defined]
 from src.mutations import partition_node_list, name_mutation
 from src.patch import read_patch_data
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.status import OK_KILLED
 
 logger = configure_logger(__name__)

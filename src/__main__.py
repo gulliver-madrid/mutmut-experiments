@@ -34,7 +34,7 @@ from src.reporters import (
 from src.context import Context
 from src.do_run import DEFAULT_RUNNER, do_run
 from src.mutation_test_runner.run_mutation import mutate_file
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.shared import POLICIES, PolicyStr
 from src.status import MUTANT_STATUSES, StatusStr
 from src.utils import SequenceStr, dict_synonyms_to_list

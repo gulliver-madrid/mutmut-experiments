@@ -4,7 +4,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 
 logger = configure_logger(__name__)
 

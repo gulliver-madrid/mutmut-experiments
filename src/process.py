@@ -8,7 +8,7 @@ import sys
 from threading import Timer
 from typing import Any, Callable, Optional
 
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 
 logger = configure_logger(__name__)
 

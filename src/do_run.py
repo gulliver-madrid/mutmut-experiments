@@ -34,7 +34,7 @@ from src.mutations import mutations_by_type
 from src.patch import CoveredLinesByFilename, read_patch_data
 from src.process import popen_streaming_output
 from src.progress import Progress
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.shared import FilenameStr
 from src.storage import DYNAMIC_CONFIG_NOT_DEFINED, storage
 from src.utils import (

@@ -9,7 +9,7 @@ from typing import Final, Optional, Sequence
 from parso.tree import NodeOrLeaf
 
 from src.config import Config
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.shared import FilenameStr
 from src.storage import storage
 from src.utils import SequenceStr, split_lines

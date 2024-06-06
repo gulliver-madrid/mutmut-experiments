@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Any, TypedDict
 
 from src.context import Context
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.storage import storage
 
 from .run_mutation import run_mutation

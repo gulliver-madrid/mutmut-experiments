@@ -16,7 +16,7 @@ from src.mutations import (
 )
 from src.mutations.mutations import LeafMutation, NodeWithChildrenMutation
 from src.parse import parse_source
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.shared import FilenameStr
 from src.storage import storage
 

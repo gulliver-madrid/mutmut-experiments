@@ -26,7 +26,7 @@ from src.context import Context
 from src.dir_context import DirContext
 from src.mutate import list_mutations
 from src.progress import Progress
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.shared import FilenameStr
 from src.storage import storage
 from src.utils import SequenceStr

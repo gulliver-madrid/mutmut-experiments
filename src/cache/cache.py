@@ -26,7 +26,7 @@ from typing_extensions import ParamSpec
 
 from src.context import Context, RelativeMutationID
 from src.mutate import mutate_from_context
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.shared import NO_TESTS_FOUND, FilenameStr, HashStr, HashResult
 from src.status import OK_KILLED, UNTESTED, StatusResultStr
 from src.storage import storage

@@ -12,7 +12,7 @@ from src.context import Context
 from src.dir_context import DirContext
 from src.mutate import mutate_from_context
 from src.mutations import SkipException
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 from src.status import (
     BAD_SURVIVED,
     BAD_TIMEOUT,

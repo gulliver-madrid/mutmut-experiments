@@ -17,7 +17,7 @@ from parso.python.tree import (
 from parso.tree import Node, BaseNode, Leaf, NodeOrLeaf
 
 from src.context import Context
-from src.setup_logging import configure_logger
+from src.tools import configure_logger
 
 from .ast_pattern import ASTPattern, is_name_node
 

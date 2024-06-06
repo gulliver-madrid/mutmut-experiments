@@ -3,10 +3,9 @@ from typing import Callable
 
 from .setup_logging import configure_logger, get_main_directory
 
+logger = configure_logger(__name__)
 
 IGNORE = [".venv", "Users"]
-
-logger = configure_logger(__name__)
 
 
 def log_function_stack(
