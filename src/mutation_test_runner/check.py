@@ -103,6 +103,7 @@ def check_mutants(
             results_queue.put(("end", process_id, None, None, None))
 
 
+# TODO: remove unused function
 def process_mutant(
     context: Context,
     feedback: StrConsumer,
