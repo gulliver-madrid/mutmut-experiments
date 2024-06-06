@@ -20,12 +20,12 @@ from src import (
 from src.cache.cache import (
     MutationsByFile,
     cached_hash_of_tests,
-    get_hash_of_tests,
     filename_and_mutation_id_from_pk,
     cached_test_time,
     set_cached_test_time,
     update_line_numbers,
 )
+from src.cache.hash import get_hash_of_tests
 from src.config import Config, ConfigFlags, DynamicCallbacks, TestTimeConfig
 from src.coverage import check_coverage_data_filepaths, read_coverage_data
 from src.dir_context import DirContext
