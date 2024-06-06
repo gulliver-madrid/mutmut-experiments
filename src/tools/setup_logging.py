@@ -1,6 +1,24 @@
+import atexit
 import logging
+import threading
+from logging.handlers import MemoryHandler
 from pathlib import Path
 from pprint import pformat
+from typing import Optional
+
+
+class CustomBufferingHandler(MemoryHandler):
+    def __init__(
+        self,
+        capacity: int,
+        flushLevel: int = logging.ERROR,
+        *,
+        target: Optional[logging.Handler] = None,
+    ):
+        super().__init__(capacity, flushLevel, target)
+
+    def shouldFlush(self, record: logging.LogRecord) -> bool:
+        return len(self.buffer) >= self.capacity
 
 
 # Function to configure a logger and send its output to a file
@@ -25,16 +43,21 @@ def configure_logger(name: str, level: int = logging.DEBUG) -> logging.Logger:
     )
     file_handler.setFormatter(formatter)
 
-    # Add the FileHandler to the logger
-    logger.addHandler(file_handler)
+    # Add the handlers to the logger
+    buffer_handler = CustomBufferingHandler(20, target=file_handler)
+    buffer_handler.setLevel(level)
+    logger.addHandler(buffer_handler)
+
     logger.info("\n")
-    logger.info("START")
+    logger.info(f"START (thread id={threading.get_ident()})")
+
+    atexit.register(buffer_handler.flush)
 
     return logger
 
 
 def get_main_directory() -> Path:
-    return Path(__file__).parents[1]
+    return Path(__file__).parents[2]
 
 
 def format_var(name: str, obj: object) -> str:
