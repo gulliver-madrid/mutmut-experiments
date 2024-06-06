@@ -335,49 +335,6 @@ def cached_mutation_status(
     return _get_mutant_result(mutant, hash_of_tests)
 
 
-def _get_line(
-    sourcefile: SourceFile | None, mutation_id: RelativeMutationID
-) -> Line | None:
-    return Line.get(
-        sourcefile=sourcefile,
-        line=mutation_id.line,
-        line_number=mutation_id.line_number,
-    )
-
-
-def _get_mutant_result(mutant: Mutant, hash_of_tests: HashResult) -> StatusResultStr:
-    if mutant.status == OK_KILLED:
-        # We assume that if a mutant was killed, a change to the test
-        # suite will mean it's still killed
-        return OK_KILLED
-
-    if _mutant_not_currently_tested(mutant, hash_of_tests):
-        return UNTESTED
-
-    return mutant.status
-
-
-def _mutant_not_currently_tested(mutant: Mutant, hash_of_tests: HashResult) -> bool:
-    return (
-        mutant.tested_against_hash != hash_of_tests
-        or mutant.tested_against_hash == NO_TESTS_FOUND
-        or hash_of_tests == NO_TESTS_FOUND
-    )
-
-
-@init_db
-@db_session
-def mutation_id_from_pk(pk: int | str) -> RelativeMutationID:
-    if not isinstance(pk, (int, str)):  # pyright: ignore [reportUnnecessaryIsInstance]
-        raise ValueError("mutation_id_from_pk:", type(pk))
-    mutant = get_mutant(id=pk)
-    assert mutant, dict(id=pk)
-    assert isinstance(mutant.line.line, str)  # always true?
-    return RelativeMutationID(
-        line=mutant.line.line, index=mutant.index, line_number=mutant.line.line_number
-    )
-
-
 @init_db
 @db_session
 def filename_and_mutation_id_from_pk(
@@ -388,7 +345,7 @@ def filename_and_mutation_id_from_pk(
     mutant = get_mutant(id=pk)
     if mutant is None:
         raise ValueError("Obtained null mutant for pk: {}".format(pk))
-    return mutant.line.sourcefile.filename, mutation_id_from_pk(pk)
+    return mutant.line.sourcefile.filename, _mutation_id_from_pk(pk)
 
 
 @init_db
@@ -427,3 +384,46 @@ def set_cached_test_time(
 def cached_hash_of_tests() -> str | None:
     d = MiscData.get(key="hash_of_tests")
     return d.value if d else None
+
+
+def _get_line(
+    sourcefile: SourceFile | None, mutation_id: RelativeMutationID
+) -> Line | None:
+    return Line.get(
+        sourcefile=sourcefile,
+        line=mutation_id.line,
+        line_number=mutation_id.line_number,
+    )
+
+
+def _get_mutant_result(mutant: Mutant, hash_of_tests: HashResult) -> StatusResultStr:
+    if mutant.status == OK_KILLED:
+        # We assume that if a mutant was killed, a change to the test
+        # suite will mean it's still killed
+        return OK_KILLED
+
+    if _mutant_not_currently_tested(mutant, hash_of_tests):
+        return UNTESTED
+
+    return mutant.status
+
+
+def _mutant_not_currently_tested(mutant: Mutant, hash_of_tests: HashResult) -> bool:
+    return (
+        mutant.tested_against_hash != hash_of_tests
+        or mutant.tested_against_hash == NO_TESTS_FOUND
+        or hash_of_tests == NO_TESTS_FOUND
+    )
+
+
+@init_db
+@db_session
+def _mutation_id_from_pk(pk: int | str) -> RelativeMutationID:
+    if not isinstance(pk, (int, str)):  # pyright: ignore [reportUnnecessaryIsInstance]
+        raise ValueError("mutation_id_from_pk:", type(pk))
+    mutant = get_mutant(id=pk)
+    assert mutant, dict(id=pk)
+    assert isinstance(mutant.line.line, str)  # always true?
+    return RelativeMutationID(
+        line=mutant.line.line, index=mutant.index, line_number=mutant.line.line_number
+    )
