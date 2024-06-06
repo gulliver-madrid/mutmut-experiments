@@ -42,20 +42,20 @@ def create_junitxml_report(
                     message=mutant.status,
                     output=get_unified_diff(mutant.id, dict_synonyms),
                 )
-            if mutant.status == BAD_TIMEOUT:
+            elif mutant.status == BAD_TIMEOUT:
                 tc.add_error_info(
                     message=mutant.status,
                     error_type="timeout",
                     output=get_unified_diff(mutant.id, dict_synonyms),
                 )
-            if mutant.status == OK_SUSPICIOUS:
+            elif mutant.status == OK_SUSPICIOUS:
                 if suspicious_policy != "ignore":
                     func = getattr(tc, "add_{}_info".format(suspicious_policy))
                     func(
                         message=mutant.status,
                         output=get_unified_diff(mutant.id, dict_synonyms),
                     )
-            if mutant.status == UNTESTED:
+            elif mutant.status == UNTESTED:
                 if untested_policy != "ignore":
                     func = getattr(tc, "add_{}_info".format(untested_policy))
                     func(
