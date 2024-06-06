@@ -16,7 +16,7 @@ base = Path(__file__).parent.parent
 if str(base) not in sys.path:
     sys.path.insert(0, str(base))
 
-from src import (
+from src.core import (
     __version__,
     config_from_file,
 )

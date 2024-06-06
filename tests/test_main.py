@@ -20,7 +20,7 @@ from unittest.mock import (
 import pytest
 from click.testing import CliRunner
 
-from src import (
+from src.core import (
     compute_exit_code,
     python_source_files,
     __version__,

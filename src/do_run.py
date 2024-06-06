@@ -10,7 +10,7 @@ from types import NoneType
 import click
 from glob2 import glob  # type: ignore [import-untyped]
 
-from src import (
+from src.core import (
     __version__,
     guess_paths_to_mutate,
     add_mutations_by_file,

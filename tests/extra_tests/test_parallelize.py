@@ -9,7 +9,7 @@ from typing import Any, Iterator
 
 from click.testing import CliRunner
 
-from src import __version__
+from src.core import __version__
 from src.__main__ import climain
 from src.dir_context import DirContext
 
