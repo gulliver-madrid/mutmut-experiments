@@ -6,11 +6,10 @@ from itertools import groupby
 from typing import TYPE_CHECKING
 
 from src.cache.cache import (
-    db_session,
     get_unified_diff,
-    init_db,
     select_mutants_by_status,
 )
+from src.cache.db_core import db_session, init_db
 from src.cache.model import Mutant
 from src.utils import SequenceStr, ranges
 from src.status import (
