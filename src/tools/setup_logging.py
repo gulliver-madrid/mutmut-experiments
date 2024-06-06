@@ -78,14 +78,19 @@ def configure_logger(name: str, level: int = logging.DEBUG) -> logging.Logger:
     buffer_handler.setLevel(level)
     logger.addHandler(buffer_handler)
 
-    created = time.time()
-    created_time = time.localtime(created)
-    date_str = time.strftime("%Y-%m-%d", created_time)
+    date_str = _get_formatted_date()
     logger.info(f"\nSTART (thread id={threading.get_ident()}, date={date_str})")
 
     atexit.register(buffer_handler.flush)
 
     return logger
+
+
+def _get_formatted_date() -> str:
+    created = time.time()
+    created_time = time.localtime(created)
+    date_str = time.strftime("%Y-%m-%d", created_time)
+    return date_str
 
 
 def get_main_directory() -> Path:
