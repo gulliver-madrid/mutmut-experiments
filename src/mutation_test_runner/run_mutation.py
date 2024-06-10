@@ -25,7 +25,7 @@ from src.status import (
 from src.storage import storage
 
 from .constants import NUMBER_OF_PROCESSES_IN_PARALLELIZATION_MODE
-from .test_runner import StrConsumer, TestRunner
+from .runner import StrConsumer, Runner
 
 logger = configure_logger(__name__)
 
@@ -69,17 +69,17 @@ def run_mutation(
         if config.dynamic.pre_mutation:
             _execute_dynamic_function(config.dynamic.pre_mutation, config, callback)
 
-        test_runner = TestRunner()
+        runner = Runner()
 
         try:
             mutate_file(backup=True, context=context, subdir=Path(os.getcwd()))
             start = time()
             try:
-                survived = test_runner.tests_pass(config=config, callback=callback)
+                survived = runner.do_tests_pass(config=config, callback=callback)
                 if _should_rerun(survived, config):
                     # rerun the whole test suite to be sure the mutant can not be killed by other tests
                     config.test_command = config.default_test_command
-                    survived = test_runner.tests_pass(config=config, callback=callback)
+                    survived = runner.do_tests_pass(config=config, callback=callback)
             except TimeoutError:
                 return BAD_TIMEOUT
 

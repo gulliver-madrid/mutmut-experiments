@@ -17,8 +17,8 @@ StrConsumer = Callable[[str], None]
 hammett_prefix: Final = "python -m hammett "
 
 
-class TestRunner:
-    def tests_pass(self, config: Config, callback: StrConsumer) -> bool:
+class Runner:
+    def do_tests_pass(self, config: Config, callback: StrConsumer) -> bool:
         """
         :return: :obj:`True` if the tests pass, otherwise :obj:`False`
         """

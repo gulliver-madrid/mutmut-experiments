@@ -7,7 +7,7 @@ from src.tools import configure_logger
 from src.storage import storage
 
 from .run_mutation import run_mutation
-from .test_runner import StrConsumer
+from .runner import StrConsumer
 from .types import MutantQueue, ProcessId, ResultQueue
 
 logger = configure_logger(__name__)
