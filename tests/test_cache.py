@@ -1,4 +1,4 @@
-from src.cache.cache import sequence_ops
+from src.cache.update_line_numbers import sequence_ops
 
 
 def test_sequence_ops() -> None:

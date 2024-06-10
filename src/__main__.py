@@ -22,9 +22,9 @@ from src.core import (
 )
 from src.cache.cache import (
     filename_and_mutation_id_from_pk,
-    update_line_numbers,
     get_unified_diff,
 )
+from src.cache.update_line_numbers import update_line_numbers
 from src.reporters import (
     create_html_report,
     print_result_cache,
